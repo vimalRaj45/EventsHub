@@ -869,8 +869,11 @@ async function showEventModal(event) {
     </div>
   `;
 
+  // Check if payment link exists
+  const hasPaymentLink = event.banner_url && event.banner_url !== 'a';
+  
   // Payment section with better visual hierarchy
-  const paymentSection = event.banner_url && event.banner_url !== 'a' ? `
+  const paymentSection = hasPaymentLink ? `
     <div class="card border-primary mb-3">
       <div class="card-header bg-primary text-white">
         <i class="bi bi-credit-card me-2"></i>Payment Information
@@ -898,6 +901,41 @@ async function showEventModal(event) {
   ` : `
     <div class="alert alert-secondary">
       <i class="bi bi-clock-history me-2"></i>Payment link will be published soon
+    </div>
+  `;
+
+  // Payment verification section (only shown if payment link exists)
+  const paymentVerificationSection = hasPaymentLink ? `
+    <div class="card mb-3" id="transactionCard">
+      <div class="card-header">
+        <i class="bi bi-receipt me-2"></i>Payment Verification
+      </div>
+      <div class="card-body">
+        <label for="transaction-id" class="form-label">Transaction ID <span class="text-danger">*</span></label>
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-123"></i></span>
+          <input type="text" class="form-control" id="transaction-id" 
+            placeholder="TXN12345678" 
+            onfocus="checkTransactionId()" 
+            oninput="checkTransactionId()">
+        </div>
+        <small class="text-muted">Enter the transaction ID you received after payment</small>
+      </div>
+    </div>
+  ` : '';
+
+  // Registration button state
+  const registerButton = hasPaymentLink ? `
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary" id="registerBtn" disabled>
+        <span class="spinner-border spinner-border-sm me-2 d-none" id="registerSpinner"></span>
+        <span id="registerText">Complete Payment First to Register</span>
+      </button>
+    </div>
+  ` : `
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      Registration will be enabled once the payment link is available
     </div>
   `;
 
@@ -972,23 +1010,7 @@ async function showEventModal(event) {
     </div>
     
     ${paymentSection}
-    
-    <div class="card mb-3" id="transactionCard">
-      <div class="card-header">
-        <i class="bi bi-receipt me-2"></i>Payment Verification
-      </div>
-      <div class="card-body">
-        <label for="transaction-id" class="form-label">Transaction ID <span class="text-danger">*</span></label>
-        <div class="input-group mb-3">
-          <span class="input-group-text"><i class="bi bi-123"></i></span>
-          <input type="text" class="form-control" id="transaction-id" 
-            placeholder="TXN12345678" 
-            onfocus="checkTransactionId()" 
-            oninput="checkTransactionId()">
-        </div>
-        <small class="text-muted">Enter the transaction ID you received after payment</small>
-      </div>
-    </div>
+    ${paymentVerificationSection}
     
     ${event.status === 'upcoming' || event.status === 'ongoing' ? `
       <div class="alert ${event.current_participants >= event.max_participants ? 'alert-danger' : 'alert-info'}">
@@ -1000,16 +1022,11 @@ async function showEventModal(event) {
       </div>
     ` : ''}
     
-    <div class="d-grid gap-2">
-      <button class="btn btn-primary" id="registerBtn" disabled>
-        <span class="spinner-border spinner-border-sm me-2 d-none" id="registerSpinner"></span>
-        <span id="registerText">Complete Payment First to Register</span>
-      </button>
-    </div>
+    ${registerButton}
   `;
 
-  // Add event listener to payment link button
-  if (event.banner_url && event.banner_url !== 'a') {
+  // Add event listener to payment link button if exists
+  if (hasPaymentLink) {
     document.getElementById('paymentLinkBtn')?.addEventListener('click', function() {
       showToast('After payment is complete, return here and enter your transaction ID to register', 'info');
     });
