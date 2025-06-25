@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Payment Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --success-color: #2ecc71;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    body {
+      background-color: #f5f7fb;
+      font-family: 'Inter', sans-serif;
+      color: #333;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .table-container {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      color: #6c757d;
+      border-bottom-width: 1px;
+    }
+    
+    .table td {
+      padding: 1rem 0.75rem;
+    }
+    
+    .badge {
+      font-weight: 500;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    
+    .btn-verify {
+      min-width: 100px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-verify:hover {
+      transform: translateY(-1px);
+    }
+    
+    .search-container {
+      margin-bottom: 1.5rem;
+    }
+    
+    .status-filter {
+      margin-bottom: 1.5rem;
+    }
+    
+    .pagination-container {
+      margin-top: 1.5rem;
+    }
+    
+    .loading-spinner {
+      display: none;
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: #6c757d;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #dee2e6;
+    }
+    
+    /* Dark mode toggle */
+    .dark-mode {
+      background-color: #1a1a2e;
+      color: #f8f9fa;
+    }
+    
+    .dark-mode .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    
+    .dark-mode .table-container {
+      background-color: #16213e;
+      color: #f8f9fa;
+    }
+    
+    .dark-mode .table th {
+      background-color: #0f3460;
+      color: #f8f9fa;
+    }
+    
+    .dark-mode .table td {
+      background-color: #16213e;
+      color: #f8f9fa;
+    }
+    
+    .dark-mode .form-control {
+      background-color: #0f3460;
+      color: #f8f9fa;
+      border-color: #1a1a2e;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .table-responsive {
+        border: none;
+      }
+      
+      .header {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container py-4">
+  <!-- Header Section -->
+  <div class="header d-flex justify-content-between align-items-center">
+    <div>
+      <h2 class="mb-0"><i class="bi bi-shield-check me-2"></i>Payment Verification</h2>
+      <p class="mb-0 opacity-75">Review and verify participant payments</p>
+    </div>
+    <div>
+      <button id="darkModeToggle" class="btn btn-sm btn-outline-light">
+        <i class="bi bi-moon-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="search-container">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" id="searchInput" class="form-control" placeholder="Search participants...">
+          <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="status-filter">
+        <div class="btn-group w-100">
+          <button type="button" class="btn btn-outline-primary filter-btn active" data-filter="all">All</button>
+          <button type="button" class="btn btn-outline-success filter-btn" data-filter="verified">Verified</button>
+          <button type="button" class="btn btn-outline-warning filter-btn" data-filter="pending">Pending</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="text-center my-5">
+    <div class="spinner-border text-primary loading-spinner" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 15%">Participant</th>
+            <th style="width: 15%">Email</th>
+            <th style="width: 15%">Event</th>
+            <th style="width: 8%">Fee</th>
+            <th style="width: 12%">Transaction ID</th>
+            <th style="width: 10%">Status</th>
+            <th style="width: 10%">Verified At</th>
+            <th style="width: 10%">Registered</th>
+            <th style="width: 10%">Action</th>
+          </tr>
+        </thead>
+        <tbody id="payment-table-body">
+          <!-- Data will be populated here -->
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <i class="bi bi-credit-card-2-back"></i>
+      <h4>No payments found</h4>
+      <p class="mb-0">There are currently no payments to display</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="row pagination-container">
+    <div class="col-12 d-flex justify-content-center">
+      <nav aria-label="Page navigation">
+        <ul class="pagination" id="pagination">
+          <!-- Pagination will be generated here -->
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Are you sure you want to change the verification status of this payment?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmAction">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE_URL = 'https://eventdb.onrender.com/api';
+  const adminToken = localStorage.getItem('jwtToken');
+  let allPayments = [];
+  let currentPage = 1;
+  const itemsPerPage = 10;
+  let currentFilter = 'all';
+  let currentSearch = '';
+  let currentParticipantId = null;
+  let currentNewStatus = null;
+
+  // DOM Elements
+  const elements = {
+    tableBody: document.getElementById('payment-table-body'),
+    loadingSpinner: document.querySelector('.loading-spinner'),
+    emptyState: document.getElementById('emptyState'),
+    searchInput: document.getElementById('searchInput'),
+    clearSearch: document.getElementById('clearSearch'),
+    filterButtons: document.querySelectorAll('.filter-btn'),
+    pagination: document.getElementById('pagination'),
+    darkModeToggle: document.getElementById('darkModeToggle'),
+    confirmationModal: new bootstrap.Modal(document.getElementById('confirmationModal')),
+    confirmAction: document.getElementById('confirmAction')
+  };
+
+  // Initialize the page
+  document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    loadPayments();
+    setupEventListeners();
+  });
+
+  // Check authentication
+  function checkAuth() {
+    if (!adminToken) {
+      window.location.href = '/admin/login';
+    }
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+    elements.searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.toLowerCase();
+      currentPage = 1;
+      renderPaymentTable();
+    });
+
+    elements.clearSearch.addEventListener('click', () => {
+      elements.searchInput.value = '';
+      currentSearch = '';
+      currentPage = 1;
+      renderPaymentTable();
+    });
+
+    elements.filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        elements.filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        currentPage = 1;
+        renderPaymentTable();
+      });
+    });
+
+    elements.darkModeToggle.addEventListener('click', toggleDarkMode);
+    elements.confirmAction.addEventListener('click', confirmTogglePayment);
+    
+    // Check for saved dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      elements.darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    }
+  }
+
+  // Toggle dark mode
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    if (document.body.classList.contains('dark-mode')) {
+      localStorage.setItem('darkMode', 'enabled');
+      elements.darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    } else {
+      localStorage.setItem('darkMode', 'disabled');
+      elements.darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+    }
+  }
+
+  // Load all payments
+  async function loadPayments() {
+    try {
+      showLoading();
+      
+      const response = await fetch(`${API_BASE_URL}/payments`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch payments');
+      }
+      
+      const data = await response.json();
+      allPayments = data.payments || [];
+      renderPaymentTable();
+    } catch (error) {
+      console.error('Failed to load payments:', error);
+      showError('Unable to load payment records. Please try again later.');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Filter and paginate payments
+  function getFilteredPayments() {
+    let filtered = allPayments;
+    
+    // Apply status filter
+    if (currentFilter === 'verified') {
+      filtered = filtered.filter(p => p.payment_verified);
+    } else if (currentFilter === 'pending') {
+      filtered = filtered.filter(p => !p.payment_verified);
+    }
+    
+    // Apply search filter
+    if (currentSearch) {
+      filtered = filtered.filter(p => 
+        p.user_name.toLowerCase().includes(currentSearch) ||
+        p.user_email.toLowerCase().includes(currentSearch) ||
+        p.event_title.toLowerCase().includes(currentSearch) ||
+        (p.transaction_id && p.transaction_id.toLowerCase().includes(currentSearch))
+      );
+    }
+    
+    return filtered;
+  }
+
+  // Render table with filtered and paginated data
+  function renderPaymentTable() {
+    const filteredPayments = getFilteredPayments();
+    const paginatedPayments = paginateData(filteredPayments);
+    
+    elements.tableBody.innerHTML = '';
+    
+    if (paginatedPayments.length === 0) {
+      elements.emptyState.style.display = 'block';
+      renderPagination(filteredPayments.length);
+      return;
+    }
+    
+    elements.emptyState.style.display = 'none';
+    
+    paginatedPayments.forEach((p, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${(currentPage - 1) * itemsPerPage + i + 1}</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 me-2">
+              <i class="bi bi-person-circle" style="font-size: 1.25rem;"></i>
+            </div>
+            <div class="flex-grow-1">
+              ${p.user_name}
+            </div>
+          </div>
+        </td>
+        <td><a href="mailto:${p.user_email}">${p.user_email}</a></td>
+        <td>${p.event_title}</td>
+        <td class="fw-bold">₹${p.event_fee || 0}</td>
+        <td>
+          ${p.transaction_id 
+            ? `<span class="badge bg-light text-dark font-monospace">${p.transaction_id}</span>` 
+            : '-'}
+        </td>
+        <td>
+          ${p.payment_verified 
+            ? '<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Verified</span>'
+            : '<span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> Pending</span>'}
+        </td>
+        <td>${p.verified_at ? formatDateTime(p.verified_at) : '-'}</td>
+        <td>${formatDateTime(p.registered_at)}</td>
+        <td>
+          <button class="btn btn-sm ${p.payment_verified ? 'btn-outline-danger' : 'btn-outline-success'} btn-verify"
+            onclick="showConfirmationModal(${p.participant_id}, ${!p.payment_verified})">
+            ${p.payment_verified ? '<i class="bi bi-x-lg me-1"></i> Unverify' : '<i class="bi bi-check-lg me-1"></i> Verify'}
+          </button>
+        </td>
+      `;
+      elements.tableBody.appendChild(tr);
+    });
+    
+    renderPagination(filteredPayments.length);
+  }
+
+  // Paginate data
+  function paginateData(data) {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return data.slice(startIndex, startIndex + itemsPerPage);
+  }
+
+  // Render pagination
+  function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    elements.pagination.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    elements.pagination.innerHTML += `
+      <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" aria-label="Previous" onclick="changePage(${currentPage - 1})">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+    `;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      elements.pagination.innerHTML += `
+        <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+        </li>
+      `;
+    }
+    
+    // Next button
+    elements.pagination.innerHTML += `
+      <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" aria-label="Next" onclick="changePage(${currentPage + 1})">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    `;
+  }
+
+  // Change page
+  function changePage(page) {
+    if (page < 1 || page > Math.ceil(getFilteredPayments().length / itemsPerPage)) return;
+    currentPage = page;
+    renderPaymentTable();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Show confirmation modal
+  function showConfirmationModal(participantId, newStatus) {
+    currentParticipantId = participantId;
+    currentNewStatus = newStatus;
+    
+    const modalTitle = newStatus ? 'Verify Payment' : 'Unverify Payment';
+    const modalBody = newStatus 
+      ? 'Are you sure you want to verify this payment? This action cannot be undone.'
+      : 'Are you sure you want to unverify this payment? The participant will need to verify again.';
+    
+    document.getElementById('modalTitle').textContent = modalTitle;
+    document.getElementById('modalBody').textContent = modalBody;
+    elements.confirmationModal.show();
+  }
+
+  // Confirm toggle payment
+  async function confirmTogglePayment() {
+    elements.confirmationModal.hide();
+    try {
+      showLoading();
+      
+      const res = await fetch(`${API_BASE_URL}/participants/${currentParticipantId}/payment`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ payment_verified: currentNewStatus })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Update failed');
+      }
+
+      // Update local data instead of reloading everything
+      const paymentIndex = allPayments.findIndex(p => p.participant_id === currentParticipantId);
+      if (paymentIndex !== -1) {
+        allPayments[paymentIndex].payment_verified = currentNewStatus;
+        allPayments[paymentIndex].verified_at = currentNewStatus ? new Date().toISOString() : null;
+      }
+      
+      renderPaymentTable();
+      showSuccess(`Payment ${currentNewStatus ? 'verified' : 'unverified'} successfully!`);
+    } catch (err) {
+      console.error('Update failed:', err.message);
+      showError('Failed to update payment status. Please try again.');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  // Format date time
+  function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
+
+  // Show loading spinner
+  function showLoading() {
+    elements.loadingSpinner.style.display = 'block';
+    elements.tableBody.innerHTML = '';
+    elements.emptyState.style.display = 'none';
+  }
+
+  // Hide loading spinner
+  function hideLoading() {
+    elements.loadingSpinner.style.display = 'none';
+  }
+
+  // Show success message
+  function showSuccess(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    alert.style.zIndex = '1100';
+    alert.innerHTML = `
+      <i class="bi bi-check-circle-fill me-2"></i>
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+      alert.classList.remove('show');
+      setTimeout(() => alert.remove(), 150);
+    }, 3000);
+  }
+
+  // Show error message
+  function showError(message) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+    alert.style.zIndex = '1100';
+    alert.innerHTML = `
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+      alert.classList.remove('show');
+      setTimeout(() => alert.remove(), 150);
+    }, 3000);
+  }
+</script>
+</body>
+</html>
