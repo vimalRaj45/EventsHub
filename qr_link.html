@@ -284,46 +284,50 @@
             });
             
             function processQRCode(image) {
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = image.width;
-                canvas.height = image.height;
-                context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
-                
-                setTimeout(() => {
-                    loadingSpinner.classList.remove('active');
-                    
-                    if (code) {
-                        extractedUrl = code.data;
-                        resultUrl.textContent = extractedUrl;
-                        resultContainer.style.display = 'block';
-                        visitBtn.href = extractedUrl;
-                        
-                        // Update steps
-                        step2.classList.remove('active');
-                        step2.classList.add('completed');
-                        step3.classList.add('active');
-                        stepProgress.style.width = '100%';
-                        
-                        // Show success message
-                        showAlert('QR code successfully decoded!', 'success');
-                    } else {
-                        qrPreview.classList.add('empty');
-                        qrPreview.innerHTML = 'Could not read QR code';
-                        showAlert('No QR code found in the image. Please try another image.', 'danger');
-                        
-                        // Reset steps
-                        step1.classList.add('active');
-                        step1.classList.remove('completed');
-                        step2.classList.remove('active');
-                        stepProgress.style.width = '0%';
-                    }
-                }, 500); // Small delay for better UX
-            }
-            
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    // Increase resolution for better accuracy
+    const scale = 2; // try 2x or 3x
+    canvas.width = image.width * scale;
+    canvas.height = image.height * scale;
+
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "attemptBoth" // boost detection of inverted QR codes
+    });
+
+    setTimeout(() => {
+        loadingSpinner.classList.remove('active');
+
+        if (code) {
+            extractedUrl = code.data;
+            resultUrl.textContent = extractedUrl;
+            resultContainer.style.display = 'block';
+            visitBtn.href = extractedUrl;
+
+            step2.classList.remove('active');
+            step2.classList.add('completed');
+            step3.classList.add('active');
+            stepProgress.style.width = '100%';
+
+            showAlert('QR code successfully decoded!', 'success');
+        } else {
+            qrPreview.classList.add('empty');
+            qrPreview.innerHTML = 'Could not read QR code';
+            showAlert('No QR code found in the image. Please try a clearer or larger image.', 'danger');
+
+            step1.classList.add('active');
+            step1.classList.remove('completed');
+            step2.classList.remove('active');
+            stepProgress.style.width = '0%';
+        }
+    }, 500);
+}
+
             copyBtn.addEventListener('click', function() {
                 navigator.clipboard.writeText(extractedUrl).then(() => {
                     showAlert('URL copied to clipboard!', 'success');
