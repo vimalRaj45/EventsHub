@@ -392,9 +392,6 @@
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 <i class="bi bi-x-circle me-1"></i>Cancel
               </button>
-              <button type="button" class="btn btn-success" onclick="registerForEvent()" id="registerButton" disabled>
-                <i class="bi bi-check-circle me-1"></i>Register Now
-              </button>
             </div>
           </div>
         </div>
@@ -970,7 +967,7 @@ async function showEventModal(event) {
     ` : ''}
     
     <div class="d-grid gap-2">
-      <button class="btn btn-primary" id="registerBtn" disabled>
+      <button class="btn btn-primary" id="registerBtn" onclick="registerForEvent()" disabled>
         <span class="spinner-border spinner-border-sm me-2 d-none" id="registerSpinner"></span>
         <span id="registerText">Complete Payment First to Register</span>
       </button>
