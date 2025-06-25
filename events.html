@@ -282,6 +282,26 @@
       <i class="bi bi-calendar3-event me-2"></i>Upcoming Events
     </h2>
 
+  <!-- Compact Mobile Search Bar -->
+<div class="col-12 col-md-6 mb-3">
+  <div class="input-group input-group-sm">
+    <span class="input-group-text bg-white py-2">
+      <i class="bi bi-search text-muted"></i>
+    </span>
+    <input 
+      type="text" 
+      class="form-control border-start-0 py-2" 
+      id="event-search" 
+      placeholder="Search..."
+      oninput="searchEvents()"
+      aria-label="Search events"
+    >
+    
+      <span class="d-none d-sm-inline" onclick="clearSearch"></span>
+      <i class="bi bi-x d-sm-none"></i>
+    </button>
+  </div>
+</div>
     <!-- Filter Section -->
     <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
       <div class="card-body d-flex flex-wrap gap-3 align-items-center">
@@ -372,8 +392,8 @@
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 <i class="bi bi-x-circle me-1"></i>Cancel
               </button>
-              <button type="button" class="btn btn-success" onclick="registerForEvent()" id="registerButton">
-                <i class="bi bi-check-circle me-1"></i>Confirm Registration
+              <button type="button" class="btn btn-success" onclick="registerForEvent()" id="registerButton" disabled>
+                <i class="bi bi-check-circle me-1"></i>Register Now
               </button>
             </div>
           </div>
@@ -416,20 +436,27 @@
 
   <script>
 
-    // Disable right-click context menu
-document.addEventListener('contextmenu', e => e.preventDefault());
-
-// Disable specific key shortcuts
-document.addEventListener('keydown', function(e) {
-  if (
-    e.key === 'F12' ||
-    (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
-    (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
-  ) {
-    e.preventDefault();
-   
+ function searchEvents() {
+  const searchTerm = document.getElementById('event-search').value.toLowerCase(); // Convert to lowercase
+  if (!searchTerm) {
+    displayEvents(allEventsData);
+    return;
   }
-});
+  
+  const filteredEvents = allEventsData.filter(event => 
+    event.title.toLowerCase().includes(searchTerm) ||
+    (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+    (event.event_type && event.event_type.toLowerCase().includes(searchTerm))
+  );
+  
+  displayEvents(filteredEvents);
+}
+
+    function clearSearch() {
+      document.getElementById('event-search').value = '';
+      displayEvents(allEventsData);
+    }
+
     // Initialize animations
     AOS.init({
       duration: 500,
@@ -463,6 +490,20 @@ document.addEventListener('keydown', function(e) {
       document.querySelector('.toast-container').appendChild(toast);
       setTimeout(() => toast.remove(), 5000);
     }
+
+   function checkTransactionId() {
+  const txnInput = document.getElementById('transaction-id');
+  const registerBtn = document.getElementById('registerButton');
+
+  if (!txnInput || !registerBtn) return;
+
+  if (txnInput.value.trim() !== '') {
+    registerBtn.removeAttribute('disabled'); // ✅ Enable the button
+  } else {
+    registerBtn.setAttribute('disabled', 'true'); // ❌ Disable it
+  }
+}
+
 
     // API request handler
     async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
@@ -588,16 +629,46 @@ document.addEventListener('keydown', function(e) {
           </div>`;
       }
     }
-
-
-    async function showAttendModal(event) {
+async function showAttendModal(event) {
   document.getElementById('attendModalLabel').textContent = event.title;
 
-  // Show loading
+  // Show modal immediately with loading spinner
   document.getElementById('attendModalLoading').style.display = 'block';
   document.getElementById('attendModalContent').style.display = 'none';
+  attendModal.show(); // 🔁 Show the modal FIRST
 
-  // Set modal content
+  let payments = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/userpayments`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${currentToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Unauthorized or error fetching payments');
+
+    const data = await res.json();
+    payments = data.payments || [];
+  } catch (error) {
+    console.error('❌ Payment fetch error:', error.message);
+  }
+
+  const isVerified = payments.some(p => p.event_id === event.id && p.payment_verified);
+
+  const attendContent = isVerified
+    ? `<a href="${event.poster_url}" target="_blank" class="btn btn-success">
+         <i class="bi bi-box-arrow-up-right me-2"></i>Attend Event
+       </a>`
+    : `<div class="card shadow-sm border-warning">
+        <div class="card-body text-center">
+          <h5 class="card-title text-warning"><i class="bi bi-hourglass-split me-2"></i>Payment Verification Pending</h5>
+          <p class="card-text mb-2">Your payment is currently under review.</p>
+          <p class="card-text text-muted">Your event link will appear here once payment is verified.</p>
+        </div>
+      </div>`;
+
   document.getElementById('attendModalContent').innerHTML = `
     <div class="row">
       <div class="col-md-6 mb-3">
@@ -609,7 +680,6 @@ document.addEventListener('keydown', function(e) {
         <p>${event.rules || 'No rules specified'}</p>
       </div>
     </div>
-
     <div class="row">
       <div class="col-md-4 mb-3">
         <h6><i class="bi bi-tag me-2"></i>Event Type</h6>
@@ -627,35 +697,28 @@ document.addEventListener('keydown', function(e) {
 
     ${event.status === 'upcoming' || event.status === 'ongoing' ? `
       <div class="alert alert-info">
-        <i class="bi bi-info-circle me-2"></i>This event is currently <strong>${event.status}</strong>. 
-        ${event.current_participants >= event.max_participants ? 
-          '<strong class="text-danger">Fully booked!</strong>' : 
-          'Register now to secure your spot!'}
+        <i class="bi bi-info-circle me-2"></i>This event is currently <strong>${event.status}</strong>.
+        ${event.current_participants >= event.max_participants ?
+          '<strong class="text-danger"> Fully booked!</strong>' :
+          ' Register now to secure your spot!'}
       </div>
     ` : ''}
 
     <div class="text-center mt-3">
-      ${event.poster_url && event.poster_url !== 'a' ? `
-        <a href="${event.poster_url}" target="_blank" class="btn btn-success">
-          <i class="bi bi-box-arrow-up-right me-2"></i>Attend Event
-        </a>
-      ` : `
-        <button class="btn btn-secondary" disabled>
-          <i class="bi bi-clock-history me-2"></i>Link will be published soon
-        </button>
-      `}
+      ${attendContent}
     </div>
   `;
 
-  // Show content
+  // Hide loading and show content
   document.getElementById('attendModalLoading').style.display = 'none';
   document.getElementById('attendModalContent').style.display = 'block';
-
-  // Show modal
-  attendModal.show();
 }
 
-    // Load all events with optional filtering
+
+    // Add these variables at the top of your script section
+    let allEventsData = []; // To store all events for search functionality
+    
+    // Modify your getAllEvents function to store the events data
     async function getAllEvents() {
       try {
         const container = document.getElementById('events-container');
@@ -670,6 +733,7 @@ document.addEventListener('keydown', function(e) {
         const status = document.getElementById('event-status').value;
         const endpoint = status ? `/events?status=${status}` : '/events';
         const events = await makeRequest('GET', endpoint, null, false);
+        allEventsData = events; // Store events for search
         displayEvents(events);
       } catch (error) {
         console.error("Error loading events:", error.message);
@@ -681,7 +745,6 @@ document.addEventListener('keydown', function(e) {
           </div>`;
       }
     }
-
     // Display events in the grid
     async function displayEvents(events) {
       const container = document.getElementById('events-container');
@@ -732,6 +795,7 @@ document.addEventListener('keydown', function(e) {
     async function showEventModal(event) {
       document.getElementById('eventModalLabel').textContent = event.title;
       document.getElementById('register-event-id').value = event.id;
+      console.log(event);
       
       // Show loading state
       document.getElementById('modalLoading').style.display = 'block';
@@ -782,7 +846,23 @@ document.addEventListener('keydown', function(e) {
             <p>${event.current_participants}/${event.max_participants || '∞'} spots filled</p>
           </div>
         </div>
+         <div class="text-center mt-3">
+      ${event.banner_url && event.banner_url !== 'a' ? `
+        <a href="${event.banner_url}" target="_blank" class="btn btn-success">
+          <i class="bi bi-box-arrow-up-right me-2"></i>Pay Registration Fee
+        </a>
+      ` : `
+        <button class="btn btn-secondary" disabled>
+          <i class="bi bi-clock-history me-2"></i>Payment Link will be published soon
+        </button>
+      `}
+    </div>
         
+        <div class="mb-3">
+  <label for="transaction-id" class="form-label">Transaction ID After Payment</label>
+  <input type="text" class="form-control" id="transaction-id" placeholder="TXN12345678" onfocus="checkTransactionId()" oninput="checkTransactionId()">
+</div>
+
         ${event.status === 'upcoming' || event.status === 'ongoing' ? `
           <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>This event is currently ${event.status}. 
@@ -816,6 +896,7 @@ document.addEventListener('keydown', function(e) {
     async function registerForEvent() {
       const eventId = document.getElementById('register-event-id').value;
       const registerButton = document.getElementById('registerButton');
+      const transactionId = document.getElementById('transaction-id').value.trim();
       
       if (!currentUserProfile) {
         showToast('Please verify your profile before registration', 'warning');
@@ -831,14 +912,17 @@ document.addEventListener('keydown', function(e) {
       
       try {
         let registrationData = {};
+
         try {
           registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
+          console.log('📦 registration_data:', registrationData);
         } catch (e) {
           throw new Error('Invalid JSON in registration data');
         }
-        
+        console.log('📦 registration_data:', registrationData);
         const result = await makeRequest('POST', `/events/${eventId}/register`, { 
-          registration_data: registrationData 
+          registration_data: registrationData,
+          transaction_id: transactionId
         });
        Swal.fire({
   icon: 'success',
@@ -921,6 +1005,7 @@ document.querySelectorAll('.eh-nav-link').forEach(n =>
         navMenu.classList.remove('active');
     })
 );
+
 
   </script>
 </body>
