@@ -179,6 +179,46 @@
         .loading-spinner.active {
             display: flex;
         }
+        
+        /* New styles for improved scanning */
+        .qr-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            border: 4px dashed rgba(67, 97, 238, 0.5);
+            border-radius: 10px;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .qr-preview.empty .qr-guide {
+            display: block;
+        }
+        
+        .camera-feedback {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 5px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .enhance-options {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .enhance-options.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +241,8 @@
                         </div>
                         
                         <div class="qr-preview empty" id="qrPreview">
+                            <div class="qr-guide"></div>
+                            <div class="camera-feedback" id="cameraFeedback"></div>
                             <div class="loading-spinner" id="loadingSpinner">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -212,6 +254,15 @@
                             <i class="bi bi-folder2-open me-2"></i>Select QR Code from Gallery
                         </label>
                         <input type="file" id="qrFileInput" class="file-input" accept="image/*">
+                        
+                        <div class="enhance-options" id="enhanceOptions">
+                            <button class="btn btn-outline-secondary btn-sm" id="enhanceBtn">
+                                <i class="bi bi-magic me-1"></i>Enhance Image
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="invertBtn">
+                                <i class="bi bi-contrast me-1"></i>Invert Colors
+                            </button>
+                        </div>
                         
                         <div class="result-container" id="resultContainer" style="display: none;">
                             <h5 class="mb-3">Extracted URL:</h5>
@@ -249,8 +300,15 @@
             const step2 = document.getElementById('step2');
             const step3 = document.getElementById('step3');
             const stepProgress = document.getElementById('stepProgress');
+            const cameraFeedback = document.getElementById('cameraFeedback');
+            const enhanceOptions = document.getElementById('enhanceOptions');
+            const enhanceBtn = document.getElementById('enhanceBtn');
+            const invertBtn = document.getElementById('invertBtn');
             
             let extractedUrl = '';
+            let currentImageData = null;
+            let currentWidth = 0;
+            let currentHeight = 0;
             
             qrFileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
@@ -283,37 +341,59 @@
                 reader.readAsDataURL(file);
             });
             
-            function processQRCode(image) {
+            function processQRCode(image, options = {}) {
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = image.width;
-                canvas.height = image.height;
-                context.drawImage(image, 0, 0, canvas.width, canvas.height);
                 
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                // Set canvas dimensions to a reasonable size for processing
+                const maxDimension = 1000;
+                let width = image.width;
+                let height = image.height;
+                
+                if (width > maxDimension || height > maxDimension) {
+                    const ratio = Math.min(maxDimension / width, maxDimension / height);
+                    width = Math.floor(width * ratio);
+                    height = Math.floor(height * ratio);
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw image with smoothing disabled for sharper edges
+                context.imageSmoothingEnabled = false;
+                context.drawImage(image, 0, 0, width, height);
+                
+                // Store image data for enhancement options
+                currentImageData = context.getImageData(0, 0, width, height);
+                currentWidth = width;
+                currentHeight = height;
+                
+                // Convert to grayscale for better QR detection
+                const grayscaleData = new Uint8ClampedArray(width * height);
+                
+                for (let i = 0; i < currentImageData.data.length; i += 4) {
+                    const r = currentImageData.data[i];
+                    const g = currentImageData.data[i + 1];
+                    const b = currentImageData.data[i + 2];
+                    // Luminosity method for grayscale
+                    grayscaleData[i / 4] = Math.floor(0.299 * r + 0.587 * g + 0.114 * b);
+                }
+                
+                // Try multiple processing attempts if needed
+                let code = tryDecoding(grayscaleData, width, height, options);
                 
                 setTimeout(() => {
                     loadingSpinner.classList.remove('active');
                     
                     if (code) {
-                        extractedUrl = code.data;
-                        resultUrl.textContent = extractedUrl;
-                        resultContainer.style.display = 'block';
-                        visitBtn.href = extractedUrl;
-                        
-                        // Update steps
-                        step2.classList.remove('active');
-                        step2.classList.add('completed');
-                        step3.classList.add('active');
-                        stepProgress.style.width = '100%';
-                        
-                        // Show success message
-                        showAlert('QR code successfully decoded!', 'success');
+                        handleSuccess(code);
                     } else {
+                        // Show enhancement options if first attempt fails
+                        enhanceOptions.style.display = 'block';
+                        
                         qrPreview.classList.add('empty');
                         qrPreview.innerHTML = 'Could not read QR code';
-                        showAlert('No QR code found in the image. Please try another image.', 'danger');
+                        showAlert('No QR code found in the image. Try enhancing the image or use a clearer picture.', 'danger');
                         
                         // Reset steps
                         step1.classList.add('active');
@@ -321,7 +401,123 @@
                         step2.classList.remove('active');
                         stepProgress.style.width = '0%';
                     }
-                }, 500); // Small delay for better UX
+                }, 500);
+            }
+            
+            function tryDecoding(imageData, width, height, options) {
+                let code = null;
+                
+                // Try normal first
+                code = jsQR(imageData, width, height);
+                if (code) return code;
+                
+                // Try with different thresholds if needed
+                const attempts = [
+                    { threshold: 100, inverted: false },
+                    { threshold: 150, inverted: false },
+                    { threshold: 100, inverted: true },
+                    { threshold: 150, inverted: true }
+                ];
+                
+                for (const attempt of attempts) {
+                    const thresholdedData = imageData.map(val => 
+                        (val > attempt.threshold) ^ attempt.inverted ? 255 : 0
+                    );
+                    code = jsQR(thresholdedData, width, height);
+                    if (code) break;
+                }
+                
+                return code;
+            }
+            
+            function handleSuccess(code) {
+                extractedUrl = code.data;
+                resultUrl.textContent = extractedUrl;
+                resultContainer.style.display = 'block';
+                visitBtn.href = extractedUrl;
+                enhanceOptions.style.display = 'none';
+                
+                // Update steps
+                step2.classList.remove('active');
+                step2.classList.add('completed');
+                step3.classList.add('active');
+                stepProgress.style.width = '100%';
+                
+                // Show success message
+                showAlert('QR code successfully decoded!', 'success');
+            }
+            
+            enhanceBtn.addEventListener('click', function() {
+                if (!currentImageData) return;
+                
+                loadingSpinner.classList.add('active');
+                infoAlert.style.display = 'none';
+                
+                // Apply sharpening and contrast enhancement
+                const enhancedData = enhanceImage(currentImageData);
+                const code = jsQR(enhancedData, currentWidth, currentHeight);
+                
+                setTimeout(() => {
+                    loadingSpinner.classList.remove('active');
+                    
+                    if (code) {
+                        handleSuccess(code);
+                    } else {
+                        showAlert('Enhancement failed. Try a different image or adjustment.', 'danger');
+                    }
+                }, 500);
+            });
+            
+            invertBtn.addEventListener('click', function() {
+                if (!currentImageData) return;
+                
+                loadingSpinner.classList.add('active');
+                infoAlert.style.display = 'none';
+                
+                // Invert colors
+                const invertedData = new Uint8ClampedArray(currentWidth * currentHeight);
+                for (let i = 0; i < currentImageData.data.length; i += 4) {
+                    const r = currentImageData.data[i];
+                    const g = currentImageData.data[i + 1];
+                    const b = currentImageData.data[i + 2];
+                    invertedData[i / 4] = 255 - Math.floor(0.299 * r + 0.587 * g + 0.114 * b);
+                }
+                
+                const code = jsQR(invertedData, currentWidth, currentHeight);
+                
+                setTimeout(() => {
+                    loadingSpinner.classList.remove('active');
+                    
+                    if (code) {
+                        handleSuccess(code);
+                    } else {
+                        showAlert('Inversion failed. Try a different image or adjustment.', 'danger');
+                    }
+                }, 500);
+            });
+            
+            function enhanceImage(imageData) {
+                // Simple contrast enhancement
+                const enhanced = new Uint8ClampedArray(imageData.data.length);
+                const factor = 1.5; // Contrast factor
+                const width = imageData.width;
+                const height = imageData.height;
+                
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    // Convert to grayscale
+                    const gray = 0.299 * imageData.data[i] + 
+                                0.587 * imageData.data[i + 1] + 
+                                0.114 * imageData.data[i + 2];
+                    
+                    // Apply contrast
+                    const contrasted = factor * (gray - 128) + 128;
+                    const clamped = Math.max(0, Math.min(255, contrasted));
+                    
+                    enhanced[i] = enhanced[i + 1] = enhanced[i + 2] = clamped;
+                    enhanced[i + 3] = 255; // Alpha
+                }
+                
+                return enhanced;
             }
             
             copyBtn.addEventListener('click', function() {
