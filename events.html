@@ -552,83 +552,85 @@
       }
     }
 
-    // Load user's registered events
-    async function getMyEvents() {
-      const container = document.getElementById('my-events-container');
-      container.classList.remove('d-none');
+  // Load user's registered events
+async function getMyEvents() {
+  const container = document.getElementById('my-events-container');
+  container.classList.remove('d-none');
+  container.innerHTML = `
+    <div class="col-12 text-center py-4">
+      <div class="loading-spinner spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading your events...</p>
+    </div>`;
+
+  try {
+    const result = await makeRequest('GET', '/profile/events');
+    container.innerHTML = '';
+
+    if (!result || !Array.isArray(result) || result.length === 0) {
       container.innerHTML = `
-        <div class="col-12 text-center py-4">
-          <div class="loading-spinner spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+        <div class="col-12">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>You are not registered for any events yet.
           </div>
-          <p class="mt-2">Loading your events...</p>
         </div>`;
-
-      try {
-        const result = await makeRequest('GET', '/profile/events');
-        container.innerHTML = '';
-
-        if (!result || !Array.isArray(result) || result.length === 0) {
-          container.innerHTML = `
-            <div class="col-12">
-              <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>You are not registered for any events yet.
-              </div>
-            </div>`;
-          return;
-        }
-
-        for (const event of result) {
-          const card = document.createElement('div');
-          card.className = 'col-md-6 col-lg-4';
-          card.setAttribute('data-aos', 'fade-up');
-          card.innerHTML = `
-            <div class="card h-100 event-card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                  <h5 class="card-title mb-0">${event.title}</h5>
-                  <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
-                </div>
-                <p class="card-text text-muted small mb-3">Event ID: ${event.id}</p>
-                
-                ${(event.score !== null || event.rank !== null) ? `
-                  <div class="bg-light p-3 rounded mb-3">
-                    ${event.score !== null ? `
-                      <div class="d-flex justify-content-between mb-2">
-                        <span><i class="bi bi-star-fill text-warning me-2"></i>Score</span>
-                        <span class="fw-bold">${event.score}</span>
-                      </div>
-                    ` : ''}
-                    ${event.rank !== null ? `
-                      <div class="d-flex justify-content-between">
-                        <span><i class="bi bi-trophy-fill text-success me-2"></i>Rank</span>
-                        <span class="fw-bold">${event.rank}</span>
-                      </div>
-                    ` : ''}
-                  </div>
-                ` : `
-                  <div class="alert alert-warning small mb-3">
-                    <i class="bi bi-hourglass me-2"></i>Results not published yet
-                  </div>
-                `}
-                
-                <button class="btn btn-outline-primary w-100" onclick='showAttendModal(${JSON.stringify(event)})'>
-                  <i class="bi bi-eye me-1"></i>View Details
-                </button>
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        }
-      } catch (error) {
-        container.innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-danger">
-              <i class="bi bi-exclamation-triangle me-2"></i>Error fetching your events: ${error.message}
-            </div>
-          </div>`;
-      }
+      return;
     }
+
+    for (const event of result) {
+      const card = document.createElement('div');
+      card.className = 'col-md-6 col-lg-4';
+      card.setAttribute('data-aos', 'fade-up');
+      card.innerHTML = `
+        <div class="card h-100 event-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">${event.title}</h5>
+              <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
+            </div>
+            <p class="card-text text-muted small mb-1">Event ID: ${event.id}</p>
+            <p class="card-text text-muted small mb-3">Fee: ₹${parseFloat(event.event_fee || 0).toFixed(2)}</p>
+            
+            ${(event.score !== null || event.rank !== null) ? `
+              <div class="bg-light p-3 rounded mb-3">
+                ${event.score !== null ? `
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-star-fill text-warning me-2"></i>Score</span>
+                    <span class="fw-bold">${event.score}</span>
+                  </div>
+                ` : ''}
+                ${event.rank !== null ? `
+                  <div class="d-flex justify-content-between">
+                    <span><i class="bi bi-trophy-fill text-success me-2"></i>Rank</span>
+                    <span class="fw-bold">${event.rank}</span>
+                  </div>
+                ` : ''}
+              </div>
+            ` : `
+              <div class="alert alert-warning small mb-3">
+                <i class="bi bi-hourglass me-2"></i>Results not published yet
+              </div>
+            `}
+            
+            <button class="btn btn-outline-primary w-100" onclick='showAttendModal(${JSON.stringify(event)})'>
+              <i class="bi bi-eye me-1"></i>View Details
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+  } catch (error) {
+    container.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>Error fetching your events: ${error.message}
+        </div>
+      </div>`;
+  }
+}
+
 async function showAttendModal(event) {
   document.getElementById('attendModalLabel').textContent = event.title;
 
