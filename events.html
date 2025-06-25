@@ -389,10 +389,14 @@
               <textarea id="register-data" class="form-control" rows="3" placeholder='{"team": "Team Name", "preferences": {}}'></textarea>
             </div>
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                <i class="bi bi-x-circle me-1"></i>Cancel
-              </button>
-            </div>
+  <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button type="button" class="btn btn-success btn-sm" onclick="registerForEvent()" id="registerButton" disabled>
+    <i class="bi bi-check-circle me-1"></i>Register Now
+  </button>
+</div>
+
           </div>
         </div>
       </div>
@@ -491,25 +495,29 @@
   // Enhanced transaction ID validation
 function checkTransactionId() {
   const txnId = document.getElementById('transaction-id').value.trim();
-  const registerBtn = document.getElementById('registerBtn');
+  const registerBtn = document.getElementById('registerButton');
   const registerText = document.getElementById('registerText');
-  
-  if (txnId.length >= 6) { // Basic validation for transaction ID
+  const txnCard = document.getElementById('transactionCard');
+
+  if (!registerBtn || !registerText || !txnCard) return;
+
+  if (txnId.length >= 6) {
     registerBtn.disabled = false;
     registerText.textContent = 'Click to Register for Event';
     registerBtn.classList.remove('btn-secondary');
     registerBtn.classList.add('btn-primary');
-    document.getElementById('transactionCard').classList.remove('border-warning');
-    document.getElementById('transactionCard').classList.add('border-success');
+    txnCard.classList.remove('border-warning');
+    txnCard.classList.add('border-success');
   } else {
     registerBtn.disabled = true;
     registerText.textContent = 'Enter Valid Transaction ID to Register';
     registerBtn.classList.remove('btn-primary');
     registerBtn.classList.add('btn-secondary');
-    document.getElementById('transactionCard').classList.remove('border-success');
-    document.getElementById('transactionCard').classList.add('border-warning');
+    txnCard.classList.remove('border-success');
+    txnCard.classList.add('border-warning');
   }
 }
+
 
     // API request handler
     async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
@@ -799,7 +807,7 @@ async function showAttendModal(event) {
       }
     }
 
- // Show event details in modal
+// Show event details in modal
 async function showEventModal(event) {
   document.getElementById('eventModalLabel').textContent = event.title;
   document.getElementById('register-event-id').value = event.id;
@@ -808,6 +816,32 @@ async function showEventModal(event) {
   document.getElementById('modalLoading').style.display = 'block';
   document.getElementById('modalContent').style.display = 'none';
   
+  // Check if deadline has passed
+  const currentDate = new Date();
+  const deadlineDate = new Date(event.registration_deadline);
+  const isDeadlinePassed = currentDate > deadlineDate;
+
+  if (isDeadlinePassed) {
+    document.getElementById('modalContent').innerHTML = `
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="bi bi-calendar-x fs-1 text-danger"></i>
+        </div>
+        <h4 class="text-danger mb-3">Registration Closed</h4>
+        <p class="lead">The registration deadline for this event has passed.</p>
+        <p class="text-muted">Deadline was ${formatDate(event.registration_deadline)}</p>
+        <button class="btn btn-outline-secondary mt-3" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>Back to Events
+        </button>
+      </div>
+    `;
+    
+    document.getElementById('modalLoading').style.display = 'none';
+    document.getElementById('modalContent').style.display = 'block';
+    eventModal.show();
+    return;
+  }
+
   if (!currentUserProfile) {
     try {
       await getMyProfile();
@@ -967,7 +1001,7 @@ async function showEventModal(event) {
     ` : ''}
     
     <div class="d-grid gap-2">
-      <button class="btn btn-primary" id="registerBtn" onclick="registerForEvent()" disabled>
+      <button class="btn btn-primary" id="registerBtn" disabled>
         <span class="spinner-border spinner-border-sm me-2 d-none" id="registerSpinner"></span>
         <span id="registerText">Complete Payment First to Register</span>
       </button>
@@ -985,8 +1019,6 @@ async function showEventModal(event) {
   document.getElementById('modalContent').style.display = 'block';
   eventModal.show();
 }
-
-
 
 
     // Get first gallery image for an event
