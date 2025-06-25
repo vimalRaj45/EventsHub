@@ -793,62 +793,67 @@ async function showAttendModal(event) {
       }
     }
 
-    // Show event details in modal
-    async function showEventModal(event) {
-      document.getElementById('eventModalLabel').textContent = event.title;
-      document.getElementById('register-event-id').value = event.id;
-      console.log(event);
-      
-      // Show loading state
-      document.getElementById('modalLoading').style.display = 'block';
-      document.getElementById('modalContent').style.display = 'none';
-      
-      // Load profile if not already loaded
-      if (!currentUserProfile) {
-        try {
-          await getMyProfile();
-        } catch (error) {
-          showToast('Please verify your profile before registration', 'warning');
-        }
-      }
-      
-      // Update registering-as information
-      if (currentUserProfile) {
-        document.getElementById('registering-as').innerHTML = `
-          ${currentUserProfile.name} (${currentUserProfile.email}) ${currentUserProfile.contact_no ? `• ${currentUserProfile.contact_no}` : ''}
-        `;
-      } else {
-        document.getElementById('registering-as').textContent = 'Profile not verified';
-      }
-      
-      // Set modal content
-      document.getElementById('modalContent').innerHTML = `
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <h6><i class="bi bi-card-text me-2"></i>Description</h6>
-            <p>${event.detailed_description || 'No detailed description provided'}</p>
-          </div>
-          <div class="col-md-6 mb-3">
-            <h6><i class="bi bi-list-check me-2"></i>Rules</h6>
-            <p>${event.rules || 'No rules specified'}</p>
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <h6><i class="bi bi-tag me-2"></i>Event Type</h6>
-            <p>${event.event_type}</p>
-          </div>
-          <div class="col-md-4 mb-3">
-            <h6><i class="bi bi-calendar-x me-2"></i>Registration Deadline</h6>
-            <p>${formatDate(event.registration_deadline) || 'No deadline'}</p>
-          </div>
-          <div class="col-md-4 mb-3">
-            <h6><i class="bi bi-people me-2"></i>Participation</h6>
-            <p>${event.current_participants}/${event.max_participants || '∞'} spots filled</p>
-          </div>
-        </div>
-         <div class="text-center mt-3">
+ // Show event details in modal
+async function showEventModal(event) {
+  document.getElementById('eventModalLabel').textContent = event.title;
+  document.getElementById('register-event-id').value = event.id;
+  console.log(event);
+  
+  // Show loading state
+  document.getElementById('modalLoading').style.display = 'block';
+  document.getElementById('modalContent').style.display = 'none';
+  
+  if (!currentUserProfile) {
+    try {
+      await getMyProfile();
+    } catch (error) {
+      showToast('Please verify your profile before registration', 'warning');
+    }
+  }
+
+  if (currentUserProfile) {
+    document.getElementById('registering-as').innerHTML = `
+      ${currentUserProfile.name} (${currentUserProfile.email}) ${currentUserProfile.contact_no ? `• ${currentUserProfile.contact_no}` : ''}
+    `;
+  } else {
+    document.getElementById('registering-as').textContent = 'Profile not verified';
+  }
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <h6><i class="bi bi-card-text me-2"></i>Description</h6>
+        <p>${event.detailed_description || 'No detailed description provided'}</p>
+      </div>
+      <div class="col-md-6 mb-3">
+        <h6><i class="bi bi-list-check me-2"></i>Rules</h6>
+        <p>${event.rules || 'No rules specified'}</p>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-tag me-2"></i>Event Type</h6>
+        <p>${event.event_type}</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-calendar-x me-2"></i>Registration Deadline</h6>
+        <p>${formatDate(event.registration_deadline) || 'No deadline'}</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-people me-2"></i>Participation</h6>
+        <p>${event.current_participants}/${event.max_participants || '∞'} spots filled</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-currency-rupee me-2"></i>Event Fee</h6>
+        <p class="fw-semibold text-primary">₹${parseFloat(event.event_fee || 0).toFixed(2)}</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-3">
       ${event.banner_url && event.banner_url !== 'a' ? `
         <a href="${event.banner_url}" target="_blank" class="btn btn-success">
           <i class="bi bi-box-arrow-up-right me-2"></i>Pay Registration Fee
@@ -859,29 +864,28 @@ async function showAttendModal(event) {
         </button>
       `}
     </div>
-        
-        <div class="mb-3">
-  <label for="transaction-id" class="form-label">Transaction ID After Payment</label>
-  <input type="text" class="form-control" id="transaction-id" placeholder="TXN12345678" onfocus="checkTransactionId()" oninput="checkTransactionId()">
-</div>
+    
+    <div class="mb-3 mt-3">
+      <label for="transaction-id" class="form-label">Transaction ID After Payment</label>
+      <input type="text" class="form-control" id="transaction-id" placeholder="TXN12345678" onfocus="checkTransactionId()" oninput="checkTransactionId()">
+    </div>
 
-        ${event.status === 'upcoming' || event.status === 'ongoing' ? `
-          <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>This event is currently ${event.status}. 
-            ${event.current_participants >= event.max_participants ? 
-              '<strong class="text-danger">Fully booked!</strong>' : 
-              'Register now to secure your spot!'}
-          </div>
-        ` : ''}
-      `;
-      
-      // Hide loading and show content
-      document.getElementById('modalLoading').style.display = 'none';
-      document.getElementById('modalContent').style.display = 'block';
-      
-      // Show modal
-      eventModal.show();
-    }
+    ${event.status === 'upcoming' || event.status === 'ongoing' ? `
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>This event is currently <strong>${event.status}</strong>. 
+        ${event.current_participants >= event.max_participants ? 
+          '<strong class="text-danger">Fully booked!</strong>' : 
+          'Register now to secure your spot!'}
+      </div>
+    ` : ''}
+  `;
+
+  document.getElementById('modalLoading').style.display = 'none';
+  document.getElementById('modalContent').style.display = 'block';
+
+  eventModal.show();
+}
+
 
     // Get first gallery image for an event
     async function getFirstGalleryImage(eventId) {
