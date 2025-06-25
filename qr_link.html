@@ -1,361 +1,345 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QR Code to URL Converter</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap @5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons @1.10.0/font/bootstrap-icons.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr @1.4.0/dist/jsQR.min.js"></script>
-  <style>
-    :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3f37c9;
-      --light-color: #f8f9fa;
-      --dark-color: #212529;
-    }
-    body {
-      background-color: #f5f7fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .card {
-      border-radius: 15px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      border: none;
-      overflow: hidden;
-      transition: transform 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      padding: 10px 20px;
-      border-radius: 50px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-    .btn-primary:hover {
-      background-color: var(--secondary-color);
-      border-color: var(--secondary-color);
-      transform: translateY(-2px);
-    }
-    .qr-preview {
-      width: 100%;
-      height: 250px;
-      background-color: var(--light-color);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      overflow: hidden;
-      position: relative;
-      border: 2px dashed #adb5bd;
-    }
-    .qr-preview img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-    .qr-preview.empty::before {
-      content: "No QR Code Selected";
-      color: #6c757d;
-      font-size: 1.1rem;
-    }
-    .result-container {
-      background-color: var(--light-color);
-      border-radius: 10px;
-      padding: 15px;
-      margin-top: 20px;
-      min-height: 80px;
-    }
-    .result-url {
-      word-break: break-all;
-      color: var(--primary-color);
-      font-weight: 500;
-    }
-    .file-input-label {
-      display: block;
-      padding: 12px 20px;
-      background-color: var(--primary-color);
-      color: white;
-      border-radius: 50px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.3s;
-      margin-bottom: 15px;
-    }
-    .file-input-label:hover {
-      background-color: var(--secondary-color);
-      transform: translateY(-2px);
-    }
-    .file-input {
-      display: none;
-    }
-    .step-indicator {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 30px;
-      position: relative;
-    }
-    .step {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #e9ecef;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #6c757d;
-      position: relative;
-      z-index: 2;
-    }
-    .step.active {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    .step.completed {
-      background-color: #4cc9f0;
-      color: white;
-    }
-    .step-line {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      height: 2px;
-      background-color: #e9ecef;
-      z-index: 1;
-    }
-    .step-line-progress {
-      height: 100%;
-      background-color: #4cc9f0;
-      width: 0%;
-      transition: width 0.3s;
-    }
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .loading-spinner {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 0.8);
-      z-index: 10;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
-    }
-    .loading-spinner.active {
-      display: flex;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code to URL Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .qr-preview {
+            width: 100%;
+            height: 250px;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            border: 2px dashed #adb5bd;
+        }
+        
+        .qr-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .qr-preview.empty::before {
+            content: "No QR Code Selected";
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .result-container {
+            background-color: var(--light-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 80px;
+        }
+        
+        .result-url {
+            word-break: break-all;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .file-input-label:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .step.completed {
+            background-color: #4cc9f0;
+            color: white;
+        }
+        
+        .step-line {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        
+        .step-line-progress {
+            height: 100%;
+            background-color: #4cc9f0;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+        
+        .loading-spinner.active {
+            display: flex;
+        }
+    </style>
 </head>
 <body>
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="card">
-          <div class="card-body p-4">
-            <h2 class="text-center mb-4">
-              <i class="bi bi-qr-code-scan me-2"></i>QR Code to URL Converter
-            </h2>
-            <div class="step-indicator">
-              <div class="step active" id="step1">1</div>
-              <div class="step" id="step2">2</div>
-              <div class="step" id="step3">3</div>
-              <div class="step-line">
-                <div class="step-line-progress" id="stepProgress"></div>
-              </div>
-            </div>
-            <div class="qr-preview empty" id="qrPreview">
-              <div class="loading-spinner" id="loadingSpinner">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Loading...</span>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">
+                            <i class="bi bi-qr-code-scan me-2"></i>QR Code to URL Converter
+                        </h2>
+                        
+                        <div class="step-indicator">
+                            <div class="step active" id="step1">1</div>
+                            <div class="step" id="step2">2</div>
+                            <div class="step" id="step3">3</div>
+                            <div class="step-line">
+                                <div class="step-line-progress" id="stepProgress"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="qr-preview empty" id="qrPreview">
+                            <div class="loading-spinner" id="loadingSpinner">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <label for="qrFileInput" class="file-input-label">
+                            <i class="bi bi-folder2-open me-2"></i>Select QR Code from Gallery
+                        </label>
+                        <input type="file" id="qrFileInput" class="file-input" accept="image/*">
+                        
+                        <div class="result-container" id="resultContainer" style="display: none;">
+                            <h5 class="mb-3">Extracted URL:</h5>
+                            <div class="result-url" id="resultUrl"></div>
+                            <div class="action-buttons mt-3">
+                                <button class="btn btn-outline-primary" id="copyBtn">
+                                    <i class="bi bi-clipboard me-2"></i>Copy URL
+                                </button>
+                                <a href="#" class="btn btn-primary" id="visitBtn" target="_blank">
+                                    <i class="bi bi-box-arrow-up-right me-2"></i>Visit URL
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3" id="infoAlert">
+                            <i class="bi bi-info-circle me-2"></i> Select a QR code image from your gallery to extract the URL
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-            <label for="qrFileInput" class="file-input-label">
-              <i class="bi bi-folder2-open me-2"></i>Select QR Code from Gallery
-            </label>
-            <input type="file" id="qrFileInput" class="file-input" accept="image/*" />
-            <div class="result-container" id="resultContainer" style="display: none;">
-              <h5 class="mb-3">Extracted URL:</h5>
-              <div class="result-url" id="resultUrl"></div>
-              <div class="action-buttons mt-3">
-                <button class="btn btn-outline-primary" id="copyBtn">
-                  <i class="bi bi-clipboard me-2"></i>Copy URL
-                </button>
-                <a href="#" class="btn btn-primary" id="visitBtn" target="_blank">
-                  <i class="bi bi-box-arrow-up-right me-2"></i>Visit URL
-                </a>
-              </div>
-            </div>
-            <div class="alert alert-info mt-3" id="infoAlert">
-              <i class="bi bi-info-circle me-2"></i> Select a QR code image from your gallery to extract the URL
-            </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const qrFileInput = document.getElementById('qrFileInput');
-      const qrPreview = document.getElementById('qrPreview');
-      const resultContainer = document.getElementById('resultContainer');
-      const resultUrl = document.getElementById('resultUrl');
-      const copyBtn = document.getElementById('copyBtn');
-      const visitBtn = document.getElementById('visitBtn');
-      const infoAlert = document.getElementById('infoAlert');
-      const loadingSpinner = document.getElementById('loadingSpinner');
-      const step1 = document.getElementById('step1');
-      const step2 = document.getElementById('step2');
-      const step3 = document.getElementById('step3');
-      const stepProgress = document.getElementById('stepProgress');
-
-      let extractedUrl = '';
-
-      // Improved Image Processing
-      function processImageForQR(img) {
-        return new Promise((resolve) => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          const size = 512;
-          canvas.width = size;
-          canvas.height = size;
-
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          ctx.drawImage(img, 0, 0, size, size);
-
-          const imageData = ctx.getImageData(0, 0, size, size);
-          const data = imageData.data;
-
-          // Convert to grayscale and enhance contrast
-          for (let i = 0; i < data.length; i += 4) {
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            data[i] = avg > 128 ? 255 : 0;
-            data[i + 1] = avg > 128 ? 255 : 0;
-            data[i + 2] = avg > 128 ? 255 : 0;
-          }
-
-          ctx.putImageData(imageData, 0, 0);
-
-          resolve(canvas.toDataURL());
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrFileInput = document.getElementById('qrFileInput');
+            const qrPreview = document.getElementById('qrPreview');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultUrl = document.getElementById('resultUrl');
+            const copyBtn = document.getElementById('copyBtn');
+            const visitBtn = document.getElementById('visitBtn');
+            const infoAlert = document.getElementById('infoAlert');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const stepProgress = document.getElementById('stepProgress');
+            
+            let extractedUrl = '';
+            
+            qrFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Show loading state
+                loadingSpinner.classList.add('active');
+                infoAlert.style.display = 'none';
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Update preview
+                        qrPreview.innerHTML = '';
+                        qrPreview.appendChild(img);
+                        qrPreview.classList.remove('empty');
+                        
+                        // Process QR code
+                        processQRCode(img);
+                        
+                        // Update steps
+                        step1.classList.remove('active');
+                        step1.classList.add('completed');
+                        step2.classList.add('active');
+                        stepProgress.style.width = '50%';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            function processQRCode(image) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                setTimeout(() => {
+                    loadingSpinner.classList.remove('active');
+                    
+                    if (code) {
+                        extractedUrl = code.data;
+                        resultUrl.textContent = extractedUrl;
+                        resultContainer.style.display = 'block';
+                        visitBtn.href = extractedUrl;
+                        
+                        // Update steps
+                        step2.classList.remove('active');
+                        step2.classList.add('completed');
+                        step3.classList.add('active');
+                        stepProgress.style.width = '100%';
+                        
+                        // Show success message
+                        showAlert('QR code successfully decoded!', 'success');
+                    } else {
+                        qrPreview.classList.add('empty');
+                        qrPreview.innerHTML = 'Could not read QR code';
+                        showAlert('No QR code found in the image. Please try another image.', 'danger');
+                        
+                        // Reset steps
+                        step1.classList.add('active');
+                        step1.classList.remove('completed');
+                        step2.classList.remove('active');
+                        stepProgress.style.width = '0%';
+                    }
+                }, 500); // Small delay for better UX
+            }
+            
+            copyBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(extractedUrl).then(() => {
+                    showAlert('URL copied to clipboard!', 'success');
+                    this.innerHTML = '<i class="bi bi-check2 me-2"></i>Copied!';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-clipboard me-2"></i>Copy URL';
+                    }, 2000);
+                });
+            });
+            
+            function showAlert(message, type) {
+                infoAlert.style.display = 'block';
+                infoAlert.className = `alert alert-${type} mt-3`;
+                infoAlert.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2"></i>${message}`;
+            }
         });
-      }
-
-      async function tryDecodeQR(canvas) {
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let code = jsQR(imageData.data, imageData.width, imageData.height);
-
-        if (!code) {
-          // Try mirrored version
-          const mirroredCanvas = document.createElement("canvas");
-          mirroredCanvas.width = canvas.width;
-          mirroredCanvas.height = canvas.height;
-          const mCtx = mirroredCanvas.getContext("2d");
-          mCtx.translate(mirroredCanvas.width, 0);
-          mCtx.scale(-1, 1);
-          mCtx.drawImage(canvas, 0, 0);
-          const mirroredData = mCtx.getImageData(0, 0, mirroredCanvas.width, mirroredCanvas.height);
-          code = jsQR(mirroredData.data, mirroredData.width, mirroredData.height);
-        }
-
-        return code;
-      }
-
-      qrFileInput.addEventListener('change', async function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        loadingSpinner.classList.add('active');
-        infoAlert.style.display = 'none';
-
-        const reader = new FileReader();
-        reader.onload = async function (event) {
-          const img = new Image();
-          img.onload = async function () {
-            qrPreview.innerHTML = '';
-            qrPreview.appendChild(img);
-            qrPreview.classList.remove('empty');
-
-            const processedImg = await processImageForQR(img);
-            const tempImg = new Image();
-            tempImg.onload = async () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = tempImg.width;
-              canvas.height = tempImg.height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(tempImg, 0, 0);
-              const code = await tryDecodeQR(canvas);
-              setTimeout(() => {
-                loadingSpinner.classList.remove('active');
-                if (code) {
-                  extractedUrl = code.data;
-                  resultUrl.textContent = extractedUrl;
-                  resultContainer.style.display = 'block';
-                  visitBtn.href = extractedUrl;
-
-                  step1.classList.remove('active');
-                  step1.classList.add('completed');
-                  step2.classList.add('active');
-                  stepProgress.style.width = '50%';
-
-                  showAlert('QR code successfully decoded!', 'success');
-                } else {
-                  qrPreview.classList.add('empty');
-                  qrPreview.innerText = 'Could not read QR code';
-                  showAlert('No QR code found in the image. Please try another image.', 'danger');
-                  resetSteps();
-                }
-              }, 500);
-            };
-            tempImg.src = processedImg;
-          };
-          img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-
-      function resetSteps() {
-        step1.classList.add('active');
-        step1.classList.remove('completed');
-        step2.classList.remove('active', 'completed');
-        step3.classList.remove('active', 'completed');
-        stepProgress.style.width = '0%';
-      }
-
-      copyBtn.addEventListener('click', function () {
-        navigator.clipboard.writeText(extractedUrl).then(() => {
-          showAlert('URL copied to clipboard!', 'success');
-          this.innerHTML = '<i class="bi bi-check2 me-2"></i>Copied!';
-          setTimeout(() => {
-            this.innerHTML = '<i class="bi bi-clipboard me-2"></i>Copy URL';
-          }, 2000);
-        });
-      });
-
-      function showAlert(message, type) {
-        infoAlert.style.display = 'block';
-        infoAlert.className = `alert alert-${type} mt-3`;
-        infoAlert.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2"></i>${message}`;
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
