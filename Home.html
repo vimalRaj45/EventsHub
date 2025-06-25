@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventHub - Event Organization Platform</title>
+    <link rel="stylesheet" href="https://vimalraj45.github.io/demo/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS & Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <!-- Toast popup -->
+<div id="devPopup" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+  <div class="toast align-items-center text-bg-danger border-0" role="alert">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-shield-lock-fill me-2 fs-4"></i>
+      <div>Action Blocked: Developer tools disabled</div>
+      <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>EventHub</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="events.html" class="nav-link">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a href="certificates.html" class="nav-link">Certificates</a>
+                </li>
+                <li class="nav-item">
+                    <a href="results.html" class="nav-link">Results</a>
+                </li>
+                <li class="nav-item" onclick="logout()">
+                    <a href="#" class="nav-link">Logout</a>
+                </li>
+                <li class="nav-item" >
+                    <a href="1.html" class="nav-link btn-primary">Edit Profile</a>
+                </li>
+                
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <!-- Hero Section -->
+<section id="home" class="hero">
+    <!-- Video Background -->
+    <video autoplay muted loop playsinline class="hero-video">
+        <source src="https://n6xuovvnbt9fbc6b.public.blob.vercel-storage.com/3255275-uhd_2560_1440_25fps-KLFFhZkLpNYebeYBRCn03LUYYtjG44.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">Organize Amazing Events</h1>
+            <p class="hero-description">
+                Join our platform to participate in quizzes, webinars, essay writing competitions, and more. 
+                Register for events, download certificates, and view your results all in one place.
+            </p>
+            <div class="hero-buttons">
+                <a href="events.html" class="btn btn-primary">Browse Events</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    <!-- What is EventHub Section -->
+<section class="eventhub-section">
+  <div class="container">
+    <h2>What is EventHub?</h2>
+
+    <div class="eventhub-cards">
+      <!-- Card 1 -->
+      <div class="eventhub-card">
+        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fG1lZXRpbmd8ZW58MHx8MHx8fDA%3D" 
+             class="eventhub-card-img" alt="Tech Events">
+        <div class="eventhub-card-body">
+          <h3 class="eventhub-card-title">Host & Manage Tech Events</h3>
+          <p class="eventhub-card-text">
+            Organize and manage workshops, speaker sessions, and conferences all in one place.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="eventhub-card">
+        <img src="https://images.unsplash.com/photo-1561489396-888724a1543d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGV2ZW50fGVufDB8fDB8fHww" 
+             class="eventhub-card-img" alt="Learning Webinars">
+        <div class="eventhub-card-body">
+          <h3 class="eventhub-card-title">Learn from Webinars & Talks</h3>
+          <p class="eventhub-card-text">
+            Attend engaging online sessions, tutorials, and panels by experts from around the world.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="eventhub-card">
+        <img src="https://images.unsplash.com/photo-1523582407565-efee5cf4a353?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWVldGluZyUyMHN0dWRlbnQlMjBjb21wZXRpb258ZW58MHx8MHx8fDA%3D" 
+             class="eventhub-card-img" alt="Competitions">
+        <div class="eventhub-card-body">
+          <h3 class="eventhub-card-title">Participate in Competitions</h3>
+          <p class="eventhub-card-text">
+            Showcase your talent in quizzes, hackathons, and creative contests hosted via EventHub.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  /* General Section Styling */
+.eventhub-section {
+  background-color: #f9fafb;
+  padding: 5rem 0;
+}
+
+.eventhub-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #1f2937;
+}
+
+/* Card Container */
+.eventhub-cards {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Individual Card Styling */
+.eventhub-card {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 360px;
+}
+
+.eventhub-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Card Image */
+.eventhub-card-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Card Body */
+.eventhub-card-body {
+  padding: 1.5rem;
+}
+
+.eventhub-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+.eventhub-card-text {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Responsive Grid */
+@media (min-width: 768px) {
+  .eventhub-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .eventhub-card {
+    max-width: 100%;
+  }
+}
+</style>
+    <!-- Floating Chatbot Button -->
+<a href="EventAi.html" 
+   class="btn btn-primary rounded-circle shadow-lg"
+   style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 60px; display: flex; align-items: center; justify-content: center; z-index: 9999;">
+  <i class="bi bi-robot" style="font-size: 22px;"></i>
+</a>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Why Choose EventHub?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Easy Registration</h3>
+                    <p>Simple and quick event registration process with instant confirmation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Digital Certificates</h3>
+                    <p>Download your participation and achievement certificates instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Real-time Results</h3>
+                    <p>View your performance and results as soon as events conclude.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community</h3>
+                    <p>Connect with like-minded participants and build your network.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EventHub</h3>
+                    <p>Your premier platform for organizing and participating in educational and competitive events.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="events.html">Events</a></li>
+                        <li><a href="certificates.html">Certificates</a></li>
+                        <li><a href="results.html">Results</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> info@eventhub.com</p>
+                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EventHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+      // Show toast popup
+function showDevPopup() {
+  const toastEl = document.querySelector('#devPopup .toast');
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
+}
+    // Disable right-click context menu
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Disable specific key shortcuts
+document.addEventListener('keydown', function(e) {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+    (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+  ) {
+    e.preventDefault();
+    showDevPopup();
+  }
+});
+    function logout() {
+    // Clear all localStorage data
+    localStorage.clear();
+
+    // Optional: clear sessionStorage if used
+    // sessionStorage.clear();
+
+    // Redirect to login page
+    window.location.href = "index.html";
+  }</script>
+    <script src="script.js"></script>
+    <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
