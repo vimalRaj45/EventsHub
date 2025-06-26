@@ -1,349 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code to URL Converter</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .card {
-            border-radius: 15px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            border: none;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-        
-        .qr-preview {
-            width: 100%;
-            height: 250px;
-            background-color: var(--light-color);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            overflow: hidden;
-            position: relative;
-            border: 2px dashed #adb5bd;
-        }
-        
-        .qr-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-        
-        .qr-preview.empty::before {
-            content: "No QR Code Selected";
-            color: #6c757d;
-            font-size: 1.1rem;
-        }
-        
-        .result-container {
-            background-color: var(--light-color);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            min-height: 80px;
-        }
-        
-        .result-url {
-            word-break: break-all;
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .file-input-label {
-            display: block;
-            padding: 12px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 50px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-        
-        .file-input-label:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #6c757d;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .step.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .step.completed {
-            background-color: #4cc9f0;
-            color: white;
-        }
-        
-        .step-line {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            height: 2px;
-            background-color: #e9ecef;
-            z-index: 1;
-        }
-        
-        .step-line-progress {
-            height: 100%;
-            background-color: #4cc9f0;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .loading-spinner {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.8);
-            z-index: 10;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-        }
-        
-        .loading-spinner.active {
-            display: flex;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPI Payment Link Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6c63ff;
+      --primary-dark: #564fd8;
+      --secondary: #f8f9fa;
+      --text: #2d3748;
+      --text-light: #718096;
+      --success: #48bb78;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: #f5f7fa;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .content {
+      padding: 25px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text);
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+    }
+    
+    .input-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+    
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      width: 100%;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--secondary);
+    }
+    
+    .output-container {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--secondary);
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .output-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .output-title i {
+      color: var(--primary);
+    }
+    
+    .output-link {
+      word-break: break-all;
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .action-buttons button {
+      flex: 1;
+    }
+    
+    .qr-code {
+      margin: 20px auto;
+      text-align: center;
+      display: none;
+    }
+    
+    .qr-code img {
+      max-width: 200px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      background: white;
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 5px;
+    }
+    
+    .error {
+      color: #e53e3e;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+    }
+    
+    .success-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--success);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .success-message.show {
+      transform: translateX(0);
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        margin: 10px auto;
+      }
+      
+      .content {
+        padding: 15px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <h2 class="text-center mb-4">
-                            <i class="bi bi-qr-code-scan me-2"></i>QR Code to URL Converter
-                        </h2>
-                        
-                        <div class="step-indicator">
-                            <div class="step active" id="step1">1</div>
-                            <div class="step" id="step2">2</div>
-                            <div class="step" id="step3">3</div>
-                            <div class="step-line">
-                                <div class="step-line-progress" id="stepProgress"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="qr-preview empty" id="qrPreview">
-                            <div class="loading-spinner" id="loadingSpinner">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <label for="qrFileInput" class="file-input-label">
-                            <i class="bi bi-folder2-open me-2"></i>Select QR Code from Gallery
-                        </label>
-                        <input type="file" id="qrFileInput" class="file-input" accept="image/*">
-                        
-                        <div class="result-container" id="resultContainer" style="display: none;">
-                            <h5 class="mb-3">Extracted URL:</h5>
-                            <div class="result-url" id="resultUrl"></div>
-                            <div class="action-buttons mt-3">
-                                <button class="btn btn-outline-primary" id="copyBtn">
-                                    <i class="bi bi-clipboard me-2"></i>Copy URL
-                                </button>
-                                <a href="#" class="btn btn-primary" id="visitBtn" target="_blank">
-                                    <i class="bi bi-box-arrow-up-right me-2"></i>Visit URL
-                                </a>
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-info mt-3" id="infoAlert">
-                            <i class="bi bi-info-circle me-2"></i> Select a QR code image from your gallery to extract the URL
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1><i class="fas fa-qrcode"></i> UPI Payment Link Generator</h1>
+      <p>Create custom payment links for your UPI ID</p>
     </div>
+    
+    <div class="content">
+      <div class="form-group">
+        <label for="upi">UPI ID</label>
+        <div class="input-wrapper">
+          <input type="text" id="upi" placeholder="yourname@upi" required>
+          <i class="fas fa-at input-icon"></i>
+        </div>
+        <div class="error" id="upi-error">Please enter a valid UPI ID (e.g., name@upi)</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="name">Payee Name (Optional)</label>
+        <div class="input-wrapper">
+          <input type="text" id="name" placeholder="Your Business Name">
+          <i class="fas fa-user input-icon"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="amount">Amount (₹)</label>
+        <div class="input-wrapper">
+          <input type="number" id="amount" placeholder="100" min="1" step="any">
+          <i class="fas fa-rupee-sign input-icon"></i>
+        </div>
+        <div class="error" id="amount-error">Please enter a valid amount (minimum ₹1)</div>
+        <div class="hint">Leave empty for any amount</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="note">Payment Note (Optional)</label>
+        <div class="input-wrapper">
+          <input type="text" id="note" placeholder="e.g. Order #1234">
+          <i class="fas fa-comment input-icon"></i>
+        </div>
+      </div>
+      
+      <button class="btn" onclick="generateUPILink()">
+        <i class="fas fa-link"></i> Generate Payment Link
+      </button>
+      
+      <div class="output-container" id="output">
+        <div class="output-title">
+          <i class="fas fa-check-circle"></i> Your Payment Link is Ready!
+        </div>
+        <div class="output-link" id="generated-link"></div>
+        
+        <div class="qr-code" id="qr-code">
+          <div class="output-title">
+            <i class="fas fa-qrcode"></i> QR Code
+          </div>
+          <img id="qr-image" src="" alt="UPI QR Code">
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn" onclick="copyToClipboard()">
+            <i class="fas fa-copy"></i> Copy Link
+          </button>
+          <button class="btn btn-secondary" onclick="testPayment()">
+            <i class="fas fa-external-link-alt"></i> Test Payment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="success-message" id="success-message">
+    <i class="fas fa-check"></i>
+    <span id="success-text">Copied to clipboard!</span>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const qrFileInput = document.getElementById('qrFileInput');
-            const qrPreview = document.getElementById('qrPreview');
-            const resultContainer = document.getElementById('resultContainer');
-            const resultUrl = document.getElementById('resultUrl');
-            const copyBtn = document.getElementById('copyBtn');
-            const visitBtn = document.getElementById('visitBtn');
-            const infoAlert = document.getElementById('infoAlert');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const step1 = document.getElementById('step1');
-            const step2 = document.getElementById('step2');
-            const step3 = document.getElementById('step3');
-            const stepProgress = document.getElementById('stepProgress');
-            
-            let extractedUrl = '';
-            
-            qrFileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                // Show loading state
-                loadingSpinner.classList.add('active');
-                infoAlert.style.display = 'none';
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Update preview
-                        qrPreview.innerHTML = '';
-                        qrPreview.appendChild(img);
-                        qrPreview.classList.remove('empty');
-                        
-                        // Process QR code
-                        processQRCode(img);
-                        
-                        // Update steps
-                        step1.classList.remove('active');
-                        step1.classList.add('completed');
-                        step2.classList.add('active');
-                        stepProgress.style.width = '50%';
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-            
-            function processQRCode(image) {
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    // Increase resolution for better accuracy
-    const scale = 2; // try 2x or 3x
-    canvas.width = image.width * scale;
-    canvas.height = image.height * scale;
-
-    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "attemptBoth" // boost detection of inverted QR codes
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script>
+    function validateUPI(upi) {
+      const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
+      return regex.test(upi);
+    }
+    
+    function showError(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      return false;
+    }
+    
+    function hideError(elementId) {
+      document.getElementById(elementId).style.display = 'none';
+      return true;
+    }
+    
+    function generateUPILink() {
+      const upi = document.getElementById('upi').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const amount = document.getElementById('amount').value.trim();
+      const note = document.getElementById('note').value.trim();
+      
+      // Validate inputs
+      let isValid = true;
+      
+      if (!upi) {
+        isValid = showError('upi-error', 'Please enter your UPI ID');
+      } else if (!validateUPI(upi)) {
+        isValid = showError('upi-error', 'Please enter a valid UPI ID (e.g., name@upi)');
+      } else {
+        isValid = hideError('upi-error');
+      }
+      
+      if (amount && (isNaN(amount) || parseFloat(amount) <= 0)) {
+        isValid = showError('amount-error', 'Please enter a valid amount (minimum ₹1)');
+      } else {
+        isValid = hideError('amount-error');
+      }
+      
+      if (!isValid) return;
+      
+      // Generate the UPI link
+      let link = `upi://pay?pa=${upi}`;
+      
+      if (name) link += `&pn=${encodeURIComponent(name)}`;
+      if (amount) link += `&am=${amount}`;
+      link += '&cu=INR';
+      if (note) link += `&tn=${encodeURIComponent(note)}`;
+      
+      // Display the result
+      document.getElementById('generated-link').textContent = link;
+      document.getElementById('output').style.display = 'block';
+      
+      // Generate QR code
+      generateQRCode(link);
+      
+      // Scroll to result
+      document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function generateQRCode(link) {
+      const qr = qrcode(0, 'L');
+      qr.addData(link);
+      qr.make();
+      
+      const qrCodeElement = document.getElementById('qr-image');
+      qrCodeElement.src = qr.createDataURL(4);
+      document.getElementById('qr-code').style.display = 'block';
+    }
+    
+    function copyToClipboard() {
+      const link = document.getElementById('generated-link').textContent;
+      navigator.clipboard.writeText(link).then(() => {
+        showSuccess('Link copied to clipboard!');
+      });
+    }
+    
+    function testPayment() {
+      const link = document.getElementById('generated-link').textContent;
+      window.open(link, '_blank');
+    }
+    
+    function showSuccess(message) {
+      const successElement = document.getElementById('success-message');
+      document.getElementById('success-text').textContent = message;
+      successElement.classList.add('show');
+      
+      setTimeout(() => {
+        successElement.classList.remove('show');
+      }, 3000);
+    }
+    
+    // Allow form submission on Enter key
+    document.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        generateUPILink();
+      }
     });
-
-    setTimeout(() => {
-        loadingSpinner.classList.remove('active');
-
-        if (code) {
-            extractedUrl = code.data;
-            resultUrl.textContent = extractedUrl;
-            resultContainer.style.display = 'block';
-            visitBtn.href = extractedUrl;
-
-            step2.classList.remove('active');
-            step2.classList.add('completed');
-            step3.classList.add('active');
-            stepProgress.style.width = '100%';
-
-            showAlert('QR code successfully decoded!', 'success');
-        } else {
-            qrPreview.classList.add('empty');
-            qrPreview.innerHTML = 'Could not read QR code';
-            showAlert('No QR code found in the image. Please try a clearer or larger image.', 'danger');
-
-            step1.classList.add('active');
-            step1.classList.remove('completed');
-            step2.classList.remove('active');
-            stepProgress.style.width = '0%';
-        }
-    }, 500);
-}
-
-            copyBtn.addEventListener('click', function() {
-                navigator.clipboard.writeText(extractedUrl).then(() => {
-                    showAlert('URL copied to clipboard!', 'success');
-                    this.innerHTML = '<i class="bi bi-check2 me-2"></i>Copied!';
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="bi bi-clipboard me-2"></i>Copy URL';
-                    }, 2000);
-                });
-            });
-            
-            function showAlert(message, type) {
-                infoAlert.style.display = 'block';
-                infoAlert.className = `alert alert-${type} mt-3`;
-                infoAlert.innerHTML = `<i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2"></i>${message}`;
-            }
-        });
-    </script>
+    
+    // Input validation as user types
+    document.getElementById('upi').addEventListener('input', function() {
+      if (validateUPI(this.value.trim())) {
+        hideError('upi-error');
+      }
+    });
+    
+    document.getElementById('amount').addEventListener('input', function() {
+      const value = this.value.trim();
+      if (!value || (!isNaN(value) && parseFloat(value) > 0)) {
+        hideError('amount-error');
+      }
+    });
+  </script>
 </body>
 </html>
