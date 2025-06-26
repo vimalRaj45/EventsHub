@@ -868,82 +868,103 @@ async function showEventModal(event) {
   // Check if payment link exists
   const hasPaymentLink = event.banner_url && event.banner_url !== 'a';
   
-  const paymentSection = hasPaymentLink ? `
+  // Payment section with better visual hierarchy
+const paymentSection = hasPaymentLink ? `
   <div class="card border-primary mb-4 shadow-sm">
     <div class="card-header bg-primary text-white d-flex align-items-center">
       <i class="bi bi-credit-card me-2 fs-5"></i>
-      <h5 class="mb-0">Complete Your Payment</h5>
+      <h5 class="mb-0">Complete Payment</h5>
     </div>
     <div class="card-body">
+      <!-- Step-by-step instructions -->
       <div class="payment-steps mb-4">
-        <div class="step mb-3 d-flex">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">1</div>
+        <div class="step d-flex mb-3">
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">1</div>
           <div>
-            <h6 class="mb-1">Save the QR Code</h6>
-            <p class="text-muted small mb-0">Take a screenshot or download this QR code to your device</p>
+            <h6 class="mb-1 fw-bold">Save QR Code</h6>
+            <p class="text-muted small mb-0">Take screenshot or long-press to save image</p>
           </div>
         </div>
         
-        <div class="step mb-3 d-flex">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">2</div>
+        <div class="step d-flex mb-3">
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">2</div>
           <div>
-            <h6 class="mb-1">Open UPI App</h6>
-            <p class="text-muted small mb-0">Launch your preferred UPI payment app</p>
+            <h6 class="mb-1 fw-bold">Open Payment App</h6>
+            <p class="text-muted small mb-0">Launch GPay, PhonePe, Paytm or your bank app</p>
           </div>
         </div>
         
         <div class="step d-flex">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">3</div>
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">3</div>
           <div>
-            <h6 class="mb-1">Scan & Pay</h6>
-            <p class="text-muted small mb-0">Select "Scan QR" in your app and choose the saved image</p>
+            <h6 class="mb-1 fw-bold">Scan & Pay</h6>
+            <p class="text-muted small mb-0">Select "Scan QR" and choose the saved image</p>
           </div>
         </div>
       </div>
 
+      <!-- QR Code Display - Mobile Responsive -->
       <div class="text-center mb-4">
-        <div class="bg-white p-3 rounded border d-inline-block mb-3 shadow-sm">
-          <img src="${event.banner_url}" alt="Payment QR Code" class="img-fluid" style="max-width: 220px;">
+        <div class="bg-white p-2 p-md-3 rounded border d-inline-block mb-3 shadow-sm" style="max-width: 100%;">
+          <img src="${event.banner_url}" alt="Payment QR Code" class="img-fluid" style="max-width: 200px; width: 100%; height: auto;">
         </div>
         
-        <div class="d-flex justify-content-center mb-4">
-          <div class="bg-light-primary rounded-pill px-4 py-2">
+        <!-- Payment Amount -->
+        <div class="d-flex justify-content-center mb-3">
+          <div class="bg-light-primary rounded-pill px-3 px-sm-4 py-1 py-sm-2">
             <span class="fw-bold text-primary fs-4">₹${parseFloat(event.event_fee || 0).toFixed(2)}</span>
           </div>
         </div>
+
         
-        <div class="mb-4">
-          <a href="upi://pay" class="btn btn-primary w-100 py-2 fw-bold" target="_blank">
-            <i class="bi bi-phone me-2"></i>Open UPI App Directly
+        
+        
+        <!-- Alternative Options -->
+        <div class="d-grid gap-2 mb-3">
+          <a href="upi://pay" class="btn btn-outline-primary py-2" target="_blank">
+  <i class="bi bi-upc-scan me-2"></i>Open UPI App
+</a>
+          <small class="text-muted d-block mt-2">
+  <i class="bi bi-info-circle me-1"></i>
+  Long press the QR code image to download it on mobile.
+</small>
+
+          <a href="#help-section" class="btn btn-outline-secondary py-2">
+            <i class="bi bi-question-circle me-2"></i>Need Help?
           </a>
-          <p class="text-muted small mt-2 mb-0">
-            <i class="bi bi-lightbulb me-1"></i>
-            Alternatively, long-press the QR code to save it
-          </p>
         </div>
+        
+        
+        <p class="text-muted small mb-0">
+          <i class="bi bi-lightbulb me-1"></i>
+          If scanning fails, try increasing brightness or saving the image
+        </p>
       </div>
       
-      <div class="alert alert-warning bg-light-warning border-warning mb-0">
+      <!-- Important Notice -->
+      <div class="alert alert-warning bg-light-warning border-warning mb-0 mt-3">
         <div class="d-flex">
           <i class="bi bi-exclamation-circle fs-5 me-2 text-warning"></i>
           <div>
-            <h6 class="alert-heading mb-1">Don't forget!</h6>
-            <p class="small mb-0">After payment, return here to enter your transaction ID and complete registration.</p>
+            <h6 class="alert-heading mb-1">Complete Registration</h6>
+            <p class="small mb-0">After payment, enter transaction ID below to verify</p>
           </div>
         </div>
       </div>
     </div>
   </div>
+  
+
+
 ` : `
   <div class="alert alert-info d-flex align-items-center">
     <i class="bi bi-info-circle-fill fs-4 me-3"></i>
     <div>
-      <h5 class="alert-heading mb-1">Payment Not Available Yet</h5>
-      <p class="mb-0">The payment QR code will be published soon. Please check back later.</p>
+      <h5 class="alert-heading mb-1">Payment Coming Soon</h5>
+      <p class="mb-0">The payment option will be available shortly. Please check back later.</p>
     </div>
   </div>
 `;
-
 
   // Payment verification section (only shown if payment link exists)
   const paymentVerificationSection = hasPaymentLink ? `
@@ -1077,6 +1098,9 @@ async function showEventModal(event) {
   document.getElementById('modalContent').style.display = 'block';
   eventModal.show();
 }
+
+
+   
 
 
     // Get first gallery image for an event
