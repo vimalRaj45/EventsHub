@@ -251,7 +251,6 @@ function renderInternships(internships) {
             <small class="text-muted">Dates: ${new Date(i.start_date).toLocaleDateString()} to ${new Date(i.end_date).toLocaleDateString()}</small><br>
             <span class="badge ${getStatusBadgeClass(i.status)}">${i.status}</span>
           </p>
-          ${i.imgurl ? `<a href="${i.imgurl}" target="_blank" class="card-link">Certificate</a>` : ''}
         </div>
         <div class="card-footer bg-transparent">
           <button onclick="deleteInternship(${i.id})" class="btn btn-sm btn-danger me-2">
