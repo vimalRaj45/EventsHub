@@ -921,13 +921,49 @@ const paymentSection = hasPaymentLink ? `
         
         <!-- Alternative Options -->
         <div class="d-grid gap-2 mb-3">
-          <a href="upi://pay" class="btn btn-outline-primary py-2" target="_blank">
-  <i class="bi bi-upc-scan me-2"></i>Open UPI App
-</a>
-          <small class="text-muted d-block mt-2">
-  <i class="bi bi-info-circle me-1"></i>
-  Long press the QR code image to download it on mobile.
-</small>
+        <div class="d-flex flex-wrap gap-2 mt-3 justify-content-center">
+
+  <!-- Google Pay -->
+  <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
+     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
+     target="_blank"
+     title="GPay">
+    <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000" 
+         width="24" height="24" 
+         style="object-fit: contain;">
+  </a>
+
+  <!-- PhonePe -->
+  <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
+     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
+     target="_blank"
+     title="PhonePe">
+    <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000" 
+         width="24" height="24" 
+         style="object-fit: contain;">
+  </a>
+
+  <!-- Paytm -->
+  <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
+     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
+     target="_blank"
+     title="Paytm">
+    <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000" 
+         width="24" height="24" 
+         style="object-fit: contain;">
+  </a>
+
+  <!-- BHIM -->
+  <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
+     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
+     target="_blank"
+     title="BHIM">
+    <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000" 
+         width="24" height="24" 
+         style="object-fit: contain;">
+  </a>
+
+</div>
 
           <a href="#help-section" class="btn btn-outline-secondary py-2">
             <i class="bi bi-question-circle me-2"></i>Need Help?
