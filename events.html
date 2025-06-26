@@ -1023,7 +1023,7 @@ const paymentSection = hasPaymentLink ? `
         
 <!-- Alternative UPI App Options -->
 <div class="text-center mb-4">
-  <p class="text-muted mb-2">Open your preferred UPI app</p>
+  <p class="text-muted mb-2">Clik to Open UPI</p>
 
   <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
 
@@ -1074,9 +1074,7 @@ const paymentSection = hasPaymentLink ? `
 
   </div>
 
-  <div class="alert alert-info small px-3 py-2 mx-auto" style="max-width: 380px;">
-    <i class="bi bi-info-circle me-1"></i> If the app doesn't open, you’ll be redirected to install or update it from the Play Store.
-  </div>
+
 
   <a href="#help-section" class="btn btn-outline-secondary py-2 mt-2">
     <i class="bi bi-question-circle me-2"></i>Need Help?
@@ -1097,7 +1095,11 @@ const paymentSection = hasPaymentLink ? `
           <i class="bi bi-exclamation-circle fs-5 me-2 text-warning"></i>
           <div>
             <h6 class="alert-heading mb-1">Complete Registration</h6>
-            <p class="small mb-0">After payment, enter transaction ID below to verify</p>
+           <p class="small text-muted mb-0">
+  <i class="bi bi-info-circle me-1"></i>
+  After completing the payment, enter your transaction ID below. The registration button will become active upon successful verification.
+</p>
+
           </div>
         </div>
       </div>
@@ -1118,7 +1120,7 @@ const paymentSection = hasPaymentLink ? `
 
   // Payment verification section (only shown if payment link exists)
   const paymentVerificationSection = hasPaymentLink ? `
-    <div class="card mb-3" id="transactionCard">
+    <div class="card mb-3" id="transactionCard" style="display:none">
       <div class="card-header">
         <i class="bi bi-receipt me-2"></i>Payment Verification
       </div>
