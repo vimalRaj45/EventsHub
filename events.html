@@ -919,57 +919,69 @@ const paymentSection = hasPaymentLink ? `
         
         
         
-        <!-- Alternative Options -->
-        <div class="d-grid gap-2 mb-3">
-        <div class="d-flex flex-wrap gap-2 mt-3 justify-content-center">
+<!-- Alternative UPI App Options -->
+<div class="text-center mb-4">
+  <p class="text-muted mb-2">Open your preferred UPI app</p>
 
-  <!-- Google Pay -->
-  <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
-     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
-     target="_blank"
-     title="GPay">
-    <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000" 
-         width="24" height="24" 
-         style="object-fit: contain;">
+  <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+
+    <!-- GPay -->
+    <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="GPay">
+      <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000"
+           alt="GPay" width="16" height="16">
+    </a>
+
+    <!-- PhonePe -->
+    <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.phonepe.app'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="PhonePe">
+      <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000"
+           alt="PhonePe" width="16" height="16">
+    </a>
+
+    <!-- Paytm -->
+    <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=net.one97.paytm'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="Paytm">
+      <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000"
+           alt="Paytm" width="16" height="16">
+    </a>
+
+    <!-- BHIM -->
+    <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.org.npci.upiapp'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="BHIM">
+      <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000"
+           alt="BHIM" width="16" height="16">
+    </a>
+
+    <!-- Slice -->
+    <a href="intent://upi/#Intent;scheme=upi;package=in.slicepay;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.slicepay'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="Slice">
+      <img src="https://cdn.branch.io/branch-assets/1670932712541-og_image.png"
+           alt="Slice" width="16" height="16" style="object-fit: contain;">
+    </a>
+
+  </div>
+
+  <div class="alert alert-info small px-3 py-2 mx-auto" style="max-width: 380px;">
+    <i class="bi bi-info-circle me-1"></i> If the app doesn't open, you’ll be redirected to install or update it from the Play Store.
+  </div>
+
+  <a href="#help-section" class="btn btn-outline-secondary py-2 mt-2">
+    <i class="bi bi-question-circle me-2"></i>Need Help?
   </a>
-
-  <!-- PhonePe -->
-  <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
-     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
-     target="_blank"
-     title="PhonePe">
-    <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000" 
-         width="24" height="24" 
-         style="object-fit: contain;">
-  </a>
-
-  <!-- Paytm -->
-  <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
-     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
-     target="_blank"
-     title="Paytm">
-    <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000" 
-         width="24" height="24" 
-         style="object-fit: contain;">
-  </a>
-
-  <!-- BHIM -->
-  <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
-     class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center p-2" 
-     target="_blank"
-     title="BHIM">
-    <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000" 
-         width="24" height="24" 
-         style="object-fit: contain;">
-  </a>
-
 </div>
 
-          <a href="#help-section" class="btn btn-outline-secondary py-2">
-            <i class="bi bi-question-circle me-2"></i>Need Help?
-          </a>
-        </div>
-        
+
         
         <p class="text-muted small mb-0">
           <i class="bi bi-lightbulb me-1"></i>
