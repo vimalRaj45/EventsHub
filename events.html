@@ -1,4 +1,1126 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - EventHub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="events.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- AOS CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+   <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --accent-color: #4cc9f0;
+      --dark-color: #1a1a2e;
+      --light-color: #f8f9fa;
+      --success-color: #4bb543;
+      --warning-color: #ff9505;
+      --danger-color: #ff3e3e;
+    }
+    
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Outfit', sans-serif;
+      color: #333;
+    }
+    
+    
+    
+    .event-card {
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .event-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .event-img {
+      height: 200px;
+      object-fit: cover;
+      object-position: center;
+    }
+    
+    .badge-status {
+      text-transform: capitalize;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 5px 10px;
+    }
+    
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 1055;
+    }
+    
+    .profile-section {
+      background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15);
+    }
+  /* Renamed from .navbar to .eh-navbar */
+.eh-navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    padding: 0.4rem 0;
+}
+
+.eh-nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.eh-nav-logo h2 {
+   color: #6366f1;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.eh-nav-menu {
+   display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 2rem;
+}
+
+.eh-nav-link {
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.eh-nav-link:hover {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.eh-btn-primary {
+    background: #6366f1;
+    color: white;
+    padding: 0.75rem 1.5rem;
+}
+
+.eh-btn-primary:hover {
+    background: #5855eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.eh-hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.eh-bar {
+    width: 25px;
+    height: 3px;
+    background: #374151;
+    margin: 3px 0;
+    transition: 0.3s;
+}
+
+/* Avoid Bootstrap modal conflict */
+.eh-modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.eh-section-title {
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+.eh-section-title:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+.eh-loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .event-img {
+        height: 150px;
+    }
+
+    .eh-hamburger {
+        display: flex;
+    }
+
+    .eh-nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 70px;
+        flex-direction: column;
+        background-color: white;
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 2rem 0;
+    }
+
+    .eh-nav-menu.active {
+        left: 0;
+    }
+}
+.modal {
+  touch-action: manipulation; /* Improve touch behavior */
+}
+
+.modal-dialog {
+  max-height: 90vh;
+  margin: 1rem auto;
+}
+
+.modal-content {
+  border-radius: 12px;
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 150px);
+  padding: 1.5rem;
+}
+
+.event-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.card-img-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.card-img-container .badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.clamp-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  height: 100%;
+}
+
+.detail-content {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 0.5rem auto;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .event-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .detail-content {
+    max-height: 100px;
+  }
+}
+
+       
+  </style>
+</head>
+<body>
+
+    <div class="toast-container"></div>
+  <nav class="eh-navbar ">
+  <div class="eh-nav-container " >
+    <div class="eh-nav-logo">
+      <h2>EventHub</h2>
+    </div>
+    <ul class="eh-nav-menu">
+      <li class="eh-nav-item">
+        <a href="Home.html" class="eh-nav-link">Home</a>
+      </li>
+      <li class="eh-nav-item">
+        <a href="events.html" class="eh-nav-link active">Events</a>
+      </li>
+      <li class="nav-item">
+        <a href="Intern.html" class="nav-link">Our InternShips</a>
+       </li>
+      <li class="eh-nav-item">
+        <a href="certificates.html" class="eh-nav-link">Certificates</a>
+      </li>
+      <li class="eh-nav-item">
+        <a href="results.html" class="eh-nav-link">Results</a>
+      </li>
+      <li class="eh-nav-item">
+                    <a href="1.html" class="nav-link btn-primary">Edit Profile</a>
+      </li>
+    </ul>
+    <div class="eh-hamburger">
+      <span class="eh-bar"></span>
+      <span class="eh-bar"></span>
+      <span class="eh-bar"></span>
+    </div>
+  </div>
+</nav>
+
+
+    
+
+  <div class="container py-4 "style="margin-top: 70px;">
+    <!-- Profile Verification Section -->
+    <div class="row mb-4" id="profileVerificationSection" style="display: none;">
+      <div class="col-12">
+        <div class="profile-section" data-aos="fade-up">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0"><i class="bi bi-shield-check me-2"></i>Profile Verification</h3>
+            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control bg-white" id="verified-name" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control bg-white" id="verified-email" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Contact Number</label>
+              <input type="text" class="form-control bg-white" id="verified-contact" readonly>
+            </div>
+          </div>
+          <p class="text-white-50 mb-0"><i class="bi bi-info-circle me-1"></i>Your profile information will be used for event registration</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h2 class="mb-4 text-center text-dark fw-bold" data-aos="fade-down">
+      <i class="bi bi-calendar3-event me-2"></i>Upcoming Events
+    </h2>
+
+  <!-- Compact Mobile Search Bar -->
+<div class="col-12 col-md-6 mb-3">
+  <div class="input-group input-group-sm">
+    <span class="input-group-text bg-white py-2">
+      <i class="bi bi-search text-muted"></i>
+    </span>
+    <input 
+      type="text" 
+      class="form-control border-start-0 py-2" 
+      id="event-search" 
+      placeholder="Search..."
+      oninput="searchEvents()"
+      aria-label="Search events"
+    >
+    
+      <span class="d-none d-sm-inline" onclick="clearSearch"></span>
+      <i class="bi bi-x d-sm-none"></i>
+    </button>
+  </div>
+</div>
+    <!-- Filter Section -->
+    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+      <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+        <label for="event-status" class="form-label mb-0 fw-medium">
+          <i class="bi bi-funnel-fill me-2"></i>Filter by Status:
+        </label>
+        <select class="form-select w-auto" id="event-status">
+          <option value="">All Events</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="btn btn-primary ms-auto" onclick="getAllEvents()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Refresh Events
+        </button>
+      </div>
+    </div>
+
+    <!-- My Events Section -->
+    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0"><i class="bi bi-ticket-perforated me-2"></i>My Registered Events</h5>
+          <button class="btn btn-outline-primary btn-sm" onclick="getMyEvents()">
+            <i class="bi bi-arrow-repeat me-1"></i> Refresh My Events
+          </button>
+        </div>
+        <div id="my-events-container" class="row g-4 mt-2 d-none"></div>
+      </div>
+    </div>
+
+    <!-- Event Cards Grid -->
+    <div class="row g-4" id="events-container"></div>
+  </div>
+
+  <div class="modal fade" id="attendModal" tabindex="-1" aria-labelledby="attendModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="attendModalLabel">Attend Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="attendModalLoading" class="text-center">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2">Loading event details...</p>
+        </div>
+        <div id="attendModalContent" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Event Details Modal -->
+  <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="eventModalBody">
+          <div class="text-center py-4" id="modalLoading">
+            <div class="loading-spinner spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading event details...</p>
+          </div>
+          <div id="modalContent" style="display: none;">
+            <!-- Content will be loaded here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="hidden" id="register-event-id">
+          <div id="registrationForm" class="w-100" >
+            
+            <div class="mb-3" style="display: none;">
+              <label class="form-label">Additional Information (JSON)</label>
+              <textarea id="register-data" class="form-control" rows="3" placeholder='{"team": "Team Name", "preferences": {}}'></textarea>
+            </div>
+            <div class="d-flex justify-content-between">
+  <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+    <i class="bi bi-x-circle me-1"></i>Cancel
+  </button>
+  <button type="button" class="btn btn-success btn-sm" onclick="registerForEvent()" id="registerButton" disabled>
+    <i class="bi bi-check-circle me-1"></i>Register Now
+  </button>
+</div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EventHub</h3>
+                    <p>Your premier platform for organizing and participating in educational and competitive events.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="Home.html">Home</a></li>
+                        <li><a href="events.html">Events</a></li>
+                        <li><a href="certificates.html">Certificates</a></li>
+                        <li><a href="results.html">Results</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> info@eventhub.com</p>
+                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EventHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script> 
+  <script src="preventRefresh.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
+
+  <script>
+
+// Track modal state
+let isEventModalOpen = false;
+      
+
+ function searchEvents() {
+  const searchTerm = document.getElementById('event-search').value.toLowerCase(); // Convert to lowercase
+  if (!searchTerm) {
+    displayEvents(allEventsData);
+    return;
+  }
+  
+  const filteredEvents = allEventsData.filter(event => 
+    event.title.toLowerCase().includes(searchTerm) ||
+    (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+    (event.event_type && event.event_type.toLowerCase().includes(searchTerm))
+  );
+  
+  displayEvents(filteredEvents);
+}
+
+    function clearSearch() {
+      document.getElementById('event-search').value = '';
+      displayEvents(allEventsData);
+    }
+
+    // Initialize animations
+    AOS.init({
+      duration: 500,
+      easing: 'ease-out-quad',
+      once: true
+    });
+    const attendModal = new bootstrap.Modal(document.getElementById('attendModal'));
+
+    
+    const API_BASE_URL = 'https://eventdb.onrender.com/api'; 
+    let currentToken = localStorage.getItem('jwtToken') || '';
+    let currentUserProfile = null;
+    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+
+    // Toast notification system
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+      toast.setAttribute('role', 'alert');
+      toast.setAttribute('aria-live', 'assertive');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body d-flex align-items-center">
+            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'danger' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      `;
+      document.querySelector('.toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+  // Enhanced transaction ID validation
+function checkTransactionId() {
+  const txnId = document.getElementById('transaction-id').value.trim();
+  const registerBtn = document.getElementById('registerButton');
+  const registerText = document.getElementById('registerText');
+  const txnCard = document.getElementById('transactionCard');
+
+  if (!registerBtn || !registerText || !txnCard) return;
+
+  if (txnId.length >= 6) {
+    registerBtn.disabled = false;
+    registerText.textContent = 'Click to Register for Event';
+    registerBtn.classList.remove('btn-secondary');
+    registerBtn.classList.add('btn-primary');
+    txnCard.classList.remove('border-warning');
+    txnCard.classList.add('border-success');
+  } else {
+    registerBtn.disabled = true;
+    registerText.textContent = 'Enter Valid Transaction ID to Register';
+    registerBtn.classList.remove('btn-primary');
+    registerBtn.classList.add('btn-secondary');
+    txnCard.classList.remove('border-success');
+    txnCard.classList.add('border-warning');
+  }
+}
+
+
+    // API request handler
+    async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (requiresAuth && currentToken) {
+        headers['Authorization'] = `Bearer ${currentToken}`;
+      }
+      const options = { method, headers };
+      if (data) options.body = JSON.stringify(data);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        const contentType = response.headers.get('content-type');
+        let result = contentType && contentType.includes('application/json') ? await response.json() : await response.text();
+
+        if (!response.ok) {
+          throw new Error(result.message || result.error || 'Request failed');
+        }
+
+        return result;
+      } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+      }
+    }
+
+    // Load user profile
+    async function getMyProfile() {
+      try {
+        const result = await makeRequest('GET', '/profile');
+        currentUserProfile = result;
+        
+        // Update verification section
+        document.getElementById('verified-name').value = result.name;
+        document.getElementById('verified-email').value = result.email;
+        document.getElementById('verified-contact').value = result.contact_no || 'Not provided';
+        document.getElementById('profileVerificationSection').style.display = 'block';
+        
+        showToast('Profile information loaded successfully', 'success');
+        return result;
+      } catch (error) {
+        showToast(`Failed to load profile: ${error.message}`, 'danger');
+        throw error;
+      }
+    }
+
+  // Load user's registered events
+async function getMyEvents() {
+  const container = document.getElementById('my-events-container');
+  container.classList.remove('d-none');
+  container.innerHTML = `
+    <div class="col-12 text-center py-4">
+      <div class="loading-spinner spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading your events...</p>
+    </div>`;
+
+  try {
+    const result = await makeRequest('GET', '/profile/events');
+    container.innerHTML = '';
+
+    if (!result || !Array.isArray(result) || result.length === 0) {
+      container.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>You are not registered for any events yet.
+          </div>
+        </div>`;
+      return;
+    }
+
+    for (const event of result) {
+      const card = document.createElement('div');
+      card.className = 'col-md-6 col-lg-4';
+      card.setAttribute('data-aos', 'fade-up');
+      card.innerHTML = `
+        <div class="card h-100 event-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">${event.title}</h5>
+              <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
+            </div>
+            <p class="card-text text-muted small mb-1">Event ID: ${event.id}</p>
+            <p class="card-text text-muted small mb-3">Fee: ₹${parseFloat(event.event_fee || 0).toFixed(2)}</p>
+            
+            ${(event.score !== null || event.rank !== null) ? `
+              <div class="bg-light p-3 rounded mb-3">
+                ${event.score !== null ? `
+                  <div class="d-flex justify-content-between mb-2">
+                    <span><i class="bi bi-star-fill text-warning me-2"></i>Score</span>
+                    <span class="fw-bold">${event.score}</span>
+                  </div>
+                ` : ''}
+                ${event.rank !== null ? `
+                  <div class="d-flex justify-content-between">
+                    <span><i class="bi bi-trophy-fill text-success me-2"></i>Rank</span>
+                    <span class="fw-bold">${event.rank}</span>
+                  </div>
+                ` : ''}
+              </div>
+            ` : `
+              <div class="alert alert-warning small mb-3">
+                <i class="bi bi-hourglass me-2"></i>Results not published yet
+              </div>
+            `}
+            
+            <button class="btn btn-outline-primary w-100" onclick='showAttendModal(${JSON.stringify(event)})'>
+              <i class="bi bi-eye me-1"></i>View Details
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+  } catch (error) {
+    container.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>Error fetching your events: ${error.message}
+        </div>
+      </div>`;
+  }
+}
+
+async function showAttendModal(event) {
+  document.getElementById('attendModalLabel').textContent = event.title;
+ 
+
+  // Show modal immediately with loading spinner
+  document.getElementById('attendModalLoading').style.display = 'block';
+  document.getElementById('attendModalContent').style.display = 'none';
+  attendModal.show(); // 🔁 Show the modal FIRST
+
+  let payments = [];
+  try {
+    const res = await fetch(`${API_BASE_URL}/userpayments`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${currentToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) throw new Error('Unauthorized or error fetching payments');
+
+    const data = await res.json();
+    payments = data.payments || [];
+  } catch (error) {
+    console.error('❌ Payment fetch error:', error.message);
+  }
+
+  const isVerified = payments.some(p => p.event_id === event.id && p.payment_verified);
+
+  const attendContent = isVerified
+    ? `<a href="${event.poster_url}" target="_blank" class="btn btn-success">
+         <i class="bi bi-box-arrow-up-right me-2"></i>Attend Event
+       </a>`
+    : `<div class="card shadow-sm border-warning">
+        <div class="card-body text-center">
+          <h5 class="card-title text-warning"><i class="bi bi-hourglass-split me-2"></i>Payment Verification Pending</h5>
+          <p class="card-text mb-2">Your payment is currently under review.</p>
+          <p class="card-text text-muted">Your event link will appear here once payment is verified.</p>
+        </div>
+      </div>`;
+
+  document.getElementById('attendModalContent').innerHTML = `
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <h6><i class="bi bi-card-text me-2"></i>Description</h6>
+        <p>${event.detailed_description || 'No detailed description provided'}</p>
+      </div>
+      <div class="col-md-6 mb-3">
+        <h6><i class="bi bi-list-check me-2"></i>Rules</h6>
+        <p>${event.rules || 'No rules specified'}</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-tag me-2"></i>Event Type</h6>
+        <p>${event.event_type}</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-calendar-x me-2"></i>Registration Deadline</h6>
+        <p>${formatDate(event.registration_deadline)}</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6><i class="bi bi-people me-2"></i>Participation</h6>
+        <p>${event.current_participants}/${event.max_participants || '∞'} spots filled</p>
+      </div>
+    </div>
+
+    ${event.status === 'upcoming' || event.status === 'ongoing' ? `
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>This event is currently <strong>${event.status}</strong>.
+        ${event.current_participants >= event.max_participants ?
+          '<strong class="text-danger"> Fully booked!</strong>' :
+          ' Register now to secure your spot!'}
+      </div>
+    ` : ''}
+
+    <div class="text-center mt-3">
+      ${attendContent}
+    </div>
+  `;
+
+  // Hide loading and show content
+  document.getElementById('attendModalLoading').style.display = 'none';
+  document.getElementById('attendModalContent').style.display = 'block';
+}
+
+
+    // Add these variables at the top of your script section
+    let allEventsData = []; // To store all events for search functionality
+    
+    // Modify your getAllEvents function to store the events data
+    async function getAllEvents() {
+      try {
+        const container = document.getElementById('events-container');
+        container.innerHTML = `
+          <div class="col-12 text-center py-4">
+            <div class="loading-spinner spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading events...</p>
+          </div>`;
+
+        const status = document.getElementById('event-status').value;
+        const endpoint = status ? `/events?status=${status}` : '/events';
+        const events = await makeRequest('GET', endpoint, null, false);
+        allEventsData = events; // Store events for search
+        displayEvents(events);
+      } catch (error) {
+        console.error("Error loading events:", error.message);
+        document.getElementById('events-container').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>Error: ${error.message}
+            </div>
+          </div>`;
+      }
+    }
+    // Display events in the grid
+    async function displayEvents(events) {
+      const container = document.getElementById('events-container');
+      container.innerHTML = '';
+      
+      if (!events.length) {
+        container.innerHTML = `
+          <div class="col-12 text-center">
+            <div class="alert alert-warning">
+              <i class="bi bi-calendar-x me-2"></i>No events found for the selected filter.
+            </div>
+          </div>`;
+        return;
+      }
+      
+      for (const event of events) {
+        const galleryImage = await getFirstGalleryImage(event.id);
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        card.setAttribute('data-aos', 'fade-up');
+        card.innerHTML = `
+          <div class="card h-100 event-card">
+            <img loading="lazy" src="${galleryImage}" class="event-img card-img-top" alt="${event.title}">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">${event.title}</h5>
+                <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
+              </div>
+              <p class="card-text text-muted">${event.description}</p>
+              
+              <ul class="list-unstyled mt-3 mb-4 small">
+                <li class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Start:</strong> ${formatDate(event.start_date)}</li>
+                <li class="mb-2"><i class="bi bi-calendar2-check me-2"></i><strong>End:</strong> ${formatDate(event.end_date)}</li>
+                <li><i class="bi bi-people-fill me-2"></i><strong>Participants:</strong> ${event.current_participants}/${event.max_participants}</li>
+              </ul>
+              
+              <button class="btn btn-primary w-100" onclick='showEventModal(${JSON.stringify(event)})'>
+                <i class="bi bi-eye me-1"></i>View Details
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+// Show event details in modal
+async function showEventModal(event) {
+  document.getElementById('eventModalLabel').textContent = event.title;
+  document.getElementById('register-event-id').value = event.id;
+   isEventModalOpen = true; // ✅ Set open state
+
+  // Prevent page unload if modal is open
+  window.addEventListener('beforeunload', function handleBeforeUnload(e) {
+    if (isEventModalOpen) {
+      e.preventDefault();
+      e.returnValue = ''; // Required to show confirmation dialog
+    }
+  });
+
+   // When modal closes, reset state
+  const modalEl = document.getElementById('eventModal'); // Replace with your modal ID
+  modalEl.addEventListener('hidden.bs.modal', () => {
+  
+    isEventModalOpen = false;
+  });
+  
+  // Show loading state
+  document.getElementById('modalLoading').style.display = 'block';
+  document.getElementById('modalContent').style.display = 'none';
+  
+  // Check if deadline has passed
+  const currentDate = new Date();
+  const deadlineDate = new Date(event.registration_deadline);
+  const isDeadlinePassed = currentDate > deadlineDate;
+
+  if (isDeadlinePassed) {
+    document.getElementById('modalContent').innerHTML = `
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="bi bi-calendar-x fs-1 text-danger"></i>
+        </div>
+        <h4 class="text-danger mb-3">Registration Closed</h4>
+        <p class="lead">The registration deadline for this event has passed.</p>
+        <p class="text-muted">Deadline was ${formatDate(event.registration_deadline)}</p>
+        <button class="btn btn-outline-secondary mt-3" data-bs-dismiss="modal">
+          <i class="bi bi-arrow-left me-2"></i>Back to Events
+        </button>
+      </div>
+    `;
+    
+    document.getElementById('modalLoading').style.display = 'none';
+    document.getElementById('modalContent').style.display = 'block';
+    eventModal.show();
+    return;
+  }
+
+  if (!currentUserProfile) {
+    try {
+      await getMyProfile();
+    } catch (error) {
+      showToast('Please verify your profile before registration', 'warning');
+    }
+  }
+
+  // User profile display
+  const profileBadge = currentUserProfile ? `
+    <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+      <div class="flex-grow-1">
+        <h6 class="mb-0">Registering as</h6>
+        <div class="d-flex flex-wrap align-items-center">
+          <span class="fw-semibold me-2">${currentUserProfile.name}</span>
+          <small class="text-muted me-2">${currentUserProfile.email}</small>
+          ${currentUserProfile.contact_no ? `<small class="text-primary"><i class="bi bi-telephone me-1"></i>${currentUserProfile.contact_no}</small>` : ''}
+        </div>
+      </div>
+      <i class="bi bi-person-check-fill text-success fs-4"></i>
+    </div>
+  ` : `
+    <div class="alert alert-warning mb-3">
+      <i class="bi bi-exclamation-triangle me-2"></i>Profile not verified
+    </div>
+  `;
+
+  // Check if payment link exists
+  const hasPaymentLink = event.banner_url && event.banner_url !== 'a';
+  
+  // Payment section with better visual hierarchy
+const paymentSection = hasPaymentLink ? `
+  <div class="card border-primary mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white d-flex align-items-center">
+      <i class="bi bi-credit-card me-2 fs-5"></i>
+      <h5 class="mb-0">Complete Payment</h5>
+    </div>
+    <div class="card-body">
+      <!-- Step-by-step instructions -->
+      <div class="payment-steps mb-4">
+        <div class="step d-flex mb-3">
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">1</div>
+          <div>
+            <h6 class="mb-1 fw-bold">Save QR Code</h6>
+            <p class="text-muted small mb-0">Take screenshot or long-press to save image</p>
+          </div>
+        </div>
+        
+        <div class="step d-flex mb-3">
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">2</div>
+          <div>
+            <h6 class="mb-1 fw-bold">Open Payment App</h6>
+            <p class="text-muted small mb-0">Launch GPay, PhonePe, Paytm or your bank app</p>
+          </div>
+        </div>
+        
+        <div class="step d-flex">
+          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">3</div>
+          <div>
+            <h6 class="mb-1 fw-bold">Scan & Pay</h6>
+            <p class="text-muted small mb-0">Select "Scan QR" and choose the saved image</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Code Display - Mobile Responsive -->
+      <div class="text-center mb-4">
+        <div class="bg-white p-2 p-md-3 rounded border d-inline-block mb-3 shadow-sm" style="max-width: 100%;">
+          <img src="${event.banner_url}" alt="Payment QR Code" class="img-fluid" style="max-width: 200px; width: 100%; height: auto;">
+        </div>
+        
+        <!-- Payment Amount -->
+        <div class="d-flex justify-content-center mb-3">
+          <div class="bg-light-primary rounded-pill px-3 px-sm-4 py-1 py-sm-2">
+            <span class="fw-bold text-primary fs-4">₹${parseFloat(event.event_fee || 0).toFixed(2)}</span>
+          </div>
+        </div>
+
+        
+        
+        
+<!-- Alternative UPI App Options -->
+<div class="text-center mb-4">
+  <p class="text-muted mb-2">Clik to Open UPI</p>
+
+  <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+
+    <!-- GPay -->
+    <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="GPay">
+      <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000"
+           alt="GPay" width="16" height="16">
+    </a>
+
+    <!-- PhonePe -->
+    <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.phonepe.app'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="PhonePe">
+      <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000"
+           alt="PhonePe" width="16" height="16">
+    </a>
+
+    <!-- Paytm -->
+    <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=net.one97.paytm'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="Paytm">
+      <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000"
+           alt="Paytm" width="16" height="16">
+    </a>
+
+    <!-- BHIM -->
+    <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.org.npci.upiapp'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="BHIM">
+      <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000"
+           alt="BHIM" width="16" height="16">
+    </a>
+
+    <!-- Slice -->
+    <a href="intent://upi/#Intent;scheme=upi;package=in.slicepay;end"
+       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.slicepay'; }, 1000)"
+       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+       style="width: 36px; height: 36px;" target="_blank" title="Slice">
+      <img src="https://cdn.branch.io/branch-assets/1670932712541-og_image.png"
+           alt="Slice" width="16" height="16" style="object-fit: contain;">
+    </a>
+
+  </div>
+
+
+
+  <a href="#help-section" class="btn btn-outline-secondary py-2 mt-2">
+    <i class="bi bi-question-circle me-2"></i>Need Help?
+  </a>
+</div>
+
+
+        
+        <p class="text-muted small mb-0">
+          <i class="bi bi-lightbulb me-1"></i>
+          If scanning fails, try increasing brightness or saving the image
+        </p>
+      </div>
+      
+      <!-- Important Notice -->
+      <div class="alert alert-warning bg-light-warning border-warning mb-0 mt-3">
+        <div class="d-flex">
+          <i class="bi bi-exclamation-circle fs-5 me-2 text-warning"></i>
+          <div>
+            <h6 class="alert-heading mb-1">Complete Registration</h6>
+           <p class="small text-muted mb-0">
+  <i class="bi bi-info-circle me-1"></i>
+  After completing the payment, enter your transaction ID below. The registration button will become active upon successful verification.
+</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
 
 ` : `
   <div class="alert alert-info d-flex align-items-center">
@@ -79,3 +1201,200 @@
             <i class="bi bi-calendar-event me-2"></i>Event Type
           </div>
           <div class="card-body">
+            <p class="card-text">${event.event_type}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="card-header">
+            <i class="bi bi-calendar-x me-2"></i>Deadline
+          </div>
+          <div class="card-body">
+            <p class="card-text">${formatDate(event.registration_deadline) || 'No deadline'}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="card-header">
+            <i class="bi bi-people me-2"></i>Availability
+          </div>
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="progress flex-grow-1 me-2" style="height: 10px;">
+                <div class="progress-bar" role="progressbar" 
+                  style="width: ${Math.min(100, (event.current_participants / event.max_participants) * 100)}%" 
+                  aria-valuenow="${event.current_participants}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="${event.max_participants}">
+                </div>
+              </div>
+              <span>${event.current_participants}/${event.max_participants || '∞'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    ${paymentSection}
+    ${paymentVerificationSection}
+    
+    ${event.status === 'upcoming' || event.status === 'ongoing' ? `
+      <div class="alert ${event.current_participants >= event.max_participants ? 'alert-danger' : 'alert-info'}">
+        <i class="bi ${event.current_participants >= event.max_participants ? 'bi-exclamation-octagon' : 'bi-info-circle'} me-2"></i>
+        This event is currently <strong>${event.status}</strong>. 
+        ${event.current_participants >= event.max_participants ? 
+          '<strong>Fully booked!</strong> No more registrations accepted.' : 
+          'Register now to secure your spot!'}
+      </div>
+    ` : ''}
+    
+    ${registerButton}
+  `;
+
+  // Add event listener to payment link button if exists
+  if (hasPaymentLink) {
+    document.getElementById('paymentLinkBtn')?.addEventListener('click', function() {
+      showToast('After payment is complete, return here and enter your transaction ID to register', 'info');
+    });
+  }
+
+  document.getElementById('modalLoading').style.display = 'none';
+  document.getElementById('modalContent').style.display = 'block';
+  eventModal.show();
+}
+
+
+   
+
+
+    // Get first gallery image for an event
+    async function getFirstGalleryImage(eventId) {
+      try {
+        const res = await makeRequest('GET', `/events/${eventId}/gallery`, null, false);
+        return res?.[0]?.image_url || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+      } catch (error) {
+        console.warn(`No gallery for event ${eventId}:`, error.message);
+        return 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+      }
+    }
+
+    // Register for an event
+    async function registerForEvent() {
+      const eventId = document.getElementById('register-event-id').value;
+      const registerButton = document.getElementById('registerButton');
+      const transactionId = document.getElementById('transaction-id').value.trim();
+      
+      if (!currentUserProfile) {
+        showToast('Please verify your profile before registration', 'warning');
+        return;
+      }
+      
+      // Disable button during registration
+      registerButton.disabled = true;
+      registerButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Registering...
+      `;
+      
+      try {
+        let registrationData = {};
+
+        try {
+          registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
+          console.log('📦 registration_data:', registrationData);
+        } catch (e) {
+          throw new Error('Invalid JSON in registration data');
+        }
+        console.log('📦 registration_data:', registrationData);
+        const result = await makeRequest('POST', `/events/${eventId}/register`, { 
+          registration_data: registrationData,
+          transaction_id: transactionId
+        });
+       Swal.fire({
+  icon: 'success',
+  title: '🎉 Registration Successful!',
+  html: `
+    <p>You have successfully registered for the event.</p>
+    <p><strong>Would you like to view your attended events now?</strong></p>
+  `,
+  showCancelButton: true,
+  confirmButtonText: '✅ Yes, show my events',
+  cancelButtonText: '❌ No, maybe later',
+  confirmButtonColor: '#198754',
+  cancelButtonColor: '#6c757d'
+}).then((result) => {
+  if (result.isConfirmed) {
+    getMyEvents(); // Function to show attended events
+  }
+});
+
+        eventModal.hide();
+        getAllEvents(); // Refresh events list
+      } catch (error) {
+        showToast(`❌ Registration failed: ${error.message}`, 'danger');
+        alert(`❌ Registration failed: ${error.message}`);
+      } finally {
+        registerButton.disabled = false;
+        registerButton.innerHTML = `
+          <i class="bi bi-check-circle me-1"></i>Confirm Registration
+        `;
+      }
+    }
+
+    // Helper function to get status color
+    function getStatusColor(status) {
+      switch (status) {
+        case 'upcoming': return 'info';
+        case 'ongoing': return 'success';
+        case 'completed': return 'secondary';
+        case 'cancelled': return 'danger';
+        default: return 'dark';
+      }
+    }
+
+    // Helper function to format dates
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Not specified';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Initialize the page
+    window.addEventListener('DOMContentLoaded', () => {
+      getAllEvents();
+      
+      // Try to load profile if token exists
+      if (currentToken) {
+        getMyProfile().catch(() => {
+          // Silent fail - user can manually load profile later
+        });
+      }
+    });
+        const hamburger = document.querySelector('.eh-hamburger');
+const navMenu = document.querySelector('.eh-nav-menu');
+
+hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navMenu.classList.toggle('active');
+});
+
+// Close mobile menu when clicking on a link
+document.querySelectorAll('.eh-nav-link').forEach(n => 
+    n.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    })
+);
+
+
+  </script>
+</body>
+</html>
