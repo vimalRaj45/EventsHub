@@ -11,6 +11,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Preconnect to API domain -->
+  <link rel="preconnect" href="https://eventdb.onrender.com" crossorigin>
+  <link rel="dns-prefetch" href="https://eventdb.onrender.com">
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Bootstrap Icons -->
@@ -527,13 +531,24 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
 
   <script>
-
 // Track modal state
 let isEventModalOpen = false;
-      
 
- function searchEvents() {
-  const searchTerm = document.getElementById('event-search').value.toLowerCase(); // Convert to lowercase
+// Cache variables
+let eventsCache = null;
+let cacheTimestamp = null;
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes cache
+const imageCache = new Map(); // For gallery images
+
+// Preconnect to API domain
+const preconnect = document.createElement('link');
+preconnect.rel = 'preconnect';
+preconnect.href = 'https://eventdb.onrender.com';
+preconnect.crossOrigin = true;
+document.head.appendChild(preconnect);
+
+function searchEvents() {
+  const searchTerm = document.getElementById('event-search').value.toLowerCase();
   if (!searchTerm) {
     displayEvents(allEventsData);
     return;
@@ -548,46 +563,45 @@ let isEventModalOpen = false;
   displayEvents(filteredEvents);
 }
 
-    function clearSearch() {
-      document.getElementById('event-search').value = '';
-      displayEvents(allEventsData);
-    }
+function clearSearch() {
+  document.getElementById('event-search').value = '';
+  displayEvents(allEventsData);
+}
 
-    // Initialize animations
-    AOS.init({
-      duration: 500,
-      easing: 'ease-out-quad',
-      once: true
-    });
-    const attendModal = new bootstrap.Modal(document.getElementById('attendModal'));
+// Initialize animations
+AOS.init({
+  duration: 0.5,
+  easing: 'linear',
+  once: true
+});
 
-    
-    const API_BASE_URL = 'https://eventdb.onrender.com/api'; 
-    let currentToken = localStorage.getItem('jwtToken') || '';
-    let currentUserProfile = null;
-    const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+const attendModal = new bootstrap.Modal(document.getElementById('attendModal'));
+const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
 
-    // Toast notification system
-    function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-bg-${type} border-0 show`;
-      toast.setAttribute('role', 'alert');
-      toast.setAttribute('aria-live', 'assertive');
-      toast.setAttribute('aria-atomic', 'true');
-      toast.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body d-flex align-items-center">
-            <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'danger' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
-            ${message}
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-      `;
-      document.querySelector('.toast-container').appendChild(toast);
-      setTimeout(() => toast.remove(), 5000);
-    }
+const API_BASE_URL = 'https://eventdb.onrender.com/api';
+let currentToken = localStorage.getItem('jwtToken') || '';
+let currentUserProfile = null;
 
-  // Enhanced transaction ID validation
+// Toast notification system
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  toast.setAttribute('aria-atomic', 'true');
+  toast.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center">
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'danger' ? 'bi-exclamation-triangle' : 'bi-info-circle'} me-2"></i>
+        ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+  document.querySelector('.toast-container').appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+
 function checkTransactionId() {
   const txnId = document.getElementById('transaction-id').value.trim();
   const registerBtn = document.getElementById('registerButton');
@@ -613,55 +627,57 @@ function checkTransactionId() {
   }
 }
 
+async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (requiresAuth && currentToken) {
+    headers['Authorization'] = `Bearer ${currentToken}`;
+  }
 
-    // API request handler
-    async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      if (requiresAuth && currentToken) {
-        headers['Authorization'] = `Bearer ${currentToken}`;
-      }
-      const options = { method, headers };
-      if (data) options.body = JSON.stringify(data);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
 
-      try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        const contentType = response.headers.get('content-type');
-        let result = contentType && contentType.includes('application/json') ? await response.json() : await response.text();
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      signal: controller.signal
+    });
 
-        if (!response.ok) {
-          throw new Error(result.message || result.error || 'Request failed');
-        }
+    clearTimeout(timeout);
 
-        return result;
-      } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-      }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || error.error || 'Request failed');
     }
 
-    // Load user profile
-    async function getMyProfile() {
-      try {
-        const result = await makeRequest('GET', '/profile');
-        currentUserProfile = result;
-        
-        // Update verification section
-        document.getElementById('verified-name').value = result.name;
-        document.getElementById('verified-email').value = result.email;
-        document.getElementById('verified-contact').value = result.contact_no || 'Not provided';
-        document.getElementById('profileVerificationSection').style.display = 'block';
-        
-        showToast('Profile information loaded successfully', 'success');
-        return result;
-      } catch (error) {
-        showToast(`Failed to load profile: ${error.message}`, 'danger');
-        throw error;
-      }
-    }
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
 
-  // Load user's registered events
+async function getMyProfile() {
+  try {
+    const result = await makeRequest('GET', '/profile');
+    currentUserProfile = result;
+    
+    document.getElementById('verified-name').value = result.name;
+    document.getElementById('verified-email').value = result.email;
+    document.getElementById('verified-contact').value = result.contact_no || 'Not provided';
+    document.getElementById('profileVerificationSection').style.display = 'block';
+    
+    showToast('Profile information loaded successfully', 'success');
+    return result;
+  } catch (error) {
+    showToast(`Failed to load profile: ${error.message}`, 'danger');
+    throw error;
+  }
+}
+
 async function getMyEvents() {
   const container = document.getElementById('my-events-container');
   container.classList.remove('d-none');
@@ -742,12 +758,9 @@ async function getMyEvents() {
 
 async function showAttendModal(event) {
   document.getElementById('attendModalLabel').textContent = event.title;
- 
-
-  // Show modal immediately with loading spinner
   document.getElementById('attendModalLoading').style.display = 'block';
   document.getElementById('attendModalContent').style.display = 'none';
-  attendModal.show(); // 🔁 Show the modal FIRST
+  attendModal.show();
 
   let payments = [];
   try {
@@ -760,11 +773,10 @@ async function showAttendModal(event) {
     });
 
     if (!res.ok) throw new Error('Unauthorized or error fetching payments');
-
     const data = await res.json();
     payments = data.payments || [];
   } catch (error) {
-    console.error('❌ Payment fetch error:', error.message);
+    console.error('Payment fetch error:', error.message);
   }
 
   const isVerified = payments.some(p => p.event_id === event.id && p.payment_verified);
@@ -821,114 +833,140 @@ async function showAttendModal(event) {
     </div>
   `;
 
-  // Hide loading and show content
   document.getElementById('attendModalLoading').style.display = 'none';
   document.getElementById('attendModalContent').style.display = 'block';
 }
 
+let allEventsData = [];
 
-    // Add these variables at the top of your script section
-    let allEventsData = []; // To store all events for search functionality
+async function getAllEvents() {
+  try {
+    const container = document.getElementById('events-container');
+    container.innerHTML = `
+      <div class="col-12 text-center py-4">
+        <div class="loading-spinner spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading events...</p>
+      </div>`;
+
+    // Check cache first
+    const now = Date.now();
+    if (eventsCache && now - cacheTimestamp < CACHE_EXPIRY) {
+      allEventsData = eventsCache;
+      displayEvents(eventsCache);
+      return;
+    }
+
+    const status = document.getElementById('event-status').value;
+    const endpoint = status ? `/events?status=${status}` : '/events';
+    const events = await makeRequest('GET', endpoint, null, false);
     
-    // Modify your getAllEvents function to store the events data
-    async function getAllEvents() {
-      try {
-        const container = document.getElementById('events-container');
-        container.innerHTML = `
-          <div class="col-12 text-center py-4">
-            <div class="loading-spinner spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading events...</p>
-          </div>`;
-
-        const status = document.getElementById('event-status').value;
-        const endpoint = status ? `/events?status=${status}` : '/events';
-        const events = await makeRequest('GET', endpoint, null, false);
-        allEventsData = events; // Store events for search
-        displayEvents(events);
-      } catch (error) {
-        console.error("Error loading events:", error.message);
-        document.getElementById('events-container').innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-danger">
-              <i class="bi bi-exclamation-triangle me-2"></i>Error: ${error.message}
-            </div>
-          </div>`;
-      }
+    // Update cache
+    allEventsData = events;
+    eventsCache = events;
+    cacheTimestamp = now;
+    
+    await displayEvents(events);
+  } catch (error) {
+    console.error("Error loading events:", error.message);
+    
+    // Fallback to cache if available
+    if (eventsCache) {
+      allEventsData = eventsCache;
+      displayEvents(eventsCache);
+      return;
     }
-    // Display events in the grid
-    async function displayEvents(events) {
-      const container = document.getElementById('events-container');
-      container.innerHTML = '';
-      
-      if (!events.length) {
-        container.innerHTML = `
-          <div class="col-12 text-center">
-            <div class="alert alert-warning">
-              <i class="bi bi-calendar-x me-2"></i>No events found for the selected filter.
-            </div>
-          </div>`;
-        return;
-      }
-      
-      for (const event of events) {
-        const galleryImage = await getFirstGalleryImage(event.id);
-        const card = document.createElement('div');
-        card.className = 'col-md-6 col-lg-4';
-        card.setAttribute('data-aos', 'fade-up');
-        card.innerHTML = `
-          <div class="card h-100 event-card">
-            <img loading="lazy" src="${galleryImage}" class="event-img card-img-top" alt="${event.title}">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title mb-0">${event.title}</h5>
-                <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
-              </div>
-              <p class="card-text text-muted">${event.description}</p>
-              
-              <ul class="list-unstyled mt-3 mb-4 small">
-                <li class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Start:</strong> ${formatDate(event.start_date)}</li>
-                <li class="mb-2"><i class="bi bi-calendar2-check me-2"></i><strong>End:</strong> ${formatDate(event.end_date)}</li>
-                <li><i class="bi bi-people-fill me-2"></i><strong>Participants:</strong> ${event.current_participants}/${event.max_participants}</li>
-              </ul>
-              
-              <button class="btn btn-primary w-100" onclick='showEventModal(${JSON.stringify(event)})'>
-                <i class="bi bi-eye me-1"></i>View Details
-              </button>
-            </div>
+    
+    document.getElementById('events-container').innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>Error: ${error.message}
+        </div>
+      </div>`;
+  }
+}
+
+async function displayEvents(events) {
+  const container = document.getElementById('events-container');
+  container.innerHTML = '';
+  
+  if (!events.length) {
+    container.innerHTML = `
+      <div class="col-12 text-center">
+        <div class="alert alert-warning">
+          <i class="bi bi-calendar-x me-2"></i>No events found for the selected filter.
+        </div>
+      </div>`;
+    return;
+  }
+  
+  // Use document fragment for better performance
+  const fragment = document.createDocumentFragment();
+  
+  // Load all images in parallel
+  const eventCards = await Promise.all(events.map(async event => {
+    const card = document.createElement('div');
+    card.className = 'col-md-6 col-lg-4';
+    card.setAttribute('data-aos', 'fade-up');
+    
+    // Get image from cache or load it
+    let imageUrl = imageCache.get(event.id);
+    if (!imageUrl) {
+      imageUrl = await getFirstGalleryImage(event.id);
+      imageCache.set(event.id, imageUrl);
+    }
+    
+    card.innerHTML = `
+      <div class="card h-100 event-card">
+        <img loading="lazy" src="${imageUrl}" class="event-img card-img-top" alt="${event.title}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">${event.title}</h5>
+            <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
           </div>
-        `;
-        container.appendChild(card);
-      }
-    }
+          <p class="card-text text-muted">${event.description}</p>
+          
+          <ul class="list-unstyled mt-3 mb-4 small">
+            <li class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Start:</strong> ${formatDate(event.start_date)}</li>
+            <li class="mb-2"><i class="bi bi-calendar2-check me-2"></i><strong>End:</strong> ${formatDate(event.end_date)}</li>
+            <li><i class="bi bi-people-fill me-2"></i><strong>Participants:</strong> ${event.current_participants}/${event.max_participants}</li>
+          </ul>
+          
+          <button class="btn btn-primary w-100" onclick='showEventModal(${JSON.stringify(event)})'>
+            <i class="bi bi-eye me-1"></i>View Details
+          </button>
+        </div>
+      </div>
+    `;
+    return card;
+  }));
+  
+  // Append all cards at once
+  eventCards.forEach(card => fragment.appendChild(card));
+  container.appendChild(fragment);
+}
 
-// Show event details in modal
 async function showEventModal(event) {
   document.getElementById('eventModalLabel').textContent = event.title;
   document.getElementById('register-event-id').value = event.id;
-   isEventModalOpen = true; // ✅ Set open state
+  isEventModalOpen = true;
 
-  // Prevent page unload if modal is open
   window.addEventListener('beforeunload', function handleBeforeUnload(e) {
     if (isEventModalOpen) {
       e.preventDefault();
-      e.returnValue = ''; // Required to show confirmation dialog
+      e.returnValue = '';
     }
   });
 
-   // When modal closes, reset state
-  const modalEl = document.getElementById('eventModal'); // Replace with your modal ID
+  const modalEl = document.getElementById('eventModal');
   modalEl.addEventListener('hidden.bs.modal', () => {
-  
     isEventModalOpen = false;
   });
   
-  // Show loading state
   document.getElementById('modalLoading').style.display = 'block';
   document.getElementById('modalContent').style.display = 'none';
   
-  // Check if deadline has passed
   const currentDate = new Date();
   const deadlineDate = new Date(event.registration_deadline);
   const isDeadlinePassed = currentDate > deadlineDate;
@@ -962,7 +1000,6 @@ async function showEventModal(event) {
     }
   }
 
-  // User profile display
   const profileBadge = currentUserProfile ? `
     <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
       <div class="flex-grow-1">
@@ -981,160 +1018,133 @@ async function showEventModal(event) {
     </div>
   `;
 
-  // Check if payment link exists
   const hasPaymentLink = event.banner_url && event.banner_url !== 'a';
   
-  // Payment section with better visual hierarchy
-const paymentSection = hasPaymentLink ? `
-  <div class="card border-primary mb-4 shadow-sm">
-    <div class="card-header bg-primary text-white d-flex align-items-center">
-      <i class="bi bi-credit-card me-2 fs-5"></i>
-      <h5 class="mb-0">Complete Payment</h5>
-    </div>
-    <div class="card-body">
-      <!-- Step-by-step instructions -->
-      <div class="payment-steps mb-4">
-        <div class="step d-flex mb-3">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">1</div>
-          <div>
-            <h6 class="mb-1 fw-bold">Save QR Code</h6>
-            <p class="text-muted small mb-0">Take screenshot or long-press to save image</p>
-          </div>
-        </div>
-        
-        <div class="step d-flex mb-3">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">2</div>
-          <div>
-            <h6 class="mb-1 fw-bold">Open Payment App</h6>
-            <p class="text-muted small mb-0">Launch GPay, PhonePe, Paytm or your bank app</p>
-          </div>
-        </div>
-        
-        <div class="step d-flex">
-          <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">3</div>
-          <div>
-            <h6 class="mb-1 fw-bold">Scan & Pay</h6>
-            <p class="text-muted small mb-0">Select "Scan QR" and choose the saved image</p>
-          </div>
-        </div>
+  const paymentSection = hasPaymentLink ? `
+    <div class="card border-primary mb-4 shadow-sm">
+      <div class="card-header bg-primary text-white d-flex align-items-center">
+        <i class="bi bi-credit-card me-2 fs-5"></i>
+        <h5 class="mb-0">Complete Payment</h5>
       </div>
-
-      <!-- QR Code Display - Mobile Responsive -->
-      <div class="text-center mb-4">
-        <div class="bg-white p-2 p-md-3 rounded border d-inline-block mb-3 shadow-sm" style="max-width: 100%;">
-          <img src="${event.banner_url}" alt="Payment QR Code" class="img-fluid" style="max-width: 200px; width: 100%; height: auto;">
-        </div>
-        
-        <!-- Payment Amount -->
-        <div class="d-flex justify-content-center mb-3">
-          <div class="bg-light-primary rounded-pill px-3 px-sm-4 py-1 py-sm-2">
-            <span class="fw-bold text-primary fs-4">₹${parseFloat(event.event_fee || 0).toFixed(2)}</span>
+      <div class="card-body">
+        <div class="payment-steps mb-4">
+          <div class="step d-flex mb-3">
+            <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">1</div>
+            <div>
+              <h6 class="mb-1 fw-bold">Save QR Code</h6>
+              <p class="text-muted small mb-0">Take screenshot or long-press to save image</p>
+            </div>
+          </div>
+          
+          <div class="step d-flex mb-3">
+            <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">2</div>
+            <div>
+              <h6 class="mb-1 fw-bold">Open Payment App</h6>
+              <p class="text-muted small mb-0">Launch GPay, PhonePe, Paytm or your bank app</p>
+            </div>
+          </div>
+          
+          <div class="step d-flex">
+            <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="min-width: 28px; height: 28px;">3</div>
+            <div>
+              <h6 class="mb-1 fw-bold">Scan & Pay</h6>
+              <p class="text-muted small mb-0">Select "Scan QR" and choose the saved image</p>
+            </div>
           </div>
         </div>
 
+        <div class="text-center mb-4">
+          <div class="bg-white p-2 p-md-3 rounded border d-inline-block mb-3 shadow-sm" style="max-width: 100%;">
+            <img src="${event.banner_url}" alt="Payment QR Code" class="img-fluid" style="max-width: 200px; width: 100%; height: auto;">
+          </div>
+          
+          <div class="d-flex justify-content-center mb-3">
+            <div class="bg-light-primary rounded-pill px-3 px-sm-4 py-1 py-sm-2">
+              <span class="fw-bold text-primary fs-4">₹${parseFloat(event.event_fee || 0).toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div class="text-center mb-4">
+            <p class="text-muted mb-2">Click to Open UPI</p>
+            <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+              <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
+                 onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'; }, 1000)"
+                 class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+                 style="width: 36px; height: 36px;" target="_blank" title="GPay">
+                <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000"
+                     alt="GPay" width="16" height="16">
+              </a>
+
+              <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
+                 onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.phonepe.app'; }, 1000)"
+                 class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+                 style="width: 36px; height: 36px;" target="_blank" title="PhonePe">
+                <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000"
+                     alt="PhonePe" width="16" height="16">
+              </a>
+
+              <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
+                 onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=net.one97.paytm'; }, 1000)"
+                 class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+                 style="width: 36px; height: 36px;" target="_blank" title="Paytm">
+                <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000"
+                     alt="Paytm" width="16" height="16">
+              </a>
+
+              <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
+                 onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.org.npci.upiapp'; }, 1000)"
+                 class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+                 style="width: 36px; height: 36px;" target="_blank" title="BHIM">
+                <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000"
+                     alt="BHIM" width="16" height="16">
+              </a>
+
+              <a href="intent://upi/#Intent;scheme=upi;package=in.slicepay;end"
+                 onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.slicepay'; }, 1000)"
+                 class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
+                 style="width: 36px; height: 36px;" target="_blank" title="Slice">
+                <img src="https://cdn.branch.io/branch-assets/1670932712541-og_image.png"
+                     alt="Slice" width="16" height="16" style="object-fit: contain;">
+              </a>
+            </div>
+
+            <a href="#help-section" class="btn btn-outline-secondary py-2 mt-2">
+              <i class="bi bi-question-circle me-2"></i>Need Help?
+            </a>
+          </div>
+          
+          <p class="text-muted small mb-0">
+            <i class="bi bi-lightbulb me-1"></i>
+            If scanning fails, try increasing brightness or saving the image
+          </p>
+        </div>
         
-        
-        
-<!-- Alternative UPI App Options -->
-<div class="text-center mb-4">
-  <p class="text-muted mb-2">Clik to Open UPI</p>
-
-  <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
-
-    <!-- GPay -->
-    <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
-       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user'; }, 1000)"
-       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
-       style="width: 36px; height: 36px;" target="_blank" title="GPay">
-      <img src="https://img.icons8.com/?size=100&id=am4ltuIYDpQ5&format=png&color=000000"
-           alt="GPay" width="16" height="16">
-    </a>
-
-    <!-- PhonePe -->
-    <a href="intent://upi/#Intent;scheme=upi;package=com.phonepe.app;end"
-       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=com.phonepe.app'; }, 1000)"
-       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
-       style="width: 36px; height: 36px;" target="_blank" title="PhonePe">
-      <img src="https://img.icons8.com/?size=100&id=OYtBxIlJwMGA&format=png&color=000000"
-           alt="PhonePe" width="16" height="16">
-    </a>
-
-    <!-- Paytm -->
-    <a href="intent://upi/#Intent;scheme=upi;package=net.one97.paytm;end"
-       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=net.one97.paytm'; }, 1000)"
-       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
-       style="width: 36px; height: 36px;" target="_blank" title="Paytm">
-      <img src="https://img.icons8.com/?size=100&id=68067&format=png&color=000000"
-           alt="Paytm" width="16" height="16">
-    </a>
-
-    <!-- BHIM -->
-    <a href="intent://upi/#Intent;scheme=upi;package=in.org.npci.upiapp;end"
-       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.org.npci.upiapp'; }, 1000)"
-       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
-       style="width: 36px; height: 36px;" target="_blank" title="BHIM">
-      <img src="https://img.icons8.com/?size=100&id=1AzdGyrT9jI0&format=png&color=000000"
-           alt="BHIM" width="16" height="16">
-    </a>
-
-    <!-- Slice -->
-    <a href="intent://upi/#Intent;scheme=upi;package=in.slicepay;end"
-       onclick="setTimeout(() => { window.location.href='https://play.google.com/store/apps/details?id=in.slicepay'; }, 1000)"
-       class="btn btn-outline-light border rounded-circle d-flex align-items-center justify-content-center p-1"
-       style="width: 36px; height: 36px;" target="_blank" title="Slice">
-      <img src="https://cdn.branch.io/branch-assets/1670932712541-og_image.png"
-           alt="Slice" width="16" height="16" style="object-fit: contain;">
-    </a>
-
-  </div>
-
-
-
-  <a href="#help-section" class="btn btn-outline-secondary py-2 mt-2">
-    <i class="bi bi-question-circle me-2"></i>Need Help?
-  </a>
-</div>
-
-
-        
-        <p class="text-muted small mb-0">
-          <i class="bi bi-lightbulb me-1"></i>
-          If scanning fails, try increasing brightness or saving the image
-        </p>
-      </div>
-      
-      <!-- Important Notice -->
-      <div class="alert alert-warning bg-light-warning border-warning mb-0 mt-3">
-        <div class="d-flex">
-          <i class="bi bi-exclamation-circle fs-5 me-2 text-warning"></i>
-          <div>
-            <h6 class="alert-heading mb-1">Complete Registration</h6>
-           <p class="small text-muted mb-0">
-  <i class="bi bi-info-circle me-1"></i>
-  After completing the payment, enter your transaction ID below. The registration button will become active upon successful verification.
-</p>
-
+        <div class="alert alert-warning bg-light-warning border-warning mb-0 mt-3">
+          <div class="d-flex">
+            <i class="bi bi-exclamation-circle fs-5 me-2 text-warning"></i>
+            <div>
+              <h6 class="alert-heading mb-1">Complete Registration</h6>
+              <p class="small text-muted mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                After completing the payment, enter your transaction ID below. The registration button will become active upon successful verification.
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  
-
-
-` : `
-  <div class="alert alert-info d-flex align-items-center">
-    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-    <div>
-      <h5 class="alert-heading mb-1">Payment Coming Soon</h5>
-      <p class="mb-0">The payment option will be available shortly. Please check back later.</p>
+  ` : `
+    <div class="alert alert-info d-flex align-items-center">
+      <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+      <div>
+        <h5 class="alert-heading mb-1">Payment Coming Soon</h5>
+        <p class="mb-0">The payment option will be available shortly. Please check back later.</p>
+      </div>
     </div>
-  </div>
-`;
+  `;
 
-  // Payment verification section (only shown if payment link exists)
   const paymentVerificationSection = hasPaymentLink ? `
-    <div class="card mb-3" id="transactionCard" >
+    <div class="card mb-3" id="transactionCard">
       <div class="card-header">
         <i class="bi bi-receipt me-2"></i>Payment Verification
       </div>
@@ -1152,7 +1162,6 @@ const paymentSection = hasPaymentLink ? `
     </div>
   ` : '';
 
-  // Registration button state
   const registerButton = hasPaymentLink ? `
     <div class="d-grid gap-2">
       <button class="btn btn-primary" id="registerBtn" disabled>
@@ -1167,7 +1176,6 @@ const paymentSection = hasPaymentLink ? `
     </div>
   `;
 
-  // Main modal content
   document.getElementById('modalContent').innerHTML = `
     ${profileBadge}
     
@@ -1253,7 +1261,6 @@ const paymentSection = hasPaymentLink ? `
     ${registerButton}
   `;
 
-  // Add event listener to payment link button if exists
   if (hasPaymentLink) {
     document.getElementById('paymentLinkBtn')?.addEventListener('click', function() {
       showToast('After payment is complete, return here and enter your transaction ID to register', 'info');
@@ -1265,135 +1272,122 @@ const paymentSection = hasPaymentLink ? `
   eventModal.show();
 }
 
+async function getFirstGalleryImage(eventId) {
+  try {
+    const res = await makeRequest('GET', `/events/${eventId}/gallery`, null, false);
+    return res?.[0]?.image_url || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+  } catch (error) {
+    console.warn(`No gallery for event ${eventId}:`, error.message);
+    return 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+  }
+}
 
-   
+async function registerForEvent() {
+  const eventId = document.getElementById('register-event-id').value;
+  const registerButton = document.getElementById('registerButton');
+  const transactionId = document.getElementById('transaction-id').value.trim();
+  
+  if (!currentUserProfile) {
+    showToast('Please verify your profile before registration', 'warning');
+    return;
+  }
+  
+  registerButton.disabled = true;
+  registerButton.innerHTML = `
+    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+    Registering...
+  `;
+  
+  try {
+    let registrationData = {};
 
-
-    // Get first gallery image for an event
-    async function getFirstGalleryImage(eventId) {
-      try {
-        const res = await makeRequest('GET', `/events/${eventId}/gallery`, null, false);
-        return res?.[0]?.image_url || 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
-      } catch (error) {
-        console.warn(`No gallery for event ${eventId}:`, error.message);
-        return 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
-      }
+    try {
+      registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
+    } catch (e) {
+      throw new Error('Invalid JSON in registration data');
     }
 
-    // Register for an event
-    async function registerForEvent() {
-      const eventId = document.getElementById('register-event-id').value;
-      const registerButton = document.getElementById('registerButton');
-      const transactionId = document.getElementById('transaction-id').value.trim();
-      
-      if (!currentUserProfile) {
-        showToast('Please verify your profile before registration', 'warning');
-        return;
+    const result = await makeRequest('POST', `/events/${eventId}/register`, { 
+      registration_data: registrationData,
+      transaction_id: transactionId
+    });
+    
+    Swal.fire({
+      icon: 'success',
+      title: '🎉 Registration Successful!',
+      html: `
+        <p>You have successfully registered for the event.</p>
+        <p><strong>Would you like to view your attended events now?</strong></p>
+      `,
+      showCancelButton: true,
+      confirmButtonText: '✅ Yes, show my events',
+      cancelButtonText: '❌ No, maybe later',
+      confirmButtonColor: '#198754',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        getMyEvents();
       }
-      
-      // Disable button during registration
-      registerButton.disabled = true;
-      registerButton.innerHTML = `
-        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-        Registering...
-      `;
-      
-      try {
-        let registrationData = {};
+    });
 
-        try {
-          registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
-          console.log('📦 registration_data:', registrationData);
-        } catch (e) {
-          throw new Error('Invalid JSON in registration data');
-        }
-        console.log('📦 registration_data:', registrationData);
-        const result = await makeRequest('POST', `/events/${eventId}/register`, { 
-          registration_data: registrationData,
-          transaction_id: transactionId
-        });
-       Swal.fire({
-  icon: 'success',
-  title: '🎉 Registration Successful!',
-  html: `
-    <p>You have successfully registered for the event.</p>
-    <p><strong>Would you like to view your attended events now?</strong></p>
-  `,
-  showCancelButton: true,
-  confirmButtonText: '✅ Yes, show my events',
-  cancelButtonText: '❌ No, maybe later',
-  confirmButtonColor: '#198754',
-  cancelButtonColor: '#6c757d'
-}).then((result) => {
-  if (result.isConfirmed) {
-    getMyEvents(); // Function to show attended events
+    eventModal.hide();
+    getAllEvents();
+  } catch (error) {
+    showToast(`❌ Registration failed: ${error.message}`, 'danger');
+  } finally {
+    registerButton.disabled = false;
+    registerButton.innerHTML = `
+      <i class="bi bi-check-circle me-1"></i>Confirm Registration
+    `;
+  }
+}
+
+function getStatusColor(status) {
+  switch (status) {
+    case 'upcoming': return 'info';
+    case 'ongoing': return 'success';
+    case 'completed': return 'secondary';
+    case 'cancelled': return 'danger';
+    default: return 'dark';
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'Not specified';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  getAllEvents();
+  
+  if (currentToken) {
+    getMyProfile().catch(() => {
+      // Silent fail - user can manually load profile later
+    });
   }
 });
 
-        eventModal.hide();
-        getAllEvents(); // Refresh events list
-      } catch (error) {
-        showToast(`❌ Registration failed: ${error.message}`, 'danger');
-        alert(`❌ Registration failed: ${error.message}`);
-      } finally {
-        registerButton.disabled = false;
-        registerButton.innerHTML = `
-          <i class="bi bi-check-circle me-1"></i>Confirm Registration
-        `;
-      }
-    }
-
-    // Helper function to get status color
-    function getStatusColor(status) {
-      switch (status) {
-        case 'upcoming': return 'info';
-        case 'ongoing': return 'success';
-        case 'completed': return 'secondary';
-        case 'cancelled': return 'danger';
-        default: return 'dark';
-      }
-    }
-
-    // Helper function to format dates
-    function formatDate(dateStr) {
-      if (!dateStr) return 'Not specified';
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    // Initialize the page
-    window.addEventListener('DOMContentLoaded', () => {
-      getAllEvents();
-      
-      // Try to load profile if token exists
-      if (currentToken) {
-        getMyProfile().catch(() => {
-          // Silent fail - user can manually load profile later
-        });
-      }
-    });
-        const hamburger = document.querySelector('.eh-hamburger');
+const hamburger = document.querySelector('.eh-hamburger');
 const navMenu = document.querySelector('.eh-nav-menu');
 
 hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navMenu.classList.toggle('active');
+  hamburger.classList.toggle('active');
+  navMenu.classList.toggle('active');
 });
 
-// Close mobile menu when clicking on a link
 document.querySelectorAll('.eh-nav-link').forEach(n => 
-    n.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
-    })
+  n.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navMenu.classList.remove('active');
+  })
 );
-
 
   </script>
 </body>
