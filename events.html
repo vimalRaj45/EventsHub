@@ -309,10 +309,9 @@
   </style>
 </head>
 <body>
-
-    <div class="toast-container"></div>
-  <nav class="eh-navbar ">
-  <div class="eh-nav-container " >
+<div class="toast-container"></div>
+<nav class="eh-navbar">
+  <div class="eh-nav-container">
     <div class="eh-nav-logo">
       <h2>EventHub</h2>
     </div>
@@ -325,7 +324,7 @@
       </li>
       <li class="nav-item">
         <a href="Intern.html" class="nav-link">Our InternShips</a>
-       </li>
+      </li>
       <li class="eh-nav-item">
         <a href="certificates.html" class="eh-nav-link">Certificates</a>
       </li>
@@ -333,7 +332,7 @@
         <a href="results.html" class="eh-nav-link">Results</a>
       </li>
       <li class="eh-nav-item">
-                    <a href="1.html" class="nav-link btn-primary">Edit Profile</a>
+        <a href="1.html" class="nav-link btn-primary">Edit Profile</a>
       </li>
     </ul>
     <div class="eh-hamburger">
@@ -344,99 +343,95 @@
   </div>
 </nav>
 
-
-    
-
-  <div class="container py-4 "style="margin-top: 70px;">
-    <!-- Profile Verification Section -->
-    <div class="row mb-4" id="profileVerificationSection" style="display: none;">
-      <div class="col-12">
-        <div class="profile-section" data-aos="fade-up">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="mb-0"><i class="bi bi-shield-check me-2"></i>Profile Verification</h3>
-            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
-          </div>
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Full Name</label>
-              <input type="text" class="form-control bg-white" id="verified-name" readonly>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Email</label>
-              <input type="email" class="form-control bg-white" id="verified-email" readonly>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Contact Number</label>
-              <input type="text" class="form-control bg-white" id="verified-contact" readonly>
-            </div>
-          </div>
-          <p class="text-white-50 mb-0"><i class="bi bi-info-circle me-1"></i>Your profile information will be used for event registration</p>
+<div class="container py-4" style="margin-top: 70px;">
+  <!-- Profile Verification Section -->
+  <div class="row mb-4" id="profileVerificationSection" style="display: none;">
+    <div class="col-12">
+      <div class="profile-section" data-aos="fade-up">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="mb-0"><i class="bi bi-shield-check me-2"></i>Profile Verification</h3>
+          <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Verified</span>
         </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control bg-white" id="verified-name" readonly>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control bg-white" id="verified-email" readonly>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Contact Number</label>
+            <input type="text" class="form-control bg-white" id="verified-contact" readonly>
+          </div>
+        </div>
+        <p class="text-white-50 mb-0"><i class="bi bi-info-circle me-1"></i>Your profile information will be used for event registration</p>
       </div>
     </div>
+  </div>
 
-    <!-- Title -->
-    <h2 class="mb-4 text-center text-dark fw-bold" data-aos="fade-down">
-      <i class="bi bi-calendar3-event me-2"></i>Upcoming Events
-    </h2>
+  <!-- Title -->
+  <h2 class="mb-4 text-center text-dark fw-bold" data-aos="fade-down">
+    <i class="bi bi-calendar3-event me-2"></i>Upcoming Events
+  </h2>
 
   <!-- Compact Mobile Search Bar -->
-<div class="col-12 col-md-6 mb-3">
-  <div class="input-group input-group-sm">
-    <span class="input-group-text bg-white py-2">
-      <i class="bi bi-search text-muted"></i>
-    </span>
-    <input 
-      type="text" 
-      class="form-control border-start-0 py-2" 
-      id="event-search" 
-      placeholder="Search..."
-      oninput="searchEvents()"
-      aria-label="Search events"
-    >
-    
-      <span class="d-none d-sm-inline" onclick="clearSearch"></span>
-      <i class="bi bi-x d-sm-none"></i>
-    </button>
+  <div class="col-12 col-md-6 mb-3">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text bg-white py-2">
+        <i class="bi bi-search text-muted"></i>
+      </span>
+      <input 
+        type="text" 
+        class="form-control border-start-0 py-2" 
+        id="event-search" 
+        placeholder="Search..."
+        oninput="searchEvents()"
+        aria-label="Search events"
+      >
+      
+    </div>
   </div>
-</div>
-    <!-- Filter Section -->
-    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
-      <div class="card-body d-flex flex-wrap gap-3 align-items-center">
-        <label for="event-status" class="form-label mb-0 fw-medium">
-          <i class="bi bi-funnel-fill me-2"></i>Filter by Status:
-        </label>
-        <select class="form-select w-auto" id="event-status">
-          <option value="">All Events</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="ongoing">Ongoing</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <button class="btn btn-primary ms-auto" onclick="getAllEvents()">
-          <i class="bi bi-arrow-clockwise me-1"></i>Refresh Events
+
+  <!-- Filter Section -->
+  <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+    <div class="card-body d-flex flex-wrap gap-3 align-items-center">
+      <label for="event-status" class="form-label mb-0 fw-medium">
+        <i class="bi bi-funnel-fill me-2"></i>Filter by Status:
+      </label>
+      <select class="form-select w-auto" id="event-status">
+        <option value="">All Events</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="ongoing">Ongoing</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-primary ms-auto" onclick="getAllEvents()">
+        <i class="bi bi-arrow-clockwise me-1"></i>Refresh Events
+      </button>
+    </div>
+  </div>
+
+  <!-- My Events Section -->
+  <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0"><i class="bi bi-ticket-perforated me-2"></i>My Registered Events</h5>
+        <button class="btn btn-outline-primary btn-sm" onclick="getMyEvents()">
+          <i class="bi bi-arrow-repeat me-1"></i> Refresh My Events
         </button>
       </div>
+      <div id="my-events-container" class="row g-4 mt-2 d-none"></div>
     </div>
-
-    <!-- My Events Section -->
-    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0"><i class="bi bi-ticket-perforated me-2"></i>My Registered Events</h5>
-          <button class="btn btn-outline-primary btn-sm" onclick="getMyEvents()">
-            <i class="bi bi-arrow-repeat me-1"></i> Refresh My Events
-          </button>
-        </div>
-        <div id="my-events-container" class="row g-4 mt-2 d-none"></div>
-      </div>
-    </div>
-
-    <!-- Event Cards Grid -->
-    <div class="row g-4" id="events-container"></div>
   </div>
 
-  <div class="modal fade" id="attendModal" tabindex="-1" aria-labelledby="attendModalLabel" aria-hidden="true">
+  <!-- Event Cards Grid -->
+  <div class="row g-4" id="events-container"></div>
+</div>
+
+<!-- Attend Event Modal -->
+<div class="modal fade" id="attendModal" tabindex="-1" aria-labelledby="attendModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -454,81 +449,76 @@
   </div>
 </div>
 
-
-  <!-- Event Details Modal -->
-  <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="eventModalBody">
-          <div class="text-center py-4" id="modalLoading">
-            <div class="loading-spinner spinner-border text-primary" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Loading event details...</p>
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="eventModalBody">
+        <div class="text-center py-4" id="modalLoading">
+          <div class="loading-spinner spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
           </div>
-          <div id="modalContent" style="display: none;">
-            <!-- Content will be loaded here -->
-          </div>
+          <p class="mt-2">Loading event details...</p>
         </div>
-        <div class="modal-footer">
-          <input type="hidden" id="register-event-id">
-          <div id="registrationForm" class="w-100" >
-            
-            <div class="mb-3" style="display: none;">
-              <label class="form-label">Additional Information (JSON)</label>
-              <textarea id="register-data" class="form-control" rows="3" placeholder='{"team": "Team Name", "preferences": {}}'></textarea>
-            </div>
-            <div class="d-flex justify-content-between">
-  <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
-    <i class="bi bi-x-circle me-1"></i>Cancel
-  </button>
-  <button type="button" class="btn btn-success btn-sm" onclick="registerForEvent()" id="registerButton" disabled>
-    <i class="bi bi-check-circle me-1"></i>Register Now
-  </button>
-</div>
-
+        <div id="modalContent" style="display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" id="register-event-id">
+        <div id="registrationForm" class="w-100">
+          <div class="mb-3" style="display: none;">
+            <label class="form-label">Additional Information (JSON)</label>
+            <textarea id="register-data" class="form-control" rows="3" placeholder='{"team": "Team Name", "preferences": {}}'></textarea>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </button>
+            <button type="button" class="btn btn-success btn-sm" onclick="registerForEvent()" id="registerButton" disabled>
+              <i class="bi bi-check-circle me-1"></i>Register Now
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-   <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>EventHub</h3>
-                    <p>Your premier platform for organizing and participating in educational and competitive events.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="Home.html">Home</a></li>
-                        <li><a href="events.html">Events</a></li>
-                        <li><a href="certificates.html">Certificates</a></li>
-                        <li><a href="results.html">Results</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Contact</h4>
-                    <p><i class="fas fa-envelope"></i> info@eventhub.com</p>
-                    <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 EventHub. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+</div>
 
-  <!-- JS Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script> 
-  <script src="preventRefresh.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>EventHub</h3>
+        <p>Your premier platform for organizing and participating in educational and competitive events.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="Home.html">Home</a></li>
+          <li><a href="events.html">Events</a></li>
+          <li><a href="certificates.html">Certificates</a></li>
+          <li><a href="results.html">Results</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <p><i class="fas fa-envelope"></i> info@eventhub.com</p>
+        <p><i class="fas fa-phone"></i> +1 (555) 123-4567</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 EventHub. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
 // Track modal state
@@ -570,7 +560,7 @@ function clearSearch() {
 
 // Initialize animations
 AOS.init({
-  duration: 0.5,
+  duration: 50,
   easing: 'linear',
   once: true
 });
@@ -670,7 +660,7 @@ async function getMyProfile() {
     document.getElementById('verified-contact').value = result.contact_no || 'Not provided';
     document.getElementById('profileVerificationSection').style.display = 'block';
     
-    showToast('Profile information loaded successfully', 'success');
+    
     return result;
   } catch (error) {
     showToast(`Failed to load profile: ${error.message}`, 'danger');
@@ -887,10 +877,28 @@ async function getAllEvents() {
   }
 }
 
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = resolve;
+    img.onerror = reject;
+  });
+}
+
+
 async function displayEvents(events) {
   const container = document.getElementById('events-container');
-  container.innerHTML = '';
   
+  // Show loading spinner first
+  container.innerHTML = `
+    <div class="col-12 text-center py-4" id="loading-indicator">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Rendering events...</p>
+    </div>`;
+
   if (!events.length) {
     container.innerHTML = `
       <div class="col-12 text-center">
@@ -900,23 +908,24 @@ async function displayEvents(events) {
       </div>`;
     return;
   }
-  
-  // Use document fragment for better performance
+
+  // Use fragment to prepare content
   const fragment = document.createDocumentFragment();
-  
-  // Load all images in parallel
-  const eventCards = await Promise.all(events.map(async event => {
+
+  const imageLoadPromises = events.map(async event => {
     const card = document.createElement('div');
     card.className = 'col-md-6 col-lg-4';
     card.setAttribute('data-aos', 'fade-up');
-    
-    // Get image from cache or load it
+
     let imageUrl = imageCache.get(event.id);
     if (!imageUrl) {
       imageUrl = await getFirstGalleryImage(event.id);
       imageCache.set(event.id, imageUrl);
     }
-    
+
+    // Preload image before inserting into DOM
+    await preloadImage(imageUrl);
+
     card.innerHTML = `
       <div class="card h-100 event-card">
         <img loading="lazy" src="${imageUrl}" class="event-img card-img-top" alt="${event.title}">
@@ -926,13 +935,13 @@ async function displayEvents(events) {
             <span class="badge bg-${getStatusColor(event.status)} badge-status">${event.status}</span>
           </div>
           <p class="card-text text-muted">${event.description}</p>
-          
+
           <ul class="list-unstyled mt-3 mb-4 small">
             <li class="mb-2"><i class="bi bi-calendar-event me-2"></i><strong>Start:</strong> ${formatDate(event.start_date)}</li>
             <li class="mb-2"><i class="bi bi-calendar2-check me-2"></i><strong>End:</strong> ${formatDate(event.end_date)}</li>
             <li><i class="bi bi-people-fill me-2"></i><strong>Participants:</strong> ${event.current_participants}/${event.max_participants}</li>
           </ul>
-          
+
           <button class="btn btn-primary w-100" onclick='showEventModal(${JSON.stringify(event)})'>
             <i class="bi bi-eye me-1"></i>View Details
           </button>
@@ -940,12 +949,16 @@ async function displayEvents(events) {
       </div>
     `;
     return card;
-  }));
-  
-  // Append all cards at once
-  eventCards.forEach(card => fragment.appendChild(card));
+  });
+
+  const cards = await Promise.all(imageLoadPromises);
+  cards.forEach(card => fragment.appendChild(card));
+
+  // Clear loading spinner after everything is ready
+  container.innerHTML = '';
   container.appendChild(fragment);
 }
+
 
 async function showEventModal(event) {
   document.getElementById('eventModalLabel').textContent = event.title;
@@ -1317,7 +1330,7 @@ async function registerForEvent() {
       title: '🎉 Registration Successful!',
       html: `
         <p>You have successfully registered for the event.</p>
-        <p><strong>Would you like to view your attended events now?</strong></p>
+        <p><strong>Would you like to view your events now?</strong></p>
       `,
       showCancelButton: true,
       confirmButtonText: '✅ Yes, show my events',
@@ -1388,6 +1401,22 @@ document.querySelectorAll('.eh-nav-link').forEach(n =>
     navMenu.classList.remove('active');
   })
 );
+
+  window.addEventListener('DOMContentLoaded', getMyProfile);
+    // Disable right-click context menu
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Disable specific key shortcuts
+document.addEventListener('keydown', function(e) {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+    (e.ctrlKey && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+  ) {
+    e.preventDefault();
+   
+  }
+});
 
   </script>
 </body>
