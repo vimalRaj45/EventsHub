@@ -464,20 +464,27 @@
       const tr = document.createElement('tr');
       
       // Prepare WhatsApp message
-      const whatsappMessage = encodeURIComponent(
-        `Hi ${p.user_name},\n\n` +
-        `Regarding your payment for ${p.event_title} (₹${p.event_fee || 0}):\n` +
-        `${p.payment_verified ? 'Your payment has been verified. Thank you!' : 'We are processing your payment. Please contact us if you have any questions.'}\n\n` +
-        `Transaction ID: ${p.transaction_id || 'N/A'}\n` +
-        `Event: ${p.event_title}\n` +
-        `Amount: ₹${p.event_fee || 0}`
-      );
+     const whatsappMessage = encodeURIComponent(
+  `Hi ${p.user_name},\n\n` +
+  `This is a confirmation from *EventHub* regarding your payment for the event *${p.event_title}* (₹${p.event_fee || 0}):\n\n` +
+  `${p.payment_verified 
+    ? '✅ Your payment has been successfully verified. Thank you for your participation!' 
+    : '⏳ We are currently processing your payment. Please feel free to contact us if you have any questions.'}\n\n` +
+  `🧾 Transaction ID: ${p.transaction_id || 'N/A'}\n` +
+  `📅 Event: ${p.event_title}\n` +
+  `💰 Amount: ₹${p.event_fee || 0}\n\n` +
+  `🔗 *The event link is now enabled in your event section on our website.*\n\n` +
+  `– Team EventHub`
+);
+
       
       // Prepare SMS message
       const smsMessage = encodeURIComponent(
-        `${p.payment_verified ? 'Payment verified' : 'Payment processing'} for ${p.event_title}. ` +
-        `ID: ${p.transaction_id || 'N/A'}, Amt: ₹${p.event_fee || 0}`
-      );
+  `${p.payment_verified ? '✅ Payment verified' : '⏳ Payment processing'} for ${p.event_title} | ` +
+  `Txn ID: ${p.transaction_id || 'N/A'}, Amt: ₹${p.event_fee || 0}. ` +
+  `Event link is enabled in your event section on our website. – EventHub`
+);
+
       
       tr.innerHTML = `
         <td>${(currentPage - 1) * itemsPerPage + i + 1}</td>
