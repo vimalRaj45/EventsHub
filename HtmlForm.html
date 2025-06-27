@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dynamic Quiz App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Outfit Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- AOS CSS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --primary-light: #e6eaf5;
+      --secondary-color: #f8f9fc;
+      --accent-color: #2e59d9;
+      --correct-color: #28a745;
+      --incorrect-color: #dc3545;
+      --text-dark: #2d3748;
+      --text-medium: #4a5568;
+      --text-light: #718096;
+    }
+    
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+    
+    /* Loading Bar Styles */
+    .loading-bar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: transparent;
+      z-index: 9999;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .loading-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--primary-color) 100%);
+      background-size: 200% 100%;
+      animation: loadingBar 2s linear infinite, loadingGradient 3s ease infinite;
+    }
+    
+    @keyframes loadingBar {
+      0% { width: 0; left: 0; }
+      50% { width: 75%; left: 25%; }
+      100% { width: 0; left: 100%; }
+    }
+    
+    @keyframes loadingGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .quiz-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+      overflow: hidden;
+      background: white;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .quiz-container.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .quiz-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      color: white;
+      padding: 1.75rem 2rem;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .quiz-header h2 {
+      font-weight: 700;
+      margin-bottom: 0;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .quiz-body {
+      padding: 2.5rem;
+      background-color: white;
+    }
+    
+    .question-card {
+      margin-bottom: 1.75rem;
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.3s ease;
+      position: relative;
+      background-color: var(--secondary-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+    
+    .question-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+    
+    .btn-submit {
+      background-color: var(--primary-color);
+      border: none;
+      padding: 0.875rem 2.5rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      border-radius: 0.75rem;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 6px rgba(78, 115, 223, 0.2);
+    }
+    
+    .btn-submit:hover {
+      background-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(78, 115, 223, 0.3);
+    }
+    
+    .progress-container {
+      height: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      transition: width 0.6s ease;
+    }
+    
+    .quiz-icon {
+      margin-right: 12px;
+      font-size: 1.2em;
+    }
+    
+    .form-control, .form-select {
+      padding: 0.875rem 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid #e2e8f0;
+      font-size: 1rem;
+      color: var(--text-medium);
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .loading-spinner {
+      display: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 0.25em solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .result-modal .modal-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      color: white;
+      border-bottom: none;
+      padding: 1.5rem 2rem;
+    }
+    
+    .result-badge {
+      font-size: 1.3rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .timeout-indicator {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .timeout-bar {
+      height: 4px;
+      background-color: #e9ecef;
+      margin-top: 0.5rem;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .timeout-progress {
+      height: 100%;
+      background-color: #dc3545;
+      width: 100%;
+      transition: width 1s linear;
+    }
+    
+    /* New UI Enhancements */
+    .quiz-intro {
+      text-align: center;
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .quiz-intro-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    
+    .quiz-intro h3 {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+    
+    .quiz-intro p {
+      color: var(--text-medium);
+      margin-bottom: 1.5rem;
+    }
+    
+    .question-counter {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      color: var(--text-medium);
+      font-weight: 500;
+    }
+    
+    .question-number {
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .question-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    
+    .form-control::placeholder {
+      color: #a0aec0;
+      opacity: 1;
+    }
+    
+    .modal-content {
+      border-radius: 1rem;
+      overflow: hidden;
+      border: none;
+      box-shadow: 0 1rem 3rem rgba(0,0,0,0.2);
+    }
+    
+    .modal-body {
+      padding: 2.5rem;
+    }
+    
+    .result-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .result-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .result-message {
+      color: var(--text-medium);
+      margin-bottom: 2rem;
+    }
+    
+    #globalTimer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+    }
+    
+    #globalTimer i {
+      margin-right: 8px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .quiz-container {
+        margin: 1rem;
+        border-radius: 0.75rem;
+      }
+      
+      .quiz-body {
+        padding: 1.5rem;
+      }
+      
+      .quiz-header {
+        padding: 1.25rem;
+      }
+      
+      #globalTimer {
+        top: 10px;
+        right: 10px;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+    
+    /* Animation enhancements */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Floating action button for mobile */
+    .fab-submit {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+    
+    .fab-submit:hover {
+      transform: translateY(-3px) scale(1.1);
+      background-color: var(--accent-color);
+    }
+    
+    @media (max-width: 576px) {
+      .fab-submit {
+        display: flex;
+      }
+      
+      .desktop-submit {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Bar -->
+  <div class="loading-bar-container" id="loadingBar">
+    <div class="loading-bar"></div>
+  </div>
+
+  <div class="quiz-container" id="quizContainer" data-aos="fade-up" data-aos-duration="800">
+    <div class="quiz-header">
+      <h2><i class="fas fa-pencil-alt quiz-icon"></i> <span id="quizTitle">Quiz</span></h2>
+    </div>
+    
+    <div class="quiz-body">
+      <div class="progress-container">
+        <div class="progress-bar" id="quizProgress" style="width: 0%"></div>
+      </div>
+      
+      <form id="quizForm"></form>
+    </div>
+  </div>
+
+  <div id="globalTimer" class="d-flex align-items-center">
+    <i class="fas fa-clock"></i>
+    <span>Time Left: 00:00</span>
+  </div>
+
+  <!-- Floating Action Button for Mobile -->
+  <button class="fab-submit" id="mobileSubmitBtn" style="display: none;">
+    <i class="fas fa-paper-plane"></i>
+  </button>
+
+  <!-- Result Modal -->
+  <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Quiz Results</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="mb-4">
+            <i class="fas fa-check-circle result-icon text-success" id="resultIcon"></i>
+            <h3 class="result-title mt-3" id="resultTitle">Quiz Submitted!</h3>
+            <div class="badge bg-primary result-badge mt-2 mb-3" id="resultScore">Score: 0/0</div>
+            <p class="result-message" id="resultMessage">Thank you for completing the quiz!</p>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-center border-top-0 pt-0">
+          <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary px-4" id="retryBtn">Try Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- AOS JS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+<script>
+  AOS.init();
+  const API_URL = "https://script.google.com/macros/s/AKfycbzmp1fwjprEnzwpwt0hNcGE9zLc6TzOwoDRxyGO89wMq6v3PA_gSXt4AspdxXoX2mZrqw/exec";
+
+  const form = document.getElementById("quizForm");
+  const quizTitle = document.getElementById("quizTitle");
+  const submitBtn = document.getElementById("submitBtn");
+  const submitText = document.getElementById("submitText");
+  const submitSpinner = document.getElementById("submitSpinner");
+  const quizProgress = document.getElementById("quizProgress");
+  const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+  const resultScore = document.getElementById("resultScore");
+  const resultTitle = document.getElementById("resultTitle");
+  const resultMessage = document.getElementById("resultMessage");
+  const resultIcon = document.getElementById("resultIcon");
+  const retryBtn = document.getElementById("retryBtn");
+  const globalTimer = document.getElementById("globalTimer");
+  const mobileSubmitBtn = document.getElementById("mobileSubmitBtn");
+  const loadingBar = document.getElementById("loadingBar");
+  const quizContainer = document.getElementById("quizContainer");
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const quizName = queryParams.get('quiz') || 'Maths';
+  quizTitle.innerText += ` – ${quizName}`;
+
+  let totalTimeout = 0;
+  let autoSubmitTimer;
+  let globalCountdownTimer;
+  let questionsCount = 0;
+
+  // Show loading bar when page loads
+  loadingBar.style.display = 'block';
+  
+  // Hide quiz container initially
+  quizContainer.style.display = 'none';
+
+  async function loadQuiz() {
+    try {
+      // Show loading state
+      loadingBar.style.display = 'block';
+      
+      const res = await fetch(`${API_URL}?quiz=${quizName}`);
+      const data = await res.json();
+      const questions = data.questions;
+      if (questions.error) throw new Error(questions.error);
+      console.log("📋 Loaded quiz questions:", questions);
+      
+      questionsCount = questions.length;
+      totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0) * 60;
+
+      // Hide loading bar and show content with fade-in effect
+      loadingBar.style.display = 'none';
+      quizContainer.style.display = 'block';
+      setTimeout(() => {
+        quizContainer.classList.add('loaded');
+      }, 50);
+
+      // Show intro screen
+      form.innerHTML = `
+        <div class="quiz-intro">
+          <div class="quiz-intro-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <h3>${quizName} Quiz</h3>
+          <p>This quiz contains ${questionsCount} questions with a total time limit of ${Math.round(totalTimeout / 60)} minutes.</p>
+          <div class="mb-4" id="emailField">
+            <label class="form-label">Enter your email to begin</label>
+            <input type="email" required id="userEmail" class="form-control form-control-lg" placeholder="your@email.com">
+          </div>
+          <button type="button" class="btn btn-primary btn-lg px-5 py-3" id="startQuizBtn">
+            <i class="fas fa-play me-2"></i> Start Quiz
+          </button>
+        </div>
+      `;
+
+      document.getElementById("startQuizBtn").addEventListener("click", () => {
+        const emailInput = document.getElementById("userEmail");
+        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+          emailInput.classList.add("is-invalid");
+          Swal.fire({
+            icon: 'error',
+            title: 'Email Required',
+            text: 'Please enter a valid email address to continue',
+            confirmButtonColor: 'var(--primary-color)'
+          });
+          return;
+        }
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Quiz Instructions',
+          html: `
+            <div class="text-start">
+              <div class="d-flex align-items-start mb-3">
+                <i class="fas fa-clock text-primary me-2 mt-1"></i>
+                <div>
+                  <h6 class="mb-1">Time Limit</h6>
+                  <p class="mb-0 text-muted">Total time: ${Math.round(totalTimeout / 60)} minutes</p>
+                </div>
+              </div>
+              <div class="d-flex align-items-start mb-3">
+                <i class="fas fa-check-circle text-primary me-2 mt-1"></i>
+                <div>
+                  <h6 class="mb-1">Completion</h6>
+                  <p class="mb-0 text-muted">All answers must be submitted before time</p>
+                </div>
+              </div>
+              <div class="d-flex align-items-start mb-3">
+                <i class="fas fa-exclamation-triangle text-primary me-2 mt-1"></i>
+                <div>
+                  <h6 class="mb-1">Timeouts</h6>
+                  <p class="mb-0 text-muted">Unanswered questions will be marked as timeout</p>
+                </div>
+              </div>
+              <div class="d-flex align-items-start">
+                <i class="fas fa-envelope text-primary me-2 mt-1"></i>
+                <div>
+                  <h6 class="mb-1">Email</h6>
+                  <p class="mb-0 text-muted">Email is required, others are optional</p>
+                </div>
+              </div>
+            </div>
+          `,
+          confirmButtonText: 'Start Quiz',
+          confirmButtonColor: 'var(--primary-color)',
+          allowOutsideClick: false,
+          backdrop: `
+            rgba(0,0,0,0.5)
+            url("/images/nyan-cat.gif")
+            left top
+            no-repeat
+          `
+        }).then(() => {
+          // Show loading while building quiz
+          loadingBar.style.display = 'block';
+          setTimeout(() => {
+            // remove email prompt
+            form.innerHTML = "";
+            buildQuiz(questions, emailInput.value);
+            loadingBar.style.display = 'none';
+          }, 300);
+        });
+      });
+
+    } catch (err) {
+      loadingBar.style.display = 'none';
+      quizContainer.style.display = 'block';
+      quizContainer.classList.add('loaded');
+      
+      quizTitle.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Quiz Loading Error`;
+      const errorAlert = document.createElement("div");
+      errorAlert.classList.add("alert", "alert-danger", "mt-3");
+      errorAlert.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <div>
+            <h5 class="mb-1">Failed to load quiz</h5>
+            <p class="mb-0">${err.message}</p>
+          </div>
+        </div>
+      `;
+      form.appendChild(errorAlert);
+    }
+  }
+
+  function buildQuiz(questions, email) {
+    // Show mobile submit button if on small screen
+    if (window.innerWidth <= 576) {
+      mobileSubmitBtn.style.display = "flex";
+      mobileSubmitBtn.addEventListener("click", () => {
+        form.dispatchEvent(new Event('submit'));
+      });
+    }
+    
+    const emailField = document.createElement("input");
+    emailField.type = "hidden";
+    emailField.name = "Email";
+    emailField.value = email;
+    form.appendChild(emailField);
+
+    questions.forEach((q, index) => {
+      const wrapper = document.createElement("div");
+      wrapper.classList.add("question-card");
+      wrapper.dataset.aos = "fade-up";
+      wrapper.dataset.aosDelay = index * 100;
+      wrapper.id = `question-${q.name}`;
+
+      const questionHeader = document.createElement("div");
+      questionHeader.classList.add("question-header");
+      
+      const questionNumber = document.createElement("div");
+      questionNumber.classList.add("question-number");
+      questionNumber.textContent = index + 1;
+      questionHeader.appendChild(questionNumber);
+      
+      const label = document.createElement("label");
+      label.textContent = q.question;
+      label.classList.add("form-label");
+      questionHeader.appendChild(label);
+      
+      wrapper.appendChild(questionHeader);
+
+      let input;
+      if (q.type === "select") {
+        input = document.createElement("select");
+        input.classList.add("form-select");
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "Select an option";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        input.appendChild(defaultOption);
+      q.options.forEach(opt => {
+  const option = document.createElement("option");
+  option.value = opt.trim();
+  option.textContent = opt.trim();
+
+  // ❌ Disable "timeout" option so it only appears during auto-submit
+  if (opt.trim().toLowerCase() === "timeout") {
+    option.disabled = true;
+    option.hidden = true;
+  }
+
+  input.appendChild(option);
+});
+
+      } else {
+        input = document.createElement("input");
+        input.type = q.type || "text";
+        input.classList.add("form-control");
+        input.placeholder = "Type your answer here...";
+      }
+
+      input.name = q.name;
+      input.required = false;
+      wrapper.appendChild(input);
+      form.appendChild(wrapper);
+    });
+
+    // Add submit button
+    const submitWrapper = document.createElement("div");
+    submitWrapper.classList.add("d-grid", "gap-2", "mt-4", "desktop-submit");
+    submitWrapper.innerHTML = `
+      <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
+        <span id="submitText">Submit Answers</span>
+        <span class="loading-spinner" id="submitSpinner" style="display: none;"></span>
+      </button>
+    `;
+    form.appendChild(submitWrapper);
+
+    // Update progress bar
+    quizProgress.style.width = `${100/questionsCount}%`;
+  }
+
+  function startGlobalCountdown(seconds) {
+    let remaining = seconds;
+    updateTimerDisplay(remaining);
+    globalCountdownTimer = setInterval(() => {
+      remaining--;
+      updateTimerDisplay(remaining);
+      
+      // Add warning when time is running low
+      if (remaining === 60) {
+        globalTimer.classList.add("pulse-animation");
+        Swal.fire({
+          icon: 'warning',
+          title: '1 Minute Left!',
+          text: 'Hurry up! The quiz will auto-submit in 1 minute',
+          confirmButtonColor: 'var(--primary-color)',
+          timer: 5000
+        });
+      }
+      
+      if (remaining <= 0) {
+        clearInterval(globalCountdownTimer);
+        globalTimer.classList.remove("pulse-animation");
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(seconds) {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    globalTimer.innerHTML = `<i class="fas fa-clock"></i><span>Time Left: ${mins}:${secs}</span>`;
+    
+    // Change color when time is running low
+    if (seconds <= 60) {
+      globalTimer.style.background = "linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)";
+    } else if (seconds <= 120) {
+      globalTimer.style.background = "linear-gradient(135deg, #fd7e14 0%, #dc3545 100%)";
+    }
+  }
+
+  function startAutoSubmit(seconds) {
+    autoSubmitTimer = setTimeout(() => {
+      const allElements = form.querySelectorAll('input[name], textarea[name], select[name]');
+      const answers = {};
+
+      allElements.forEach(el => {
+        if (el.name !== "Email") {
+          // Detect unfilled field for input/textarea or unselected select
+          const isSelect = el.tagName.toLowerCase() === "select";
+          const isEmpty = isSelect ? el.value === "" : !el.value.trim();
+
+          if (isEmpty) {
+            el.value = "timeout";
+          }
+        }
+
+        answers[el.name] = el.value.trim();
+      });
+
+      console.log("📋 Auto-submitting quiz with the following answers:");
+      console.table(answers);
+
+      // Submit the form
+      if (typeof form.requestSubmit === "function") {
+        form.requestSubmit();
+      } else {
+        form.submit();
+      }
+    }, seconds * 1000);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    clearTimeout(autoSubmitTimer);
+    clearInterval(globalCountdownTimer);
+
+    const submitText = document.getElementById("submitText");
+    const submitSpinner = document.getElementById("submitSpinner");
+    const submitBtn = document.getElementById("submitBtn");
+
+    submitText.textContent = "Submitting...";
+    submitSpinner.style.display = "inline-block";
+    submitBtn.disabled = true;
+    if (mobileSubmitBtn) {
+      mobileSubmitBtn.disabled = true;
+      mobileSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+
+    // Show loading bar during submission
+    loadingBar.style.display = 'block';
+
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((v, k) => data[k] = v);
+    data.quiz = quizName;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      submitText.textContent = "Submit Answers";
+      submitSpinner.style.display = "none";
+      submitBtn.disabled = false;
+      if (mobileSubmitBtn) {
+        mobileSubmitBtn.disabled = false;
+        mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      }
+
+      // Hide loading bar after submission
+      loadingBar.style.display = 'none';
+
+      if (result.success) {
+        resultScore.textContent = `Score: ${result.score}`;
+        resultTitle.textContent = "Quiz Submitted!";
+        resultMessage.textContent = "Thank you for completing the quiz!";
+        resultIcon.className = "fas fa-check-circle result-icon text-success";
+        
+        // Add confetti for good results
+        if (result.score.includes('/')) {
+          const [correct, total] = result.score.split('/').map(Number);
+          const percentage = (correct / total) * 100;
+          if (percentage >= 80) {
+            resultIcon.className = "fas fa-trophy result-icon text-warning";
+            resultTitle.textContent = "Excellent Work!";
+            resultMessage.textContent = `You scored ${percentage.toFixed(0)}% - Great job!`;
+            
+            // Trigger confetti
+            Swal.fire({
+              title: 'Congratulations!',
+              text: `You scored ${percentage.toFixed(0)}%!`,
+              icon: 'success',
+              confirmButtonColor: 'var(--primary-color)',
+              backdrop: `
+                rgba(0,0,0,0.5)
+                url("/images/nyan-cat.gif")
+                left top
+                no-repeat
+              `,
+              showConfirmButton: false,
+              timer: 2000
+            });
+          } else if (percentage >= 50) {
+            resultIcon.className = "fas fa-thumbs-up result-icon text-primary";
+            resultTitle.textContent = "Good Job!";
+            resultMessage.textContent = `You scored ${percentage.toFixed(0)}% - Keep it up!`;
+          }
+        }
+        
+        resultModal.show();
+      } else {
+        resultScore.textContent = "";
+        resultTitle.textContent = "Submission Failed";
+        resultMessage.textContent = result.error || "An unknown error occurred";
+        resultIcon.className = "fas fa-times-circle result-icon text-danger";
+        resultModal.show();
+      }
+    } catch (err) {
+      resultScore.textContent = "";
+      resultTitle.textContent = "Network Error";
+      resultMessage.textContent = "Failed to submit quiz. Please check your connection.";
+      resultIcon.className = "fas fa-exclamation-triangle result-icon text-warning";
+      resultModal.show();
+      submitText.textContent = "Submit Answers";
+      submitSpinner.style.display = "none";
+      submitBtn.disabled = false;
+      if (mobileSubmitBtn) {
+        mobileSubmitBtn.disabled = false;
+        mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      }
+      loadingBar.style.display = 'none';
+    }
+  });
+
+  retryBtn.addEventListener("click", () => {
+    resultModal.hide();
+    form.reset();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (totalTimeout > 0) {
+      startGlobalCountdown(totalTimeout);
+      startAutoSubmit(totalTimeout);
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', loadQuiz);
+</script>
+</body>
+</html>
