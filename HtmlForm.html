@@ -378,9 +378,8 @@ async function loadQuiz() {
 
     const questions = data.questions;
 
-    // ✅ Keep your original timeout logic
     questionsCount = questions.length;
-    totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0);
+      totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0) * 60;
 
     // Show intro screen
     form.innerHTML = `
