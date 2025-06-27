@@ -314,7 +314,13 @@
     async function fetchResult() {
       let quiz = ''
       let email = ''
-
+      alert(
+  "⚠️ Please enter details carefully:\n" +
+  "- Quiz name is *case-sensitive* (e.g., 'Maths', 'Science')\n" +
+  "- First letter should be capital\n" +
+  "- No spaces at the start or end\n" +
+  "- Email should match exactly how you registered"
+);
       if (!quiz) {
         quiz = prompt("Enter quiz name (First letter capital):");
         if (!quiz) return;
