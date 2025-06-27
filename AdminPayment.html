@@ -135,6 +135,32 @@
       border-color: #1a1a2e;
     }
     
+    /* Message action buttons */
+    .message-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .message-actions .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .message-actions .btn-whatsapp {
+      background-color: #25D366;
+      color: white;
+    }
+    
+    .message-actions .btn-sms {
+      background-color: #34B7F1;
+      color: white;
+    }
+    
+    .message-actions .btn-call {
+      background-color: #128C7E;
+      color: white;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .table-responsive {
@@ -201,13 +227,15 @@
           <tr>
             <th style="width: 5%">#</th>
             <th style="width: 15%">Participant</th>
-            <th style="width: 15%">Email</th>
-            <th style="width: 15%">Event</th>
+            <th style="width: 12%">Email</th>
+            <th style="width: 12%">Contact</th>
+            <th style="width: 12%">Event</th>
             <th style="width: 8%">Fee</th>
-            <th style="width: 12%">Transaction ID</th>
-            <th style="width: 10%">Status</th>
+            <th style="width: 10%">Transaction ID</th>
+            <th style="width: 8%">Status</th>
             <th style="width: 10%">Verified At</th>
             <th style="width: 10%">Registered</th>
+            <th style="width: 10%">Message</th>
             <th style="width: 10%">Action</th>
           </tr>
         </thead>
@@ -259,7 +287,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const API_BASE_URL = 'https://eventdb.onrender.com/api';
-  const adminToken = localStorage.getItem('jwtToken');
+  const BASE = 'https://eventdb.onrender.com';
+  const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTEwMDMwMjMsImV4cCI6MTc1MTA4OTQyM30.kNjzr9UUQzdDgxuz3ieaHH56epHoAbaXjRCjZptCQ8Q';
   let allPayments = [];
   let currentPage = 1;
   const itemsPerPage = 10;
@@ -358,6 +387,30 @@
       
       const data = await response.json();
       allPayments = data.payments || [];
+      
+      // Fetch user details for each payment to get contact numbers
+      const paymentsWithContacts = await Promise.all(allPayments.map(async payment => {
+        try {
+          const userRes = await fetch(`${BASE}/api/users/${payment.user_id}`, {
+            headers: { Authorization: `Bearer ${adminToken}` }
+          });
+          
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            return {
+              ...payment,
+              user_contact: userData.contact_no || 'N/A'
+            };
+          }
+          return payment;
+        } catch (error) {
+          console.error(`Failed to fetch user details for user ${payment.user_id}:`, error);
+          return payment;
+        }
+      }));
+      
+      allPayments = paymentsWithContacts;
+      console.log('Payments loaded:', allPayments);
       renderPaymentTable();
     } catch (error) {
       console.error('Failed to load payments:', error);
@@ -384,7 +437,8 @@
         p.user_name.toLowerCase().includes(currentSearch) ||
         p.user_email.toLowerCase().includes(currentSearch) ||
         p.event_title.toLowerCase().includes(currentSearch) ||
-        (p.transaction_id && p.transaction_id.toLowerCase().includes(currentSearch))
+        (p.transaction_id && p.transaction_id.toLowerCase().includes(currentSearch)) ||
+        (p.user_contact && p.user_contact.toLowerCase().includes(currentSearch))
       );
     }
     
@@ -408,6 +462,23 @@
     
     paginatedPayments.forEach((p, i) => {
       const tr = document.createElement('tr');
+      
+      // Prepare WhatsApp message
+      const whatsappMessage = encodeURIComponent(
+        `Hi ${p.user_name},\n\n` +
+        `Regarding your payment for ${p.event_title} (₹${p.event_fee || 0}):\n` +
+        `${p.payment_verified ? 'Your payment has been verified. Thank you!' : 'We are processing your payment. Please contact us if you have any questions.'}\n\n` +
+        `Transaction ID: ${p.transaction_id || 'N/A'}\n` +
+        `Event: ${p.event_title}\n` +
+        `Amount: ₹${p.event_fee || 0}`
+      );
+      
+      // Prepare SMS message
+      const smsMessage = encodeURIComponent(
+        `${p.payment_verified ? 'Payment verified' : 'Payment processing'} for ${p.event_title}. ` +
+        `ID: ${p.transaction_id || 'N/A'}, Amt: ₹${p.event_fee || 0}`
+      );
+      
       tr.innerHTML = `
         <td>${(currentPage - 1) * itemsPerPage + i + 1}</td>
         <td>
@@ -421,6 +492,7 @@
           </div>
         </td>
         <td><a href="mailto:${p.user_email}">${p.user_email}</a></td>
+        <td>${p.user_contact || 'N/A'}</td>
         <td>${p.event_title}</td>
         <td class="fw-bold">₹${p.event_fee || 0}</td>
         <td>
@@ -435,6 +507,28 @@
         </td>
         <td>${p.verified_at ? formatDateTime(p.verified_at) : '-'}</td>
         <td>${formatDateTime(p.registered_at)}</td>
+        <td>
+          <div class="message-actions">
+            ${p.user_contact && p.user_contact !== 'N/A' ? `
+              <a href="https://wa.me/${p.user_contact}?text=${whatsappMessage}" 
+                 class="btn btn-whatsapp" 
+                 target="_blank"
+                 title="Send WhatsApp">
+                <i class="bi bi-whatsapp"></i>
+              </a>
+              <a href="sms:${p.user_contact}?body=${smsMessage}" 
+                 class="btn btn-sms" 
+                 title="Send SMS">
+                <i class="bi bi-chat-text"></i>
+              </a>
+              <a href="tel:${p.user_contact}" 
+                 class="btn btn-call" 
+                 title="Call">
+                <i class="bi bi-telephone"></i>
+              </a>
+            ` : '<span class="text-muted">No contact</span>'}
+          </div>
+        </td>
         <td>
           <button class="btn btn-sm ${p.payment_verified ? 'btn-outline-danger' : 'btn-outline-success'} btn-verify"
             onclick="showConfirmationModal(${p.participant_id}, ${!p.payment_verified})">
