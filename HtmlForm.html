@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dynamic Quiz App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <!-- Google Outfit Font -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- AOS CSS -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <style>
     :root {
       --primary-color: #4e73df;
@@ -23,6 +25,7 @@
       --text-dark: #2d3748;
       --text-medium: #4a5568;
       --text-light: #718096;
+      --swal-confirm: var(--primary-color);
     }
     
     body {
@@ -30,26 +33,23 @@
       font-family: 'Outfit', sans-serif;
       color: var(--text-dark);
       line-height: 1.6;
+      -webkit-tap-highlight-color: transparent;
     }
     
     .quiz-container {
       max-width: 800px;
-      margin: 2rem auto;
-      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
-      border-radius: 1rem;
+      margin: 1rem auto;
+      box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.1);
+      border-radius: 0.75rem;
       overflow: hidden;
       background: white;
       transition: all 0.3s ease;
     }
     
-    .quiz-container:hover {
-      box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
-    }
-    
     .quiz-header {
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
       color: white;
-      padding: 1.75rem 2rem;
+      padding: 1.25rem 1.5rem;
       position: relative;
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
@@ -60,61 +60,46 @@
       letter-spacing: -0.5px;
       display: flex;
       align-items: center;
+      font-size: 1.25rem;
     }
     
     .quiz-body {
-      padding: 2.5rem;
+      padding: 1.5rem;
       background-color: white;
     }
     
     .question-card {
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.25rem;
       border-left: 4px solid var(--primary-color);
-      transition: all 0.3s ease;
-      position: relative;
       background-color: var(--secondary-color);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-    }
-    
-    .question-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+      border-radius: 0.5rem;
+      padding: 1rem;
     }
     
     .form-label {
       font-weight: 600;
       color: var(--text-dark);
-      margin-bottom: 0.75rem;
-      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
     }
     
     .btn-submit {
       background-color: var(--primary-color);
       border: none;
-      padding: 0.875rem 2.5rem;
+      padding: 0.75rem 1.5rem;
       font-weight: 600;
-      letter-spacing: 0.5px;
       transition: all 0.3s ease;
-      border-radius: 0.75rem;
-      text-transform: uppercase;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 6px rgba(78, 115, 223, 0.2);
-    }
-    
-    .btn-submit:hover {
-      background-color: var(--accent-color);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 8px rgba(78, 115, 223, 0.3);
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgba(78, 115, 223, 0.2);
     }
     
     .progress-container {
-      height: 10px;
+      height: 8px;
       background-color: #e9ecef;
-      border-radius: 5px;
-      margin-bottom: 2.5rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
       overflow: hidden;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
     }
     
     .progress-bar {
@@ -123,29 +108,27 @@
     }
     
     .quiz-icon {
-      margin-right: 12px;
-      font-size: 1.2em;
+      margin-right: 8px;
+      font-size: 1em;
     }
     
     .form-control, .form-select {
-      padding: 0.875rem 1.25rem;
-      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
       border: 1px solid #e2e8f0;
-      font-size: 1rem;
-      color: var(--text-medium);
-      transition: all 0.3s ease;
+      font-size: 0.95rem;
     }
     
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+      box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
     }
     
     .loading-spinner {
       display: none;
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 0.25em solid rgba(255, 255, 255, 0.3);
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 0.2em solid rgba(255, 255, 255, 0.3);
       border-top-color: white;
       border-radius: 50%;
       animation: spin 1s linear infinite;
@@ -160,180 +143,91 @@
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
       color: white;
       border-bottom: none;
-      padding: 1.5rem 2rem;
+      padding: 1.25rem;
     }
     
     .result-badge {
-      font-size: 1.3rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 2rem;
+      font-size: 1.1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 1.5rem;
       font-weight: 600;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
-    .timeout-indicator {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: #f8d7da;
-      color: #721c24;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .timeout-bar {
-      height: 4px;
-      background-color: #e9ecef;
-      margin-top: 0.5rem;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .timeout-progress {
-      height: 100%;
-      background-color: #dc3545;
-      width: 100%;
-      transition: width 1s linear;
-    }
-    
-    /* New UI Enhancements */
+    /* Mobile Optimizations */
     .quiz-intro {
       text-align: center;
-      padding: 2rem;
-      max-width: 600px;
-      margin: 0 auto;
+      padding: 1.5rem;
     }
     
     .quiz-intro-icon {
-      font-size: 3rem;
+      font-size: 2.5rem;
       color: var(--primary-color);
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
     
     .quiz-intro h3 {
       font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text-dark);
+      margin-bottom: 0.75rem;
+      font-size: 1.5rem;
     }
     
     .quiz-intro p {
       color: var(--text-medium);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
     }
     
     .question-counter {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      color: var(--text-medium);
-      font-weight: 500;
+      margin-bottom: 1rem;
     }
     
     .question-number {
       background-color: var(--primary-light);
       color: var(--primary-color);
-      width: 36px;
-      height: 36px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 600;
-      margin-right: 12px;
+      margin-right: 8px;
       flex-shrink: 0;
+      font-size: 0.9rem;
     }
     
     .question-header {
       display: flex;
       align-items: center;
-      margin-bottom: 1.25rem;
-    }
-    
-    .form-control::placeholder {
-      color: #a0aec0;
-      opacity: 1;
-    }
-    
-    .modal-content {
-      border-radius: 1rem;
-      overflow: hidden;
-      border: none;
-      box-shadow: 0 1rem 3rem rgba(0,0,0,0.2);
-    }
-    
-    .modal-body {
-      padding: 2.5rem;
-    }
-    
-    .result-icon {
-      font-size: 5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .result-title {
-      font-weight: 700;
       margin-bottom: 1rem;
     }
     
-    .result-message {
-      color: var(--text-medium);
-      margin-bottom: 2rem;
+    .modal-content {
+      border-radius: 0.75rem;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .result-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
     }
     
     #globalTimer {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 10px;
+      right: 10px;
       background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
       color: white;
-      padding: 0.75rem 1.25rem;
+      padding: 0.5rem 1rem;
       border-radius: 50px;
       font-weight: 600;
-      box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+      font-size: 0.85rem;
       z-index: 1000;
       display: flex;
       align-items: center;
-    }
-    
-    #globalTimer i {
-      margin-right: 8px;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .quiz-container {
-        margin: 1rem;
-        border-radius: 0.75rem;
-      }
-      
-      .quiz-body {
-        padding: 1.5rem;
-      }
-      
-      .quiz-header {
-        padding: 1.25rem;
-      }
-      
-      #globalTimer {
-        top: 10px;
-        right: 10px;
-        font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-      }
-    }
-    
-    /* Animation enhancements */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .pulse-animation {
-      animation: pulse 2s infinite;
     }
     
     /* Floating action button for mobile */
@@ -341,26 +235,66 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
       background-color: var(--primary-color);
       color: white;
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-size: 1.25rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 100;
-      transition: all 0.3s ease;
+      border: none;
     }
     
-    .fab-submit:hover {
-      transform: translateY(-3px) scale(1.1);
-      background-color: var(--accent-color);
+    /* Loader for quiz loading */
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
     }
     
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid var(--primary-light);
+      border-bottom-color: var(--primary-color);
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+    
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
     @media (max-width: 576px) {
+      .quiz-container {
+        margin: 0.5rem;
+        border-radius: 0.5rem;
+      }
+      
+      .quiz-body {
+        padding: 1rem;
+      }
+      
+      .quiz-header {
+        padding: 1rem;
+      }
+      
+      .quiz-header h2 {
+        font-size: 1.1rem;
+      }
+      
       .fab-submit {
         display: flex;
       }
@@ -374,7 +308,7 @@
 <body>
   <div class="quiz-container" data-aos="fade-up" data-aos-duration="800">
     <div class="quiz-header">
-      <h2><i class="fas fa-pencil-alt quiz-icon"></i> <span id="quizTitle">Quiz</span></h2>
+      <h2><i class="bi bi-pencil-square quiz-icon"></i> <span id="quizTitle">Quiz</span></h2>
     </div>
     
     <div class="quiz-body">
@@ -387,44 +321,20 @@
   </div>
 
   <div id="globalTimer" class="d-flex align-items-center">
-    <i class="fas fa-clock"></i>
+    <i class="bi bi-clock"></i>
     <span>Time Left: 00:00</span>
   </div>
 
   <!-- Floating Action Button for Mobile -->
   <button class="fab-submit" id="mobileSubmitBtn" style="display: none;">
-    <i class="fas fa-paper-plane"></i>
+    <i class="bi bi-send"></i>
   </button>
-
-  <!-- Result Modal -->
-  <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Quiz Results</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body text-center">
-          <div class="mb-4">
-            <i class="fas fa-check-circle result-icon text-success" id="resultIcon"></i>
-            <h3 class="result-title mt-3" id="resultTitle">Quiz Submitted!</h3>
-            <div class="badge bg-primary result-badge mt-2 mb-3" id="resultScore">Score: 0/0</div>
-            <p class="result-message" id="resultMessage">Thank you for completing the quiz!</p>
-          </div>
-        </div>
-        <div class="modal-footer justify-content-center border-top-0 pt-0">
-          <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary px-4" id="retryBtn">Try Again</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- AOS JS -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <!-- SweetAlert2 -->
+  <!-- SweetAlert2 JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
 <script>
@@ -433,16 +343,7 @@
 
   const form = document.getElementById("quizForm");
   const quizTitle = document.getElementById("quizTitle");
-  const submitBtn = document.getElementById("submitBtn");
-  const submitText = document.getElementById("submitText");
-  const submitSpinner = document.getElementById("submitSpinner");
   const quizProgress = document.getElementById("quizProgress");
-  const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
-  const resultScore = document.getElementById("resultScore");
-  const resultTitle = document.getElementById("resultTitle");
-  const resultMessage = document.getElementById("resultMessage");
-  const resultIcon = document.getElementById("resultIcon");
-  const retryBtn = document.getElementById("retryBtn");
   const globalTimer = document.getElementById("globalTimer");
   const mobileSubmitBtn = document.getElementById("mobileSubmitBtn");
 
@@ -454,6 +355,15 @@
   let autoSubmitTimer;
   let globalCountdownTimer;
   let questionsCount = 0;
+  let userEmail = '';
+
+  // Show loading state initially
+  form.innerHTML = `
+    <div class="loader-container">
+      <span class="loader"></span>
+      <p>Loading quiz questions...</p>
+    </div>
+  `;
 
   async function loadQuiz() {
     try {
@@ -461,25 +371,24 @@
       const data = await res.json();
       const questions = data.questions;
       if (questions.error) throw new Error(questions.error);
-      console.log("📋 Loaded quiz questions:", questions);
       
       questionsCount = questions.length;
-      totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0) * 60;
+      totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0);
 
       // Show intro screen
       form.innerHTML = `
         <div class="quiz-intro">
           <div class="quiz-intro-icon">
-            <i class="fas fa-question-circle"></i>
+            <i class="bi bi-question-circle"></i>
           </div>
           <h3>${quizName} Quiz</h3>
           <p>This quiz contains ${questionsCount} questions with a total time limit of ${Math.round(totalTimeout / 60)} minutes.</p>
-          <div class="mb-4" id="emailField">
+          <div class="mb-3" id="emailField">
             <label class="form-label">Enter your email to begin</label>
-            <input type="email" required id="userEmail" class="form-control form-control-lg" placeholder="your@email.com">
+            <input type="email" required id="userEmail" class="form-control" placeholder="your@email.com">
           </div>
-          <button type="button" class="btn btn-primary btn-lg px-5 py-3" id="startQuizBtn">
-            <i class="fas fa-play me-2"></i> Start Quiz
+          <button type="button" class="btn btn-primary px-4 py-2" id="startQuizBtn">
+            <i class="bi bi-play-fill me-2"></i> Start Quiz
           </button>
         </div>
       `;
@@ -497,75 +406,71 @@
           return;
         }
 
-        Swal.fire({
-          icon: 'info',
-          title: 'Quiz Instructions',
-          html: `
-            <div class="text-start">
-              <div class="d-flex align-items-start mb-3">
-                <i class="fas fa-clock text-primary me-2 mt-1"></i>
-                <div>
-                  <h6 class="mb-1">Time Limit</h6>
-                  <p class="mb-0 text-muted">Total time: ${Math.round(totalTimeout / 60)} minutes</p>
-                </div>
-              </div>
-              <div class="d-flex align-items-start mb-3">
-                <i class="fas fa-check-circle text-primary me-2 mt-1"></i>
-                <div>
-                  <h6 class="mb-1">Completion</h6>
-                  <p class="mb-0 text-muted">All answers must be submitted before time</p>
-                </div>
-              </div>
-              <div class="d-flex align-items-start mb-3">
-                <i class="fas fa-exclamation-triangle text-primary me-2 mt-1"></i>
-                <div>
-                  <h6 class="mb-1">Timeouts</h6>
-                  <p class="mb-0 text-muted">Unanswered questions will be marked as timeout</p>
-                </div>
-              </div>
-              <div class="d-flex align-items-start">
-                <i class="fas fa-envelope text-primary me-2 mt-1"></i>
-                <div>
-                  <h6 class="mb-1">Email</h6>
-                  <p class="mb-0 text-muted">Email is required, others are optional</p>
-                </div>
-              </div>
-            </div>
-          `,
-          confirmButtonText: 'Start Quiz',
-          confirmButtonColor: 'var(--primary-color)',
-          allowOutsideClick: false,
-          backdrop: `
-            rgba(0,0,0,0.5)
-            url("/images/nyan-cat.gif")
-            left top
-            no-repeat
-          `
-        }).then(() => {
-          // remove email prompt
-          form.innerHTML = "";
-          buildQuiz(questions, emailInput.value);
-        });
+        userEmail = emailInput.value.trim();
+        showQuizInstructions(questions);
       });
 
     } catch (err) {
-      quizTitle.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Quiz Loading Error`;
-      const errorAlert = document.createElement("div");
-      errorAlert.classList.add("alert", "alert-danger", "mt-3");
-      errorAlert.innerHTML = `
-        <div class="d-flex align-items-center">
-          <i class="fas fa-exclamation-circle me-2"></i>
-          <div>
-            <h5 class="mb-1">Failed to load quiz</h5>
-            <p class="mb-0">${err.message}</p>
-          </div>
-        </div>
-      `;
-      form.appendChild(errorAlert);
+      quizTitle.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i> Quiz Loading Error`;
+      form.innerHTML = '';
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to load quiz',
+        text: err.message,
+        confirmButtonColor: 'var(--primary-color)'
+      });
     }
   }
 
-  function buildQuiz(questions, email) {
+  function showQuizInstructions(questions) {
+    Swal.fire({
+      title: 'Quiz Instructions',
+      html: `
+        <div class="text-start">
+          <div class="d-flex align-items-start mb-3">
+            <i class="bi bi-clock text-primary me-2 mt-1"></i>
+            <div>
+              <h6 class="mb-1">Time Limit</h6>
+              <p class="mb-0 text-muted">Total time: ${Math.round(totalTimeout / 60)} minutes</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-start mb-3">
+            <i class="bi bi-check-circle text-primary me-2 mt-1"></i>
+            <div>
+              <h6 class="mb-1">Completion</h6>
+              <p class="mb-0 text-muted">All answers must be submitted before time</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-start mb-3">
+            <i class="bi bi-exclamation-triangle text-primary me-2 mt-1"></i>
+            <div>
+              <h6 class="mb-1">Timeouts</h6>
+              <p class="mb-0 text-muted">Unanswered questions will be marked as timeout</p>
+            </div>
+          </div>
+          <div class="d-flex align-items-start">
+            <i class="bi bi-envelope text-primary me-2 mt-1"></i>
+            <div>
+              <h6 class="mb-1">Email</h6>
+              <p class="mb-0 text-muted">Email is required, others are optional</p>
+            </div>
+          </div>
+        </div>
+      `,
+      confirmButtonText: 'Start Quiz',
+      confirmButtonColor: 'var(--primary-color)',
+      allowOutsideClick: false,
+      backdrop: `
+        rgba(0,0,0,0.5)
+      `
+    }).then(() => {
+      // remove email prompt
+      form.innerHTML = "";
+      buildQuiz(questions);
+    });
+  }
+
+  function buildQuiz(questions) {
     // Show mobile submit button if on small screen
     if (window.innerWidth <= 576) {
       mobileSubmitBtn.style.display = "flex";
@@ -577,7 +482,7 @@
     const emailField = document.createElement("input");
     emailField.type = "hidden";
     emailField.name = "Email";
-    emailField.value = email;
+    emailField.value = userEmail;
     form.appendChild(emailField);
 
     questions.forEach((q, index) => {
@@ -612,20 +517,17 @@
         defaultOption.disabled = true;
         defaultOption.selected = true;
         input.appendChild(defaultOption);
-       q.options.forEach(opt => {
-  const option = document.createElement("option");
-  option.value = opt.trim();
-  option.textContent = opt.trim();
+        
+        q.options.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt.trim();
+          option.textContent = opt.trim();
+        if (opt.trim().toLowerCase() === "timeout") {
+  option.hidden = true; // hide, but DO NOT disable
+}
 
-  // ❌ Disable "timeout" option so it only appears during auto-submit
-  if (opt.trim().toLowerCase() === "timeout") {
-    option.disabled = true;
-    option.hidden = true;
-  }
-
-  input.appendChild(option);
-});
-
+          input.appendChild(option);
+        });
       } else {
         input = document.createElement("input");
         input.type = q.type || "text";
@@ -641,7 +543,7 @@
 
     // Add submit button
     const submitWrapper = document.createElement("div");
-    submitWrapper.classList.add("d-grid", "gap-2", "mt-4", "desktop-submit");
+    submitWrapper.classList.add("d-grid", "gap-2", "mt-3", "desktop-submit");
     submitWrapper.innerHTML = `
       <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
         <span id="submitText">Submit Answers</span>
@@ -664,9 +566,7 @@
       remaining--;
       updateTimerDisplay(remaining);
       
-      // Add warning when time is running low
       if (remaining === 60) {
-        globalTimer.classList.add("pulse-animation");
         Swal.fire({
           icon: 'warning',
           title: '1 Minute Left!',
@@ -678,7 +578,6 @@
       
       if (remaining <= 0) {
         clearInterval(globalCountdownTimer);
-        globalTimer.classList.remove("pulse-animation");
       }
     }, 1000);
   }
@@ -686,9 +585,8 @@
   function updateTimerDisplay(seconds) {
     const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
     const secs = String(seconds % 60).padStart(2, '0');
-    globalTimer.innerHTML = `<i class="fas fa-clock"></i><span>Time Left: ${mins}:${secs}</span>`;
+    globalTimer.innerHTML = `<i class="bi bi-clock"></i><span>Time Left: ${mins}:${secs}</span>`;
     
-    // Change color when time is running low
     if (seconds <= 60) {
       globalTimer.style.background = "linear-gradient(135deg, #ffc107 0%, #fd7e14 100%)";
     } else if (seconds <= 120) {
@@ -696,147 +594,179 @@
     }
   }
 
-  function startAutoSubmit(seconds) {
-    autoSubmitTimer = setTimeout(() => {
-      const allElements = form.querySelectorAll('input[name], textarea[name], select[name]');
-      const answers = {};
-
-      allElements.forEach(el => {
-        if (el.name !== "Email") {
-          // Detect unfilled field for input/textarea or unselected select
-          const isSelect = el.tagName.toLowerCase() === "select";
-          const isEmpty = isSelect ? el.value === "" : !el.value.trim();
-
-          if (isEmpty) {
-            el.value = "timeout";
-          }
-        }
-
-        answers[el.name] = el.value.trim();
-      });
-
-      console.log("📋 Auto-submitting quiz with the following answers:");
-      console.table(answers);
-
-      // Submit the form
-      if (typeof form.requestSubmit === "function") {
-        form.requestSubmit();
-      } else {
-        form.submit();
-      }
-    }, seconds * 1000);
-  }
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    clearTimeout(autoSubmitTimer);
-    clearInterval(globalCountdownTimer);
-
-    const submitText = document.getElementById("submitText");
-    const submitSpinner = document.getElementById("submitSpinner");
-    const submitBtn = document.getElementById("submitBtn");
-
-    submitText.textContent = "Submitting...";
-    submitSpinner.style.display = "inline-block";
-    submitBtn.disabled = true;
-    if (mobileSubmitBtn) {
-      mobileSubmitBtn.disabled = true;
-      mobileSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    }
-
-    const formData = new FormData(form);
-    const data = {};
-    formData.forEach((v, k) => data[k] = v);
-    data.quiz = quizName;
-
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(data)
+    // Prevent default only if this is a user-initiated submission
+    const isUserSubmission = !e.detail?.isAutoSubmit;
+    
+    if (isUserSubmission) {
+      e.preventDefault();
+      
+      const { isConfirmed } = await Swal.fire({
+        title: 'Confirm Submission',
+        text: 'Are you sure you want to submit your answers?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--primary-color)',
+        cancelButtonColor: 'var(--incorrect-color)',
+        confirmButtonText: 'Yes, submit!',
+        cancelButtonText: 'No, continue'
       });
-
-      const result = await res.json();
-
-      submitText.textContent = "Submit Answers";
-      submitSpinner.style.display = "none";
-      submitBtn.disabled = false;
-      if (mobileSubmitBtn) {
-        mobileSubmitBtn.disabled = false;
-        mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+      
+      if (!isConfirmed) {
+        return; // User canceled, don't submit
       }
+      
+      // User confirmed, proceed with submission
+      submitQuiz();
+    } else {
+      // This is an auto-submit from timeout, proceed immediately
+      submitQuiz();
+    }
+  });
 
-      if (result.success) {
-        resultScore.textContent = `Score: ${result.score}`;
-        resultTitle.textContent = "Quiz Submitted!";
-        resultMessage.textContent = "Thank you for completing the quiz!";
-        resultIcon.className = "fas fa-check-circle result-icon text-success";
-        
-        // Add confetti for good results
-        if (result.score.includes('/')) {
-          const [correct, total] = result.score.split('/').map(Number);
-          const percentage = (correct / total) * 100;
-          if (percentage >= 80) {
-            resultIcon.className = "fas fa-trophy result-icon text-warning";
-            resultTitle.textContent = "Excellent Work!";
-            resultMessage.textContent = `You scored ${percentage.toFixed(0)}% - Great job!`;
-            
-            // Trigger confetti
-            Swal.fire({
-              title: 'Congratulations!',
-              text: `You scored ${percentage.toFixed(0)}%!`,
-              icon: 'success',
-              confirmButtonColor: 'var(--primary-color)',
-              backdrop: `
-                rgba(0,0,0,0.5)
-                url("/images/nyan-cat.gif")
-                left top
-                no-repeat
-              `,
-              showConfirmButton: false,
-              timer: 2000
-            });
-          } else if (percentage >= 50) {
-            resultIcon.className = "fas fa-thumbs-up result-icon text-primary";
-            resultTitle.textContent = "Good Job!";
-            resultMessage.textContent = `You scored ${percentage.toFixed(0)}% - Keep it up!`;
+  async function submitQuiz() {
+  const submitText = document.getElementById("submitText");
+  const submitSpinner = document.getElementById("submitSpinner");
+  const submitBtn = document.getElementById("submitBtn");
+
+  submitText.textContent = "Submitting...";
+  submitSpinner.style.display = "inline-block";
+  submitBtn.disabled = true;
+
+  if (mobileSubmitBtn) {
+    mobileSubmitBtn.disabled = true;
+    mobileSubmitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i>';
+  }
+
+  const formData = new FormData(form);
+  const data = {};
+  formData.forEach((v, k) => data[k] = v);
+  data.quiz = quizName;
+  console.log("📋 Submitting answers:", data);
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    // Reset UI states
+    submitText.textContent = "Submit Answers";
+    submitSpinner.style.display = "none";
+    submitBtn.disabled = false;
+
+    if (mobileSubmitBtn) {
+      mobileSubmitBtn.disabled = false;
+      mobileSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
+    }
+
+    // Show thank you alert (no score)
+    if (result.success) {
+      Swal.fire({
+        title: '🎉 Thank You for Attending!',
+        html: `
+          <div class="text-center">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            <p class="mt-3">Your responses have been submitted.</p>
+            <p class="small text-muted">A confirmation has been sent to <strong>${userEmail}</strong></p>
+            <p class="small text-muted mb-0">Please wait for your result.</p>
+          </div>
+        `,
+        confirmButtonText: 'OK',
+        confirmButtonColor: 'var(--primary-color)'
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Submission Failed',
+        text: result.error || "An unknown error occurred",
+        confirmButtonColor: 'var(--primary-color)'
+      });
+    }
+
+  } catch (err) {
+    submitText.textContent = "Submit Answers";
+    submitSpinner.style.display = "none";
+    submitBtn.disabled = false;
+
+    if (mobileSubmitBtn) {
+      mobileSubmitBtn.disabled = false;
+      mobileSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Network Error',
+      text: 'Failed to submit quiz. Please check your connection.',
+      confirmButtonColor: 'var(--primary-color)'
+    });
+  }
+}
+
+
+function startAutoSubmit(seconds) {
+  autoSubmitTimer = setTimeout(() => {
+    const allElements = form.querySelectorAll('input[name], textarea[name], select[name]');
+    const timedOutFields = [];
+
+    // First: Force timeout value for unanswered fields
+    allElements.forEach(el => {
+      if (el.name && el.name !== "Email") {
+        const isSelect = el.tagName.toLowerCase() === "select";
+        const isEmpty = isSelect ? el.value === "" : !el.value.trim();
+
+        if (isEmpty) {
+          el.value = "timeout";
+
+          if (isSelect) {
+            // Ensure timeout option exists & is selected
+            let timeoutOption = Array.from(el.options).find(opt => opt.value === "timeout");
+            if (!timeoutOption) {
+              timeoutOption = new Option("timeout", "timeout", true, true);
+              el.appendChild(timeoutOption);
+            } else {
+              timeoutOption.selected = true;
+            }
           }
-        }
-        
-        resultModal.show();
-      } else {
-        resultScore.textContent = "";
-        resultTitle.textContent = "Submission Failed";
-        resultMessage.textContent = result.error || "An unknown error occurred";
-        resultIcon.className = "fas fa-times-circle result-icon text-danger";
-        resultModal.show();
-      }
-    } catch (err) {
-      resultScore.textContent = "";
-      resultTitle.textContent = "Network Error";
-      resultMessage.textContent = "Failed to submit quiz. Please check your connection.";
-      resultIcon.className = "fas fa-exclamation-triangle result-icon text-warning";
-      resultModal.show();
-      submitText.textContent = "Submit Answers";
-      submitSpinner.style.display = "none";
-      submitBtn.disabled = false;
-      if (mobileSubmitBtn) {
-        mobileSubmitBtn.disabled = false;
-        mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-      }
-    }
-  });
 
-  retryBtn.addEventListener("click", () => {
-    resultModal.hide();
-    form.reset();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (totalTimeout > 0) {
-      startGlobalCountdown(totalTimeout);
-      startAutoSubmit(totalTimeout);
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+
+          timedOutFields.push({
+            name: el.name,
+            type: el.tagName.toLowerCase(),
+            label: el.closest('.question-card')?.querySelector('label')?.innerText || 'Unknown'
+          });
+        }
+      }
+    });
+
+    // ✅ Now build FormData AFTER all values have been updated
+    const currentData = new FormData(form);
+
+    // 🔍 Log timeout fields
+    if (timedOutFields.length > 0) {
+      console.log("⏱️ The following fields were auto-filled as 'timeout':");
+      console.table(timedOutFields);
+    } else {
+      console.log("✅ All fields were answered. No timeouts inserted.");
     }
-  });
+
+    // 📤 Trigger auto-submission
+    setTimeout(() => {
+      console.log("📋 Auto-submitting final answers...");
+      const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+      submitEvent.detail = { isAutoSubmit: true };
+      form.dispatchEvent(submitEvent);
+    }, 50);
+  }, seconds * 1000);
+}
+
+
 
   document.addEventListener('DOMContentLoaded', loadQuiz);
 </script>
