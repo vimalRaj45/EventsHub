@@ -32,39 +32,6 @@
       line-height: 1.6;
     }
     
-    /* Loading Bar Styles */
-    .loading-bar-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background-color: transparent;
-      z-index: 9999;
-      overflow: hidden;
-      display: none;
-    }
-    
-    .loading-bar {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 50%, var(--primary-color) 100%);
-      background-size: 200% 100%;
-      animation: loadingBar 2s linear infinite, loadingGradient 3s ease infinite;
-    }
-    
-    @keyframes loadingBar {
-      0% { width: 0; left: 0; }
-      50% { width: 75%; left: 25%; }
-      100% { width: 0; left: 100%; }
-    }
-    
-    @keyframes loadingGradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    
     .quiz-container {
       max-width: 800px;
       margin: 2rem auto;
@@ -73,14 +40,10 @@
       overflow: hidden;
       background: white;
       transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
     }
     
-    .quiz-container.loaded {
-      opacity: 1;
-      transform: translateY(0);
+    .quiz-container:hover {
+      box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
     }
     
     .quiz-header {
@@ -409,12 +372,7 @@
   </style>
 </head>
 <body>
-  <!-- Loading Bar -->
-  <div class="loading-bar-container" id="loadingBar">
-    <div class="loading-bar"></div>
-  </div>
-
-  <div class="quiz-container" id="quizContainer" data-aos="fade-up" data-aos-duration="800">
+  <div class="quiz-container" data-aos="fade-up" data-aos-duration="800">
     <div class="quiz-header">
       <h2><i class="fas fa-pencil-alt quiz-icon"></i> <span id="quizTitle">Quiz</span></h2>
     </div>
@@ -487,8 +445,6 @@
   const retryBtn = document.getElementById("retryBtn");
   const globalTimer = document.getElementById("globalTimer");
   const mobileSubmitBtn = document.getElementById("mobileSubmitBtn");
-  const loadingBar = document.getElementById("loadingBar");
-  const quizContainer = document.getElementById("quizContainer");
 
   const queryParams = new URLSearchParams(window.location.search);
   const quizName = queryParams.get('quiz') || 'Maths';
@@ -499,17 +455,8 @@
   let globalCountdownTimer;
   let questionsCount = 0;
 
-  // Show loading bar when page loads
-  loadingBar.style.display = 'block';
-  
-  // Hide quiz container initially
-  quizContainer.style.display = 'none';
-
   async function loadQuiz() {
     try {
-      // Show loading state
-      loadingBar.style.display = 'block';
-      
       const res = await fetch(`${API_URL}?quiz=${quizName}`);
       const data = await res.json();
       const questions = data.questions;
@@ -518,13 +465,6 @@
       
       questionsCount = questions.length;
       totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0) * 60;
-
-      // Hide loading bar and show content with fade-in effect
-      loadingBar.style.display = 'none';
-      quizContainer.style.display = 'block';
-      setTimeout(() => {
-        quizContainer.classList.add('loaded');
-      }, 50);
 
       // Show intro screen
       form.innerHTML = `
@@ -602,22 +542,13 @@
             no-repeat
           `
         }).then(() => {
-          // Show loading while building quiz
-          loadingBar.style.display = 'block';
-          setTimeout(() => {
-            // remove email prompt
-            form.innerHTML = "";
-            buildQuiz(questions, emailInput.value);
-            loadingBar.style.display = 'none';
-          }, 300);
+          // remove email prompt
+          form.innerHTML = "";
+          buildQuiz(questions, emailInput.value);
         });
       });
 
     } catch (err) {
-      loadingBar.style.display = 'none';
-      quizContainer.style.display = 'block';
-      quizContainer.classList.add('loaded');
-      
       quizTitle.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> Quiz Loading Error`;
       const errorAlert = document.createElement("div");
       errorAlert.classList.add("alert", "alert-danger", "mt-3");
@@ -681,7 +612,7 @@
         defaultOption.disabled = true;
         defaultOption.selected = true;
         input.appendChild(defaultOption);
-      q.options.forEach(opt => {
+       q.options.forEach(opt => {
   const option = document.createElement("option");
   option.value = opt.trim();
   option.textContent = opt.trim();
@@ -721,6 +652,9 @@
 
     // Update progress bar
     quizProgress.style.width = `${100/questionsCount}%`;
+
+    startGlobalCountdown(totalTimeout);
+    startAutoSubmit(totalTimeout);
   }
 
   function startGlobalCountdown(seconds) {
@@ -811,9 +745,6 @@
       mobileSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     }
 
-    // Show loading bar during submission
-    loadingBar.style.display = 'block';
-
     const formData = new FormData(form);
     const data = {};
     formData.forEach((v, k) => data[k] = v);
@@ -835,9 +766,6 @@
         mobileSubmitBtn.disabled = false;
         mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
       }
-
-      // Hide loading bar after submission
-      loadingBar.style.display = 'none';
 
       if (result.success) {
         resultScore.textContent = `Score: ${result.score}`;
@@ -897,7 +825,6 @@
         mobileSubmitBtn.disabled = false;
         mobileSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
       }
-      loadingBar.style.display = 'none';
     }
   });
 
