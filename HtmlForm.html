@@ -339,7 +339,7 @@
   
 <script>
   AOS.init();
-  const API_URL = "https://script.google.com/macros/s/AKfycbzmp1fwjprEnzwpwt0hNcGE9zLc6TzOwoDRxyGO89wMq6v3PA_gSXt4AspdxXoX2mZrqw/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwMtXi-gvbd4zb6U181TK2NkDmYaIj7FMdmLWng4r4FQpXMoqSbQqAJKxkxPDooFkxU/exec";
 
   const form = document.getElementById("quizForm");
   const quizTitle = document.getElementById("quizTitle");
@@ -365,62 +365,71 @@
     </div>
   `;
 
-  async function loadQuiz() {
-    try {
-      const res = await fetch(`${API_URL}?quiz=${quizName}`);
-      const data = await res.json();
-      const questions = data.questions;
-      if (questions.error) throw new Error(questions.error);
-      
-      questionsCount = questions.length;
-      totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0);
+async function loadQuiz() {
+  try {
+    const res = await fetch(`${API_URL}?quiz=${quizName}`);
+    const data = await res.json();
 
-      // Show intro screen
-      form.innerHTML = `
-        <div class="quiz-intro">
-          <div class="quiz-intro-icon">
-            <i class="bi bi-question-circle"></i>
-          </div>
-          <h3>${quizName} Quiz</h3>
-          <p>This quiz contains ${questionsCount} questions with a total time limit of ${Math.round(totalTimeout / 60)} minutes.</p>
-          <div class="mb-3" id="emailField">
-            <label class="form-label">Enter your email to begin</label>
-            <input type="email" required id="userEmail" class="form-control" placeholder="your@email.com">
-          </div>
-          <button type="button" class="btn btn-primary px-4 py-2" id="startQuizBtn">
-            <i class="bi bi-play-fill me-2"></i> Start Quiz
-          </button>
-        </div>
-      `;
-
-      document.getElementById("startQuizBtn").addEventListener("click", () => {
-        const emailInput = document.getElementById("userEmail");
-        if (!emailInput.value.trim() || !emailInput.checkValidity()) {
-          emailInput.classList.add("is-invalid");
-          Swal.fire({
-            icon: 'error',
-            title: 'Email Required',
-            text: 'Please enter a valid email address to continue',
-            confirmButtonColor: 'var(--primary-color)'
-          });
-          return;
-        }
-
-        userEmail = emailInput.value.trim();
-        showQuizInstructions(questions);
-      });
-
-    } catch (err) {
-      quizTitle.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i> Quiz Loading Error`;
-      form.innerHTML = '';
-      Swal.fire({
-        icon: 'error',
-        title: 'Failed to load quiz',
-        text: err.message,
-        confirmButtonColor: 'var(--primary-color)'
-      });
+    // ✅ Gracefully handle backend errors
+    if (!data || !data.questions || !Array.isArray(data.questions)) {
+      const errorMsg = data?.message || data?.error || "Quiz is not available at the moment.";
+      throw new Error(errorMsg);
     }
+
+    const questions = data.questions;
+
+    // ✅ Keep your original timeout logic
+    questionsCount = questions.length;
+    totalTimeout = questions.reduce((total, q) => total + (q.timeout || 2), 0);
+
+    // Show intro screen
+    form.innerHTML = `
+      <div class="quiz-intro">
+        <div class="quiz-intro-icon">
+          <i class="bi bi-question-circle"></i>
+        </div>
+        <h3>${quizName} Quiz</h3>
+        <p>This quiz contains ${questionsCount} questions with a total time limit of ${Math.round(totalTimeout / 60)} minutes.</p>
+        <div class="mb-3" id="emailField">
+          <label class="form-label">Enter your email to begin</label>
+          <input type="email" required id="userEmail" class="form-control" placeholder="your@email.com">
+        </div>
+        <button type="button" class="btn btn-primary px-4 py-2" id="startQuizBtn">
+          <i class="bi bi-play-fill me-2"></i> Start Quiz
+        </button>
+      </div>
+    `;
+
+    document.getElementById("startQuizBtn").addEventListener("click", () => {
+      const emailInput = document.getElementById("userEmail");
+      if (!emailInput.value.trim() || !emailInput.checkValidity()) {
+        emailInput.classList.add("is-invalid");
+        Swal.fire({
+          icon: 'error',
+          title: 'Email Required',
+          text: 'Please enter a valid email address to continue',
+          confirmButtonColor: 'var(--primary-color)'
+        });
+        return;
+      }
+
+      userEmail = emailInput.value.trim();
+      showQuizInstructions(questions);
+    });
+
+  } catch (err) {
+    quizTitle.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i> Quiz Loading Error`;
+    form.innerHTML = '';
+    Swal.fire({
+      icon: 'error',
+      title: 'Failed to load quiz',
+      text: err.message,
+      confirmButtonColor: 'var(--primary-color)'
+    });
   }
+}
+
+
 
   function showQuizInstructions(questions) {
     Swal.fire({
