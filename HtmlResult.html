@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Result Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --google-blue: #4285F4;
+      --google-red: #EA4335;
+      --google-yellow: #FBBC05;
+      --google-green: #34A853;
+      --google-gray: #f1f3f4;
+      --google-dark-gray: #5f6368;
+      --google-light-gray: #e8eaed;
+    }
+    
+    body {
+      padding: 1rem;
+      background-color: white;
+      font-family: 'Roboto', sans-serif;
+      color: #202124;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--google-light-gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .logo {
+      color: var(--google-blue);
+      font-size: 1.5rem;
+      margin-right: 1rem;
+    }
+    
+    .result-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .result-summary {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .result-title {
+      color: var(--google-blue);
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    
+    .score-display {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .score-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--google-blue);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1.5rem;
+      font-weight: 500;
+    }
+    
+    .score-percent {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+    
+    .score-label {
+      font-size: 0.8rem;
+    }
+    
+    .user-info {
+      color: var(--google-dark-gray);
+      font-size: 0.9rem;
+    }
+    
+    .result-details {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table thead th {
+      border-bottom: 1px solid var(--google-light-gray);
+      font-weight: 500;
+      color: var(--google-dark-gray);
+    }
+    
+    .table td, .table th {
+      padding: 0.75rem;
+      vertical-align: middle;
+    }
+    
+    .correct {
+      color: var(--google-green);
+    }
+    
+    .wrong {
+      color: var(--google-red);
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .correct-badge {
+      background-color: rgba(52, 168, 83, 0.1);
+    }
+    
+    .wrong-badge {
+      background-color: rgba(234, 67, 53, 0.1);
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+      gap: 0.75rem;
+    }
+    
+    .btn-google {
+      border-radius: 4px;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--google-light-gray);
+      background: white;
+      color: var(--google-blue);
+    }
+    
+    .btn-google:hover {
+      background: var(--google-gray);
+    }
+    
+    .btn-primary-google {
+      background: var(--google-blue);
+      color: white;
+      border: none;
+    }
+    
+    .btn-primary-google:hover {
+      background: #3367d6;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--google-dark-gray);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--google-gray);
+      margin-bottom: 1rem;
+    }
+    
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--google-gray);
+      border-radius: 24px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .search-box input {
+      background: transparent;
+      border: none;
+      flex: 1;
+      padding: 0.5rem;
+      outline: none;
+    }
+    
+    .search-box i {
+      color: var(--google-dark-gray);
+    }
+    
+    @media print {
+      .action-buttons, .header, .search-box {
+        display: none;
+      }
+      
+      body {
+        padding: 0;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .score-display {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .score-circle {
+        margin-right: 0;
+        margin-bottom: 1rem;
+      }
+      
+      .table-responsive {
+        border: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <i class="fas fa-poll"></i>
+    </div>
+    <h1 style="font-size: 1.25rem; font-weight: 400; margin: 0;">Quiz Results</h1>
+  </div>
+
+  <div class="result-container">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="search-input" placeholder="Search in results...">
+    </div>
+    
+    <div class="result-summary">
+      <h2 class="result-title" id="result-title">Your Quiz Results</h2>
+      
+      <div class="score-display">
+        <div class="score-circle">
+          <span class="score-percent" id="percent">0</span>
+          <span class="score-label">%</span>
+        </div>
+        <div>
+          <p style="margin-bottom: 0.25rem;"><strong>Quiz:</strong> <span id="quiz-name">Loading...</span></p>
+          <p style="margin-bottom: 0.25rem;"><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+          <p style="margin-bottom: 0;"><strong>Score:</strong> <span id="score">0</span> out of <span id="total-questions">0</span></p>
+        </div>
+      </div>
+      
+      <div class="progress" style="height: 8px; background-color: #e0e0e0; border-radius: 4px;">
+        <div id="score-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--google-blue);"></div>
+      </div>
+    </div>
+    
+    <div class="result-details">
+      <h3 style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1rem;">Question Details</h3>
+      
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Question</th>
+              <th>Your Answer</th>
+              <th>Correct Answer</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="result-table-body">
+            <tr>
+              <td colspan="5" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <i class="fas fa-inbox"></i>
+        <h4>No results found</h4>
+        <p>We couldn't find any matching results for your query.</p>
+      </div>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="btn btn-google" onclick="window.location.href='/'">
+        <i class="fas fa-home"></i> Back to Home
+      </button>
+      <button class="btn btn-primary-google" onclick="window.print()">
+        <i class="fas fa-print"></i> Print Result
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwHffa6otHDDuP8qaqYqeFEDL64IPkTzqj4jan8uiLaV2dOUtzkCRXExDfaEl835y0rhA/exec";
+
+    async function fetchResult() {
+      let quiz = localStorage.getItem("quiz");
+      let email = localStorage.getItem("email");
+
+      if (!quiz) {
+        quiz = prompt("Enter quiz name:");
+        if (!quiz) return;
+       
+      }
+
+      if (!email) {
+        email = prompt("Enter your email:");
+        if (!email) return;
+        
+      }
+
+      document.getElementById("quiz-name").textContent = quiz;
+      document.getElementById("user-email").textContent = email;
+
+      try {
+        const res = await fetch(`${API_URL}?action=getUserResult&quiz=${encodeURIComponent(quiz)}&email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+
+        if (!data.success) {
+          showError(data.message || data.error || 'Unable to fetch result.');
+          return;
+        }
+
+        // Update summary
+        document.getElementById("score").textContent = data.score;
+        document.getElementById("percent").textContent = data.percentage;
+        document.getElementById("total-questions").textContent = data.details.length;
+        document.getElementById("score-progress").style.width = `${data.percentage}%`;
+        
+        // Update details table
+        const tbody = document.getElementById("result-table-body");
+        tbody.innerHTML = '';
+        
+        if (data.details.length === 0) {
+          document.getElementById("empty-state").style.display = 'block';
+          return;
+        }
+        
+        data.details.forEach((item, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>
+              <div style="font-weight: 500;">${item.question}</div>
+              <div style="font-size: 0.8rem; color: var(--google-dark-gray);">${item.field}</div>
+            </td>
+            <td>${item.yourAnswer || '-'}</td>
+            <td>${item.correctAnswer || '-'}</td>
+            <td>
+              <span class="${item.isCorrect ? 'correct' : 'wrong'} status-badge ${item.isCorrect ? 'correct-badge' : 'wrong-badge'}">
+                <i class="fas ${item.isCorrect ? 'fa-check' : 'fa-times'}"></i>
+                ${item.isCorrect ? 'Correct' : 'Incorrect'}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+        // Add search functionality
+        setupSearch();
+      } catch (err) {
+        showError('Something went wrong while fetching the result.');
+        console.error(err);
+      }
+    }
+    
+    function showError(message) {
+      const tbody = document.getElementById("result-table-body");
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            <div class="alert alert-danger" style="margin: 0;">
+              <i class="fas fa-exclamation-circle"></i> ${message}
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+    
+    function setupSearch() {
+      const searchInput = document.getElementById("search-input");
+      const rows = document.querySelectorAll("#result-table-body tr");
+      const emptyState = document.getElementById("empty-state");
+      
+      searchInput.addEventListener("input", (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        let hasMatches = false;
+        
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          if (text.includes(searchTerm)) {
+            row.style.display = '';
+            hasMatches = true;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        emptyState.style.display = hasMatches ? 'none' : 'block';
+      });
+    }
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", fetchResult);
+  </script>
+</body>
+</html>
