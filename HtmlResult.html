@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -311,11 +312,11 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwHffa6otHDDuP8qaqYqeFEDL64IPkTzqj4jan8uiLaV2dOUtzkCRXExDfaEl835y0rhA/exec";
 
     async function fetchResult() {
-      let quiz = localStorage.getItem("quiz");
-      let email = localStorage.getItem("email");
+      let quiz = ''
+      let email = ''
 
       if (!quiz) {
-        quiz = prompt("Enter quiz name:");
+        quiz = prompt("Enter quiz name (First letter capital):");
         if (!quiz) return;
        
       }
@@ -326,8 +327,9 @@
         
       }
 
-      document.getElementById("quiz-name").textContent = quiz;
-      document.getElementById("user-email").textContent = email;
+      document.getElementById("quiz-name").textContent = quiz.trim();
+
+      document.getElementById("user-email").textContent = email.trim();
 
       try {
         const res = await fetch(`${API_URL}?action=getUserResult&quiz=${encodeURIComponent(quiz)}&email=${encodeURIComponent(email)}`);
