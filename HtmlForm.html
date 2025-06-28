@@ -355,6 +355,12 @@
 
   //precations
 
+
+  document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    alert("Please don’t switch apps or take screenshots during the quiz.");
+  }
+});
   document.addEventListener("contextmenu", e => e.preventDefault());
   document.addEventListener("copy", e => e.preventDefault());
   document.addEventListener("cut", e => e.preventDefault());
