@@ -354,7 +354,13 @@
 
 
   //precations
-
+   // 🔒 Prevent Back Button (mobile & desktop)
+  window.addEventListener("beforeunload", function (e) {
+    e.preventDefault(); // Required for Chrome
+    e.returnValue = ''; // Required for most browsers
+    // Modern browsers will show a generic message like:
+    // "Changes you made may not be saved."
+  });
 
 
   document.addEventListener('visibilitychange', () => {
