@@ -303,6 +303,13 @@
         display: none;
       }
     }
+
+    * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
   </style>
 </head>
 <body>
@@ -338,6 +345,39 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
 <script>
+
+
+  //precations
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("copy", e => e.preventDefault());
+  document.addEventListener("cut", e => e.preventDefault());
+  document.addEventListener("paste", e => e.preventDefault());
+
+  document.addEventListener("keydown", function (e) {
+    if (
+      (e.ctrlKey && ['c', 'u', 's', 'p'].includes(e.key.toLowerCase())) || // Ctrl+ combos
+      e.key === "PrintScreen" || e.key === "F12" || // PrtSc, DevTools
+      e.key === "Escape"
+    ) {
+      e.preventDefault();
+    }
+  });
+
+  let switchCount = 0;
+  window.onblur = () => {
+    switchCount++;
+    alert(`Tab switch detected! (${switchCount})\nPlease stay on the quiz page.`);
+    // Optionally: auto-submit or disqualify
+  };
+
+  function enableFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+  }
+
+  document.addEventListener("DOMContentLoaded", enableFullscreen);
+  
   AOS.init();
   const API_URL = "https://script.google.com/macros/s/AKfycbzj6DM0eIEVhehTCr5R-IcvbG42TfgY9witIkVI2xS_aYYjPFo6L5CXdqxIwsgTz29R/exec";
 
