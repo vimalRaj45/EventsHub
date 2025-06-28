@@ -358,7 +358,8 @@
   // Strong anti-paste logic
     input.addEventListener("input", (e) => {
       const currentValue = input.value;
-      const currentLength = currentValue.length;
+      const currentLength = currentValue.length; 
+      
 
       // Detect pasted content (multi-char jump)
       if (currentLength - lastLength > 1) {
