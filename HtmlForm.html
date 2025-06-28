@@ -355,6 +355,21 @@
 
   //precations
 
+  // Strong anti-paste logic
+    input.addEventListener("input", (e) => {
+      const currentValue = input.value;
+      const currentLength = currentValue.length;
+
+      // Detect pasted content (multi-char jump)
+      if (currentLength - lastLength > 1) {
+        alert("Pasting is not allowed.");
+        input.value = currentValue.slice(0, lastLength); // revert to previous state
+        return;
+      }
+
+      lastLength = input.value.length;
+    });
+
 
   document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
