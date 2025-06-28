@@ -372,11 +372,12 @@
   };
 
   function enableFullscreen() {
+    console.log("calling...");
     const elem = document.documentElement;
     if (elem.requestFullscreen) elem.requestFullscreen();
   }
 
-  document.addEventListener("DOMContentLoaded", enableFullscreen);
+   
   
   AOS.init();
   const API_URL = "https://script.google.com/macros/s/AKfycbzj6DM0eIEVhehTCr5R-IcvbG42TfgY9witIkVI2xS_aYYjPFo6L5CXdqxIwsgTz29R/exec";
@@ -816,7 +817,7 @@ function startAutoSubmit(seconds) {
 
 
 
-  document.addEventListener('DOMContentLoaded', loadQuiz);
+  document.addEventListener('DOMContentLoaded', loadQuiz,enableFullscreen);
 </script>
 </body>
 </html>
