@@ -388,7 +388,6 @@
     // Disable F11
     if (e.key === "F11" || e.keyCode === 122) {
       e.preventDefault();
-      showFullscreenToast(); // Optional toast alert
     }
   });
 
@@ -428,26 +427,7 @@
     });
   })();
 
-  // Optional: Show toast on attempt
-  function showFullscreenToast() {
-    const container = document.getElementById("toast-container");
-    const toastId = `toast-${Date.now()}`;
-    const toastHTML = `
-      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-warning text-dark">
-          <strong class="me-auto">Action Blocked</strong>
-          <small>now</small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          F11 (fullscreen) is disabled during the quiz.
-        </div>
-      </div>
-    `;
-    container.insertAdjacentHTML("beforeend", toastHTML);
-    const toastElement = document.getElementById(toastId);
-    new bootstrap.Toast(toastElement, { delay: 4000 }).show();
-  }
+ 
 
   
 
