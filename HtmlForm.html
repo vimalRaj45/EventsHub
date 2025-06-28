@@ -355,39 +355,40 @@
 
   //precations
 
-  function blockPasteProtection(el) {
+ document.querySelectorAll('input[type="text"]').forEach((input) => {
     let lastLength = 0;
 
-    el.addEventListener("input", () => {
-      const val = el.value;
-      const currentLength = val.length;
+    // Detect multi-character input (likely paste)
+    input.addEventListener("input", () => {
+      const currentLength = input.value.length;
       if (currentLength - lastLength > 1) {
         alert("❌ Pasting is not allowed.");
-        el.value = val.slice(0, lastLength); // revert change
+        input.value = input.value.slice(0, lastLength);
       } else {
         lastLength = currentLength;
       }
     });
 
-    el.addEventListener("paste", (e) => {
-      alert("❌ Paste action is disabled.");
+    // Prevent direct paste
+    input.addEventListener("paste", (e) => {
       e.preventDefault();
+      alert("❌ Paste is disabled.");
     });
 
-    el.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
-        alert("❌ Ctrl+V is disabled.");
+    // Disable Ctrl+V / Cmd+V
+    input.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
         e.preventDefault();
+        alert("❌ Paste is disabled.");
       }
     });
 
-    el.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
+    // Prevent right-click menu (desktop) & long press (mobile)
+    input.addEventListener("contextmenu", (e) => e.preventDefault());
+    input.addEventListener("touchstart", (e) => {
+      if (e.touches.length > 1) e.preventDefault(); // prevent multitouch paste
     });
-  }
-
-  // Apply to all inputs and textareas
-  document.querySelectorAll("input[type='text'], textarea").forEach(blockPasteProtection);
+  });
 
 
   document.addEventListener('visibilitychange', () => {
