@@ -355,45 +355,11 @@
 
   //precations
 
- document.querySelectorAll('input[type="text"]').forEach((input) => {
-    let lastLength = 0;
-
-    // Detect multi-character input (likely paste)
-    input.addEventListener("input", () => {
-      const currentLength = input.value.length;
-      if (currentLength - lastLength > 1) {
-        alert("❌ Pasting is not allowed.");
-        input.value = input.value.slice(0, lastLength);
-      } else {
-        lastLength = currentLength;
-      }
-    });
-
-    // Prevent direct paste
-    input.addEventListener("paste", (e) => {
-      e.preventDefault();
-      alert("❌ Paste is disabled.");
-    });
-
-    // Disable Ctrl+V / Cmd+V
-    input.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
-        e.preventDefault();
-        alert("❌ Paste is disabled.");
-      }
-    });
-
-    // Prevent right-click menu (desktop) & long press (mobile)
-    input.addEventListener("contextmenu", (e) => e.preventDefault());
-    input.addEventListener("touchstart", (e) => {
-      if (e.touches.length > 1) e.preventDefault(); // prevent multitouch paste
-    });
-  });
 
 
   document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
-    alert("Please don’t switch apps or take screenshots during the quiz.");
+    showFullscreenToast()
   }
 });
   document.addEventListener("contextmenu", e => e.preventDefault());
