@@ -313,6 +313,12 @@
   </style>
 </head>
 <body>
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+
+
+
+
   <div class="quiz-container" data-aos="fade-up" data-aos-duration="800">
     <div class="quiz-header">
       <h2><i class="bi bi-pencil-square quiz-icon"></i> <span id="quizTitle">Quiz</span></h2>
@@ -357,25 +363,117 @@
   document.addEventListener("keydown", function (e) {
     if (
       (e.ctrlKey && ['c', 'u', 's', 'p'].includes(e.key.toLowerCase())) || // Ctrl+ combos
-      e.key === "PrintScreen" || e.key === "F12" || // PrtSc, DevTools
+      e.key === "PrintScreen" || e.key === "F9" || // PrtSc, DevTools
       e.key === "Escape"
     ) {
       e.preventDefault();
     }
   });
 
-  let switchCount = 0;
-  window.onblur = () => {
-    switchCount++;
-    alert(`Tab switch detected! (${switchCount})\nPlease stay on the quiz page.`);
-    // Optionally: auto-submit or disqualify
-  };
+  // Block F11 and other fullscreen triggers
+  document.addEventListener("keydown", function (e) {
+    // Disable F11
+    if (e.key === "F11" || e.keyCode === 122) {
+      e.preventDefault();
+      showFullscreenToast(); // Optional toast alert
+    }
+  });
+
+   (function () {
+    const css = `
+      @media print {
+        body {
+          display: none !important;
+        }
+      }
+
+      html::before {
+        content: 'Screenshots and printing are disabled.';
+        font-size: 20px;
+        color: red;
+        display: none;
+        text-align: center;
+        padding: 50px;
+      }
+
+      @media print {
+        html::before {
+          display: block !important;
+        }
+      }
+    `;
+    const style = document.createElement("style");
+    style.innerHTML = css;
+    document.head.appendChild(style);
+
+    // Optional: blur page on PrintScreen key
+    document.addEventListener("keyup", function (e) {
+      if (e.key === "PrintScreen") {
+        document.body.innerHTML = "";
+        alert("Screenshots are not allowed.");
+      }
+    });
+  })();
+
+  // Optional: Show toast on attempt
+  function showFullscreenToast() {
+    const container = document.getElementById("toast-container");
+    const toastId = `toast-${Date.now()}`;
+    const toastHTML = `
+      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-warning text-dark">
+          <strong class="me-auto">Action Blocked</strong>
+          <small>now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          F11 (fullscreen) is disabled during the quiz.
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML("beforeend", toastHTML);
+    const toastElement = document.getElementById(toastId);
+    new bootstrap.Toast(toastElement, { delay: 4000 }).show();
+  }
+
+  
 
   function enableFullscreen() {
-    console.log("calling...");
     const elem = document.documentElement;
     if (elem.requestFullscreen) elem.requestFullscreen();
   }
+
+   let switchCount = 0;
+
+  window.onblur = () => {
+    switchCount++;
+
+    const container = document.getElementById("toast-container");
+
+    const toastId = `toast-${Date.now()}`;
+    const time = new Date().toLocaleTimeString();
+
+    const toastHTML = `
+      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <img src="https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg" class="rounded me-2" alt="B" width="16" height="16">
+          <strong class="me-auto text-danger">Tab Switch Alert</strong>
+          <small class="text-muted">${time}</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          Tab switch detected (${switchCount}). Please stay on the quiz page.
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML("beforeend", toastHTML);
+
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+    toast.show();
+  };
+  
 
    
   
@@ -442,6 +540,7 @@ async function loadQuiz() {
 
     document.getElementById("startQuizBtn").addEventListener("click", () => {
       const emailInput = document.getElementById("userEmail");
+      enableFullscreen();
       if (!emailInput.value.trim() || !emailInput.checkValidity()) {
         emailInput.classList.add("is-invalid");
         Swal.fire({
@@ -817,7 +916,16 @@ function startAutoSubmit(seconds) {
 
 
 
-  document.addEventListener('DOMContentLoaded', loadQuiz,enableFullscreen);
+  document.addEventListener('DOMContentLoaded', loadQuiz);
 </script>
+
+<!-- NoPrint.js protection -->
+<script language="javascript">
+  var noPrint = true;
+  var noCopy = true;
+  var noScreenshot = true;
+  var autoBlur = true;
+</script>
+<script type="text/javascript" src="https://pdfanticopy.com/noprint.js"></script>
 </body>
 </html>
