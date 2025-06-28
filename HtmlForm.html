@@ -355,21 +355,39 @@
 
   //precations
 
-  // Strong anti-paste logic
-    input.addEventListener("input", (e) => {
-      const currentValue = input.value;
-      const currentLength = currentValue.length; 
-      
+  function blockPasteProtection(el) {
+    let lastLength = 0;
 
-      // Detect pasted content (multi-char jump)
+    el.addEventListener("input", () => {
+      const val = el.value;
+      const currentLength = val.length;
       if (currentLength - lastLength > 1) {
-        alert("Pasting is not allowed.");
-        input.value = currentValue.slice(0, lastLength); // revert to previous state
-        return;
+        alert("❌ Pasting is not allowed.");
+        el.value = val.slice(0, lastLength); // revert change
+      } else {
+        lastLength = currentLength;
       }
-
-      lastLength = input.value.length;
     });
+
+    el.addEventListener("paste", (e) => {
+      alert("❌ Paste action is disabled.");
+      e.preventDefault();
+    });
+
+    el.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+        alert("❌ Ctrl+V is disabled.");
+        e.preventDefault();
+      }
+    });
+
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+  }
+
+  // Apply to all inputs and textareas
+  document.querySelectorAll("input[type='text'], textarea").forEach(blockPasteProtection);
 
 
   document.addEventListener('visibilitychange', () => {
