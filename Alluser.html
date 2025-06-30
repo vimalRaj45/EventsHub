@@ -506,17 +506,7 @@ document.addEventListener('keydown', function(e) {
 
 
 
-        // Submit JWT token
-        submitJwtBtn.addEventListener('click', function() {
-            jwtToken = jwtTokenInput.value.trim();
-            if (jwtToken) {
-                localStorage.setItem('eventdb_jwt', jwtToken);
-                jwtModal.hide();
-                fetchUsers();
-            } else {
-                alert('Please enter a valid JWT token');
-            }
-        });
+        
 
         // Search functionality
         searchBtn.addEventListener('click', function() {
