@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -288,7 +289,7 @@
 <script>
   const API_BASE_URL = 'https://eventdb.onrender.com/api';
   const BASE = 'https://eventdb.onrender.com';
-  const adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTEwMDMwMjMsImV4cCI6MTc1MTA4OTQyM30.kNjzr9UUQzdDgxuz3ieaHH56epHoAbaXjRCjZptCQ8Q';
+  const adminToken = localStorage.getItem('jwtToken');
   let allPayments = [];
   let currentPage = 1;
   const itemsPerPage = 10;
