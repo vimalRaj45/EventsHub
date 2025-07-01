@@ -399,14 +399,16 @@
     });
 
     // Share via WhatsApp
+     // Share via WhatsApp
     whatsappShareBtn.addEventListener('click', () => {
       if (referralCodeInput.value && referralCodeInput.value !== 'Not available') {
-        const message = `Hey! Use my referral code ${code} to sign up and attend Any Event and we may get rewards!\n\nJoin now: https://eventorag.netlify.app/`;
+        const message = `Hey! Use my referral code *${referralCodeInput.value}* to sign up and attend Any Event and we may get rewards!\n\nJoin now: https://eventorag.netlify.app/`;
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         showToast('Opening WhatsApp...', 'info');
       }
     });
+
 
     // Share via other methods
 otherShareBtn.addEventListener('click', () => {
