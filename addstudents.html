@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management System</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- AOS Animation -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #f8f9fc;
+      --accent-color: #2e59d9;
+      --text-color: #5a5c69;
+    }
+    
+    body {
+      background-color: #f8f9fc;
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .navbar-brand {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    
+    .card {
+      border: none;
+      border-radius: 0.35rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      border-bottom: none;
+      border-radius: 0.35rem 0.35rem 0 0 !important;
+      padding: 1rem 1.35rem;
+    }
+    
+    .form-control, .form-select {
+      border: 1px solid #d1d3e2;
+      border-radius: 0.35rem;
+      padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    
+    .btn-warning {
+      color: white;
+    }
+    
+    .table {
+      margin-top: 1.5rem;
+      background-color: white;
+    }
+    
+    .table th {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      font-weight: 600;
+      border-top: 1px solid #e3e6f0;
+    }
+    
+    .table td {
+      vertical-align: middle;
+    }
+    
+    .action-buttons .btn {
+      margin-right: 0.3rem;
+    }
+    
+    .progress {
+      height: 1rem;
+      border-radius: 0.35rem;
+    }
+    
+    .progress-bar {
+      background-color: var(--primary-color);
+    }
+    
+    .search-container {
+      margin-bottom: 1.5rem;
+    }
+    
+    .status-badge {
+      padding: 0.35em 0.65em;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    
+    .status-active {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    .status-inactive {
+      background-color: #f8d7da;
+      color: #842029;
+    }
+    
+    .floating-button {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.3);
+      z-index: 1000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .floating-button:hover {
+      background-color: var(--accent-color);
+      transform: scale(1.05);
+    }
+    
+    /* Loading spinner */
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+    }
+    
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 0.35em solid rgba(78, 115, 223, 0.2);
+      border-left-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Table row animation */
+    tr {
+      transition: all 0.3s ease;
+    }
+    
+    tr:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#" data-aos="fade-right">
+        <i class="bi bi-people-fill me-2"></i>Student Manager
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="me-3 d-none d-sm-inline" data-aos="fade-down">Welcome, Admin</span>
+        <button class="btn btn-outline-danger btn-sm" data-aos="fade-left">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Student Form Card -->
+    <div class="card mb-4" id="studentFormCard" data-aos="fade-up">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-plus-fill me-2"></i>Student Information</span>
+        <button class="btn btn-sm btn-light" onclick="collapseForm()">
+          <i class="bi bi-dash-lg"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <form id="studentForm">
+          <input type="hidden" id="studentId" />
+          <div class="row g-3">
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="first_name" class="form-label">First Name</label>
+              <input class="form-control" id="first_name" placeholder="Enter first name" required />
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+              <label for="last_name" class="form-label">Last Name</label>
+              <input class="form-control" id="last_name" placeholder="Enter last name" required />
+            </div>
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="contact_number" class="form-label">Contact Number</label>
+              <input class="form-control" id="contact_number" placeholder="Enter phone number" required />
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" placeholder="Enter email address" required />
+            </div>
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="college_name" class="form-label">College Name</label>
+              <input class="form-control" id="college_name" placeholder="Enter college name" />
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+              <label for="study_year" class="form-label">Study Year</label>
+              <select class="form-select" id="study_year">
+                <option value="">Select year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+                <option value="Graduate">Graduate</option>
+              </select>
+            </div>
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="district" class="form-label">District</label>
+              <input class="form-control" id="district" placeholder="Enter district" />
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+              <label for="payment_method" class="form-label">Payment Method</label>
+              <select class="form-select" id="payment_method">
+                <option value="">Select method</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="payment_number" class="form-label">Payment Number</label>
+              <input class="form-control" id="payment_number" placeholder="Enter payment number" />
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+              <label for="target" class="form-label">Target Users</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="target" placeholder="Enter target amount" />
+              </div>
+            </div>
+            <div class="col-md-6" data-aos="fade-right">
+              <label for="attained" class="form-label">Attained Users</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="attained" placeholder="Enter attained amount" readonly/>
+              </div>
+            </div>
+            <div class="col-12 mt-3" data-aos="fade-up">
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                  <span id="submitText"><i class="bi bi-save-fill me-2"></i>Save Student</span>
+                  <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Students List Card -->
+    <div class="card" data-aos="fade-up" data-aos-delay="100">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-people-fill me-2"></i>Student Records</span>
+          <div class="input-group" style="width: 300px;">
+            <input type="text" class="form-control" placeholder="Search students..." id="searchInput">
+            <button class="btn btn-outline-primary" type="button">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover" id="studentTable">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Contact</th>
+                <th>College</th>
+                <th>Progress</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody">
+              <!-- Loading spinner will be shown here initially -->
+              <tr>
+                <td colspan="6" class="text-center">
+                  <div class="spinner-container">
+                    <div class="spinner"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mt-4">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <div class="floating-button" onclick="showForm()" data-aos="fade-up" data-aos-delay="200">
+    <i class="bi bi-plus-lg" style="font-size: 1.5rem;"></i>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  
+  <script>
+    // Initialize AOS animation
+    AOS.init({
+      duration: 80,
+      easing: 'ease-in-out',
+      once: true
+    });
+
+    const API_BASE = 'https://eventdb.onrender.com/students'; 
+    const jwtToken = localStorage.getItem('jwt') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTEyOTc4OTQsImV4cCI6MTc1MTM4NDI5NH0.jtMMBldh_P8tu3kybabBQqpPvo0QIzRKhrwoOL3Wj8E';
+
+    if (!jwtToken) {
+      Swal.fire({
+        title: 'Authentication Required',
+        text: 'No token found. Please log in first.',
+        icon: 'warning',
+        confirmButtonText: 'Go to Login',
+        allowOutsideClick: false
+      }).then(() => {
+        window.location.href = '/login.html';
+      });
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${jwtToken}`
+    };
+
+    // Toggle form visibility
+    function collapseForm() {
+      const formCard = document.getElementById('studentFormCard');
+      formCard.style.display = formCard.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function showForm() {
+      document.getElementById('studentFormCard').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Show loading state
+    function showLoading(element) {
+      const textElement = element.querySelector('#submitText');
+      const spinnerElement = element.querySelector('#submitSpinner');
+      
+      textElement.classList.add('d-none');
+      spinnerElement.classList.remove('d-none');
+      element.disabled = true;
+    }
+    
+    // Hide loading state
+    function hideLoading(element) {
+      const textElement = element.querySelector('#submitText');
+      const spinnerElement = element.querySelector('#submitSpinner');
+      
+      textElement.classList.remove('d-none');
+      spinnerElement.classList.add('d-none');
+      element.disabled = false;
+    }
+
+    // Load All Students
+    async function loadStudents() {
+      try {
+        // Show loading in table
+        const tbody = document.querySelector('#studentTableBody');
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center">
+              <div class="spinner-container">
+                <div class="spinner"></div>
+              </div>
+            </td>
+          </tr>
+        `;
+
+        const res = await fetch(API_BASE, { headers });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                <p class="mt-2">No students found</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        data.forEach((student, index) => {
+          const progress = student.target > 0 ? 
+            Math.min(100, Math.round((student.attained / student.target) * 100)) : 0;
+            
+          const row = document.createElement('tr');
+          row.setAttribute('data-aos', 'fade-up');
+          row.setAttribute('data-aos-delay', `${index * 50}`);
+          row.innerHTML = `
+            <td>
+              <div class="fw-bold">${student.first_name} ${student.last_name}</div>
+              <div class="text-muted small">${student.email}</div>
+            </td>
+            <td>${student.contact_number || '-'}</td>
+            <td>${student.college_name || '-'}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="progress flex-grow-1 me-2">
+                  <div class="progress-bar" role="progressbar" style="width: ${progress}%" 
+                    aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted">${progress}%</small>
+              </div>
+              <small class="text-muted d-block">
+                ${student.attained || 0} of ${student.target || 0}
+              </small>
+            </td>
+            <td>
+              <span class="status-badge ${progress >= 100 ? 'status-active' : 'status-inactive'}">
+                ${progress >= 100 ? 'Completed' : 'In Progress'}
+              </span>
+            </td>
+            <td class="action-buttons">
+              <button class="btn btn-sm btn-outline-primary" onclick='editStudent(${JSON.stringify(student)})'>
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${student.id})">
+                <i class="bi bi-trash"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-primary" onclick='viewStudent(${JSON.stringify(student).replace(/'/g, "&apos;")})'>
+  <i class="bi bi-eye"></i>
+</button>
+
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        
+        // Re-initialize AOS for new elements
+        AOS.refresh();
+      } catch (error) {
+        console.error('Error loading students:', error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-danger py-4">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <p class="mt-2">Failed to load students</p>
+              <button class="btn btn-sm btn-primary mt-2" onclick="loadStudents()">
+                <i class="bi bi-arrow-repeat"></i> Retry
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function viewStudent(student) {
+      const { first_name, last_name, email, contact_number, college_name, attained, target } = student;
+      const percent = target && target > 0 ? Math.round((attained / target) * 100) : 0;
+      
+      Swal.fire({
+        title: `${first_name} ${last_name}`,
+        html: `
+          <div class="text-start">
+            <p><i class="bi bi-envelope-fill me-2"></i> <strong>Email:</strong> ${email}</p>
+            <p><i class="bi bi-telephone-fill me-2"></i> <strong>Contact:</strong> ${contact_number || 'N/A'}</p>
+            <p><i class="bi bi-building me-2"></i> <strong>College:</strong> ${college_name || 'N/A'}</p>
+            <div class="mt-3">
+              <h6>Progress</h6>
+              <div class="progress mb-2">
+                <div class="progress-bar" role="progressbar" style="width: ${percent}%" 
+                  aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <p>${attained || 0} of ${target || 0} (${percent}%)</p>
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'Close',
+        showCloseButton: true,
+        customClass: {
+          confirmButton: 'btn btn-primary'
+        }
+      });
+    }
+
+    // Save Student
+    document.getElementById('studentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      showLoading(submitBtn);
+
+      const student = {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        contact_number: document.getElementById('contact_number').value,
+        email: document.getElementById('email').value,
+        college_name: document.getElementById('college_name').value,
+        study_year: document.getElementById('study_year').value,
+        district: document.getElementById('district').value,
+        payment_method: document.getElementById('payment_method').value,
+        payment_number: document.getElementById('payment_number').value,
+        target: parseInt(document.getElementById('target').value) || 0,
+        attained: parseInt(document.getElementById('attained').value) || 0
+      };
+
+      const studentId = document.getElementById('studentId').value;
+      const method = studentId ? 'PUT' : 'POST';
+      const url = studentId ? `${API_BASE}/${studentId}` : API_BASE;
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers,
+          body: JSON.stringify(student)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          hideLoading(submitBtn);
+          
+          Swal.fire({
+            title: 'Success!',
+            text: `Student ${studentId ? 'updated' : 'added'} successfully.`,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 2000,
+            timerProgressBar: true,
+            willClose: () => {
+              document.getElementById('studentForm').reset();
+              document.getElementById('studentId').value = '';
+              loadStudents();
+            }
+          });
+        } else {
+          const error = await res.json();
+          throw new Error(error.message || 'Failed to save student');
+        }
+      } catch (error) {
+        hideLoading(submitBtn);
+        console.error('Error saving student:', error);
+        
+        Swal.fire({
+          title: 'Error!',
+          text: error.message || 'Failed to save student. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+
+    // Edit
+    function editStudent(student) {
+      document.getElementById('studentId').value = student.id;
+      document.getElementById('first_name').value = student.first_name;
+      document.getElementById('last_name').value = student.last_name;
+      document.getElementById('contact_number').value = student.contact_number;
+      document.getElementById('email').value = student.email;
+      document.getElementById('college_name').value = student.college_name;
+      document.getElementById('study_year').value = student.study_year;
+      document.getElementById('district').value = student.district;
+      document.getElementById('payment_method').value = student.payment_method;
+      document.getElementById('payment_number').value = student.payment_number;
+      document.getElementById('target').value = student.target;
+      document.getElementById('attained').value = student.attained;
+      
+      showForm();
+    }
+
+    // Delete
+    async function deleteStudent(id) {
+      const { isConfirmed } = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      });
+      
+      if (!isConfirmed) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/${id}`, {
+          method: 'DELETE',
+          headers
+        });
+
+        if (res.ok) {
+          await Swal.fire({
+            title: 'Deleted!',
+            text: 'Student has been deleted.',
+            icon: 'success',
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
+          loadStudents();
+        } else {
+          throw new Error('Delete failed');
+        }
+      } catch (error) {
+        console.error('Error deleting student:', error);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to delete student. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStudents();
+      
+      // Search functionality
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#studentTable tbody tr');
+        
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
