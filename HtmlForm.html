@@ -846,31 +846,33 @@ async function submitQuiz() {
     document.body.style.overflow = "auto";
 
     if (result.success) {
-      await checkReferralAndProceed();
+  await checkReferralAndProceed();
 
-      Swal.fire({
-  title: '🎉 Thank You for Attending!',
-  html: `
-    <div class="text-center">
-      <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-      <p class="mt-3">Your responses have been submitted.</p>
-      <p class="small text-muted">A confirmation has been sent to <strong>${userEmail}</strong></p>
-      <p class="small text-muted mb-1">Please wait for the result date.</p>
-      <p class="small text-muted mb-0">
-        🔍 You can check your result at<br>
-        <a href="https://eventorag.netlify.app/htmlresult" target="_blank">https://eventorag.netlify.app/htmlresult</a>
-      </p>
-    </div>
-  `,
-  confirmButtonText: 'OK',
-  confirmButtonColor: 'var(--primary-color)'
-}).then(() => {
-  window.removeEventListener("beforeunload", beforeUnloadHandler);
-  window.location.replace("index.html");
-});
-
-
-    } else {
+  Swal.fire({
+    title: '🎉 Thank You for Attending!',
+    html: `
+      <div class="text-center">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        <p class="mt-3">Your responses have been submitted.</p>
+        <p class="small text-muted">A confirmation has been sent to <strong>${userEmail}</strong></p>
+        <p class="small text-muted mb-1">Please wait for the result date.</p>
+        <p class="small text-muted mb-0">
+          🔍 You can check your result at<br>
+          <a href="https://eventorag.netlify.app/htmlresult" target="_blank">https://eventorag.netlify.app/htmlresult</a>
+        </p>
+      </div>
+    `,
+    confirmButtonText: 'OK',
+    confirmButtonColor: 'var(--primary-color)'
+  }).then(() => {
+    // ✅ Delay navigation AFTER OK click
+    setTimeout(() => {
+      window.removeEventListener("beforeunload", beforeUnloadHandler);
+      window.location.replace("index.html");
+    }, 2000); // Delay by 2 seconds
+  });
+}
+else {
       Swal.fire({
         icon: 'error',
         title: 'Submission Failed',
