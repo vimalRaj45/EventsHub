@@ -402,11 +402,11 @@
 whatsappShareBtn.addEventListener('click', () => {
   const code = referralCodeInput.value;
   if (code && code !== 'Not available') {
-    const message = `🎟️ Hey! Use my referral code *${code}* to sign up and attend any EventOrag event.
+    const message = `Hey! Use my referral code *${code}* to sign up and attend any event.
 
 You may be asked for this code during check-in. So keep it ready and share it with friends!
 
-👇 Join now: https://eventorag.netlify.app/`;
+Join now: https://eventorag.netlify.app/`;
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
