@@ -313,6 +313,38 @@
   </style>
 </head>
 <body>
+    <!-- Full Screen Loader -->
+<div id="fullscreenLoader" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 9999;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+">
+  <div class="loader" style="
+    width: 64px;
+    height: 64px;
+    border: 6px solid #e6eaf5;
+    border-top-color: #4e73df;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  "></div>
+  <h5 class="text-muted">Submitting your answers...</h5>
+  <div class="progress w-75" style="height: 10px; border-radius: 5px;">
+    <div id="submitProgressBar" class="progress-bar" role="progressbar"
+         style="width: 0%; background-color: #4e73df;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
 <!-- Toast Container -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
 
@@ -363,15 +395,9 @@
   });
 
 
-  document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    showFullscreenToast()
-  }
-});
-  document.addEventListener("contextmenu", e => e.preventDefault());
+
   document.addEventListener("copy", e => e.preventDefault());
-  document.addEventListener("cut", e => e.preventDefault());
-  document.addEventListener("paste", e => e.preventDefault());
+  
 
   document.addEventListener("keydown", function (e) {
     if (
@@ -488,6 +514,7 @@
   let globalCountdownTimer;
   let questionsCount = 0;
   let userEmail = '';
+  let referralCode = ''; 
 
   // Show loading state initially
   form.innerHTML = `
@@ -524,6 +551,7 @@ async function loadQuiz() {
         <div class="mb-3" id="emailField">
           <label class="form-label">Enter your email to begin</label>
           <input type="email" required id="userEmail" class="form-control" placeholder="your@email.com">
+          <input type="text" id="referralCode" class="form-control mt-2" placeholder="Referral Code (optional)">
         </div>
         <button type="button" class="btn btn-primary px-4 py-2" id="startQuizBtn">
           <i class="bi bi-play-fill me-2"></i> Start Quiz
@@ -546,6 +574,7 @@ async function loadQuiz() {
       }
 
       userEmail = emailInput.value.trim();
+      referralCode = document.getElementById("referralCode").value.trim(); // ✅ Save it here
       showQuizInstructions(questions);
     });
 
@@ -767,6 +796,13 @@ async function loadQuiz() {
   });
 
   async function submitQuiz() {
+  // ✅ Show full-screen loader
+  const fullscreenLoader = document.getElementById("fullscreenLoader");
+  const progressBar = document.getElementById("submitProgressBar");
+  fullscreenLoader.style.display = "flex";
+  progressBar.style.width = "0%";
+  document.body.style.overflow = "hidden"; // Prevent scrolling
+
   const submitText = document.getElementById("submitText");
   const submitSpinner = document.getElementById("submitSpinner");
   const submitBtn = document.getElementById("submitBtn");
@@ -784,10 +820,21 @@ async function loadQuiz() {
   const data = {};
   formData.forEach((v, k) => data[k] = v);
   data.quiz = quizName;
+
   console.log("📋 Submitting answers:", data);
 
   try {
-    const res = await fetch(API_URL, {
+    // Start progress animation
+    let progress = 0;
+    const interval = setInterval(() => {
+      if (progress < 90) {
+        progress += 1;
+        progressBar.style.width = progress + "%";
+      }
+    }, 30); // Adjust speed as needed
+
+    // Send request
+    const res = await fetch('https://script.google.com/macros/s/AKfycbxyHXFnAQqE7tGHTUulI0gFggti69YzNYabVVTahGp5AfLi8SUBwlvZQ_XvkS5EV6BqtA/exec', {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(data)
@@ -795,18 +842,19 @@ async function loadQuiz() {
 
     const result = await res.json();
 
-    // Reset UI states
-    submitText.textContent = "Submit Answers";
-    submitSpinner.style.display = "none";
-    submitBtn.disabled = false;
+    clearInterval(interval);
+    progressBar.style.width = "100%";
 
-    if (mobileSubmitBtn) {
-      mobileSubmitBtn.disabled = false;
-      mobileSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
-    }
+    // Wait for animation to finish
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Show thank you alert (no score)
+    // Reset UI
+    fullscreenLoader.style.display = "none";
+    document.body.style.overflow = "auto";
+
+    // Show thank you alert
     if (result.success) {
+      checkReferralAndProceed();
       Swal.fire({
         title: '🎉 Thank You for Attending!',
         html: `
@@ -828,16 +876,14 @@ async function loadQuiz() {
         confirmButtonColor: 'var(--primary-color)'
       });
     }
+    
 
   } catch (err) {
-    submitText.textContent = "Submit Answers";
-    submitSpinner.style.display = "none";
-    submitBtn.disabled = false;
-
-    if (mobileSubmitBtn) {
-      mobileSubmitBtn.disabled = false;
-      mobileSubmitBtn.innerHTML = '<i class="bi bi-send"></i>';
-    }
+    clearInterval(interval);
+    progressBar.style.width = "100%";
+    await new Promise(resolve => setTimeout(resolve, 500));
+    fullscreenLoader.style.display = "none";
+    document.body.style.overflow = "auto";
 
     Swal.fire({
       icon: 'error',
@@ -846,8 +892,10 @@ async function loadQuiz() {
       confirmButtonColor: 'var(--primary-color)'
     });
   }
+  finally{
+        window.location.replace("index.html");
+    }
 }
-
 
 function startAutoSubmit(seconds) {
   autoSubmitTimer = setTimeout(() => {
@@ -908,6 +956,52 @@ function startAutoSubmit(seconds) {
 }
 
 
+async function incrementAttained(code) {
+  let currentCode = code.trim();
+
+  const res = await fetch(`https://eventdb.onrender.com/students/increment-attained`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ referral_code: currentCode })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || data.message?.toLowerCase().includes("not found")) {
+    const retry = prompt("❌ Invalid referral code.\nEnter a valid code or leave blank to proceed without it:", currentCode);
+
+    if (retry === null || retry.trim() === "") {
+      // User cancelled or left blank — fallback to untracked
+      await logUntrackedVisit();
+      return null;
+    } else {
+      // Retry once with new code
+      return await incrementAttained(retry);
+    }
+  } else {
+    console.log("✅ Referral recorded:", data);
+    return data;
+  }
+}
+
+
+// Log Untracked Visit
+async function logUntrackedVisit() {
+  const res = await fetch(`https://eventdb.onrender.com/visits/untracked`, { method: 'POST' });
+  const data = await res.json();
+}
+
+async function checkReferralAndProceed() {
+  if (referralCode) {
+    await incrementAttained(referralCode); // Pass it as an argument
+    referralCode = null; // ✅ Clear after use
+  } else {
+    await logUntrackedVisit();
+  }
+}
+
+
+
 
   document.addEventListener('DOMContentLoaded', loadQuiz);
 </script>
@@ -917,7 +1011,7 @@ function startAutoSubmit(seconds) {
   var noPrint = true;
   var noCopy = true;
   var noScreenshot = true;
-  var autoBlur = true;
+  
 </script>
 <script type="text/javascript" src="https://pdfanticopy.com/noprint.js"></script>
 </body>
