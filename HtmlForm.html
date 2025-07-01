@@ -841,7 +841,7 @@ async function submitQuiz() {
 
     clearInterval(interval);
     progressBar.style.width = "100%";
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 50));
     fullscreenLoader.style.display = "none";
     document.body.style.overflow = "auto";
 
