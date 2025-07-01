@@ -591,20 +591,25 @@
         if (res.ok) {
           const result = await res.json();
           hideLoading(submitBtn);
-          
-          Swal.fire({
-            title: 'Success!',
-            text: `Student ${studentId ? 'updated' : 'added'} successfully.`,
-            icon: 'success',
-            confirmButtonText: 'OK',
-            timer: 2000,
-            timerProgressBar: true,
-            willClose: () => {
-              document.getElementById('studentForm').reset();
-              document.getElementById('studentId').value = '';
-              loadStudents();
-            }
-          });
+       Swal.fire({
+  title: 'Success!',
+  html: `
+    Student ${studentId ? 'updated' : 'added'} successfully.<br><br>
+    <button class="btn btn-success" onclick="shareStudent('${student.first_name}', '${student.email}', '${student.contact_number}')">
+      <i class="bi bi-whatsapp"></i> Share Login Link
+    </button>
+  `,
+  icon: 'success',
+  confirmButtonText: 'OK',
+  timer: 5000,
+  timerProgressBar: true,
+  willClose: () => {
+    document.getElementById('studentForm').reset();
+    document.getElementById('studentId').value = '';
+    loadStudents();
+  }
+});
+
         } else {
           const error = await res.json();
           throw new Error(error.message || 'Failed to save student');
@@ -621,6 +626,18 @@
         });
       }
     });
+
+
+    function shareStudent(name, email, phone) {
+  const loginLink = `https://eventorag.netlify.app/stdlogin.html`;
+  const message = `👋 Hello ${name},\n\nYou have been successfully registered for the Referer program.\n\n🔐 Login using:\n📧 Email: ${email}\n📱 Phone: ${phone}\n\n🔗 Login here: ${loginLink}\n\n📊 You can also track your referral progress on the portal.\n\nBest wishes!`;
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+
+  window.open(whatsappUrl, '_blank');
+}
+
+
 
     // Edit
     function editStudent(student) {
