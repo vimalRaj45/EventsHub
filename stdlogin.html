@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Portal</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; background: #f9f9f9; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    form, .dashboard { display: none; flex-direction: column; gap: 10px; }
+    input, button { padding: 10px; font-size: 16px; width: 100%; }
+    .info { margin: 8px 0; }
+    .error { color: red; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="page-title">Student Login</h2>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+      <input type="text" name="contact_number" placeholder="Contact Number" required />
+      <input type="email" name="email" placeholder="Email Address" required />
+      <button type="submit">Login</button>
+      <div class="error" id="error"></div>
+    </form>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+      <h3>Welcome, <span id="name"></span></h3>
+      <div class="info"><strong>Contact:</strong> <span id="contact"></span></div>
+      <div class="info"><strong>Email:</strong> <span id="email"></span></div>
+      <div class="info"><strong>College:</strong> <span id="college"></span></div>
+      <div class="info"><strong>Year:</strong> <span id="year"></span></div>
+      <div class="info"><strong>District:</strong> <span id="district"></span></div>
+      <div class="info"><strong>Referral Code:</strong> <span id="referral"></span></div>
+      <div class="info"><strong>Payment Method:</strong> <span id="pay_method"></span></div>
+      <div class="info"><strong>Payment Number:</strong> <span id="pay_number"></span></div>
+      <div class="info"><strong>Target:</strong> <span id="target"></span></div>
+      <div class="info"><strong>Attained:</strong> <span id="attained"></span></div>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('dashboard');
+    const errorDiv = document.getElementById('error');
+
+    const student = JSON.parse(localStorage.getItem('student'));
+    if (student) {
+      showDashboard(student);
+    } else {
+      loginForm.style.display = 'flex';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorDiv.textContent = '';
+      const formData = new FormData(loginForm);
+      const body = {
+        contact_number: formData.get('contact_number'),
+        email: formData.get('email')
+      };
+
+      try {
+        const res = await fetch('http://localhost:4000/stdlogin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('student', JSON.stringify(data));
+          showDashboard(data);
+        } else {
+          errorDiv.textContent = data.error || 'Login failed';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Unable to connect to server';
+      }
+    });
+
+    function showDashboard(student) {
+      document.getElementById('page-title').textContent = 'Student Dashboard';
+      loginForm.style.display = 'none';
+      dashboard.style.display = 'flex';
+
+      document.getElementById('name').textContent = student.first_name + ' ' + student.last_name;
+      document.getElementById('contact').textContent = student.contact_number;
+      document.getElementById('email').textContent = student.email;
+      document.getElementById('college').textContent = student.college_name;
+      document.getElementById('year').textContent = student.study_year;
+      document.getElementById('district').textContent = student.district;
+      document.getElementById('referral').textContent = student.referral_code;
+      document.getElementById('pay_method').textContent = student.payment_method;
+      document.getElementById('pay_number').textContent = student.payment_number;
+      document.getElementById('target').textContent = student.target;
+      document.getElementById('attained').textContent = student.attained;
+    }
+
+    function logout() {
+      localStorage.removeItem('student');
+      location.reload();
+    }
+  </script>
+</body>
+</html>
