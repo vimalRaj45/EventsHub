@@ -792,14 +792,12 @@ async function loadQuiz() {
       submitQuiz();
     }
   });
-
-  async function submitQuiz() {
-  // ✅ Show full-screen loader
+async function submitQuiz() {
   const fullscreenLoader = document.getElementById("fullscreenLoader");
   const progressBar = document.getElementById("submitProgressBar");
   fullscreenLoader.style.display = "flex";
   progressBar.style.width = "0%";
-  document.body.style.overflow = "hidden"; // Prevent scrolling
+  document.body.style.overflow = "hidden";
 
   const submitText = document.getElementById("submitText");
   const submitSpinner = document.getElementById("submitSpinner");
@@ -821,17 +819,18 @@ async function loadQuiz() {
 
   console.log("📋 Submitting answers:", data);
 
+  let interval; // Declare outside try for access in catch
+
   try {
-    // Start progress animation
+    // Start progress bar animation
     let progress = 0;
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       if (progress < 90) {
         progress += 1;
         progressBar.style.width = progress + "%";
       }
-    }, 30); // Adjust speed as needed
+    }, 30);
 
-    // Send request
     const res = await fetch('https://script.google.com/macros/s/AKfycbxyHXFnAQqE7tGHTUulI0gFggti69YzNYabVVTahGp5AfLi8SUBwlvZQ_XvkS5EV6BqtA/exec', {
       method: "POST",
       headers: { "Content-Type": "text/plain" },
@@ -842,30 +841,35 @@ async function loadQuiz() {
 
     clearInterval(interval);
     progressBar.style.width = "100%";
-
-    // Wait for animation to finish
     await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Reset UI
     fullscreenLoader.style.display = "none";
     document.body.style.overflow = "auto";
 
-    // Show thank you alert
     if (result.success) {
-      checkReferralAndProceed();
+      await checkReferralAndProceed();
+
       Swal.fire({
-        title: '🎉 Thank You for Attending!',
-        html: `
-          <div class="text-center">
-            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-            <p class="mt-3">Your responses have been submitted.</p>
-            <p class="small text-muted">A confirmation has been sent to <strong>${userEmail}</strong></p>
-            <p class="small text-muted mb-0">Please wait for your result.</p>
-          </div>
-        `,
-        confirmButtonText: 'OK',
-        confirmButtonColor: 'var(--primary-color)'
-      });
+  title: '🎉 Thank You for Attending!',
+  html: `
+    <div class="text-center">
+      <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+      <p class="mt-3">Your responses have been submitted.</p>
+      <p class="small text-muted">A confirmation has been sent to <strong>${userEmail}</strong></p>
+      <p class="small text-muted mb-1">Please wait for the result date.</p>
+      <p class="small text-muted mb-0">
+        🔍 You can check your result at<br>
+        <a href="https://eventorag.netlify.app/htmlresult" target="_blank">https://eventorag.netlify.app/htmlresult</a>
+      </p>
+    </div>
+  `,
+  confirmButtonText: 'OK',
+  confirmButtonColor: 'var(--primary-color)'
+}).then(() => {
+  window.removeEventListener("beforeunload", beforeUnloadHandler);
+  window.location.replace("index.html");
+});
+
+
     } else {
       Swal.fire({
         icon: 'error',
@@ -874,7 +878,6 @@ async function loadQuiz() {
         confirmButtonColor: 'var(--primary-color)'
       });
     }
-    
 
   } catch (err) {
     clearInterval(interval);
@@ -890,12 +893,8 @@ async function loadQuiz() {
       confirmButtonColor: 'var(--primary-color)'
     });
   }
- finally {
-  window.removeEventListener("beforeunload", beforeUnloadHandler);
-  window.location.replace("index.html");
 }
 
-}
 
 function startAutoSubmit(seconds) {
   autoSubmitTimer = setTimeout(() => {
