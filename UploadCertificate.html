@@ -59,6 +59,7 @@
       <input type="text" id="cert-sheet-id" placeholder="Google Sheet ID" class="form-control mb-2">
       <input type="text" id="cert-template-id" placeholder="Slide Template ID" class="form-control mb-2">
       <input type="text" id="cert-folder-id" placeholder="Drive Folder ID" class="form-control mb-2">
+       <input type="text" id="sheetname" placeholder="Enter Sheet Name" class="form-control mb-2">
       <input type="email" id="cert-email" placeholder="Participant Email" class="form-control mb-2" readonly>
       <button onclick="uploadCertificate()" class="btn btn-success mt-2 w-100">
         🚀 Generate & Upload Certificate
@@ -225,6 +226,7 @@ document.getElementById('cert-participant-id').addEventListener('change', async 
       const templateId = document.getElementById('cert-template-id').value;
       const folderId = document.getElementById('cert-folder-id').value;
       const participantEmail = document.getElementById('cert-email').value;
+      const allowedsheet= document.getElementById('sheetname').value;
 
       const checkRes = await fetch(`${API_BASE_URL}/events/${eventId}/certificates/${participantId}`, {
         method: 'GET',
@@ -247,7 +249,7 @@ document.getElementById('cert-participant-id').addEventListener('change', async 
 
       const scriptUrl = `https://script.google.com/macros/s/AKfycbx4BNgZ2-hOXBmQ_EpXRQjWDzTDIsQduvBj0JYoh1btsFxDRrgu4bPstPWeENu87Ps9/exec`;
       const query = `?sheetId=${sheetId}&templateId=${templateId}&folderId=${folderId}&email=${encodeURIComponent(participantEmail)}`;
-      const fullUrl = `${scriptUrl}${query}&allowedSheet=Responses_Maths`;
+      const fullUrl = `${scriptUrl}${query}&allowedSheet=${allowedsheet}`;
 
       const response = await fetch(fullUrl);
       const responseText = await response.text();
