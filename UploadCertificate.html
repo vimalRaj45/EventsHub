@@ -245,7 +245,7 @@ document.getElementById('cert-participant-id').addEventListener('change', async 
         throw new Error((await checkRes.json()).error || 'Fetch Error');
       }
 
-      const scriptUrl = `https://script.google.com/macros/s/AKfycbyVB5_MKM4mFUDNpOFDh8ASxGspDN0V4UDru7kyAwR1L6XLP354jBth22WH_KsPZT_z/exec`;
+      const scriptUrl = `https://script.google.com/macros/s/AKfycbx4BNgZ2-hOXBmQ_EpXRQjWDzTDIsQduvBj0JYoh1btsFxDRrgu4bPstPWeENu87Ps9/exec`;
       const query = `?sheetId=${sheetId}&templateId=${templateId}&folderId=${folderId}&email=${encodeURIComponent(participantEmail)}`;
       const fullUrl = `${scriptUrl}${query}&allowedSheet=Responses_Maths`;
 
