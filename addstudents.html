@@ -376,8 +376,7 @@
     });
 
     const API_BASE = 'https://eventdb.onrender.com/students'; 
-    const jwtToken = localStorage.getItem('jwt') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NTEyOTc4OTQsImV4cCI6MTc1MTM4NDI5NH0.jtMMBldh_P8tu3kybabBQqpPvo0QIzRKhrwoOL3Wj8E';
-
+    const jwtToken = localStorage.getItem('jwt');
     if (!jwtToken) {
       Swal.fire({
         title: 'Authentication Required',
