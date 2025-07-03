@@ -1,97 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Management System</title>
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <meta charset="UTF-8" />
+  <title>Referral System</title>
+
+  <link href="https://unpkg.com/vis-network/styles/vis-network.min.css" rel="stylesheet" />
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <!-- AOS Animation -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
-  <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Outfit Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --primary-color: #4e73df;
       --secondary-color: #f8f9fc;
-      --accent-color: #2e59d9;
-      --text-color: #5a5c69;
+      --success-color: #1cc88a;
+      --info-color: #36b9cc;
+      --warning-color: #f6c23e;
+      --danger-color: #e74a3b;
     }
     
     body {
       background-color: #f8f9fc;
-      color: var(--text-color);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Outfit', sans-serif; /* Changed to Outfit font */
     }
     
-    .navbar-brand {
-      font-weight: 600;
-      color: var(--primary-color);
+    .navbar {
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
     }
     
     .card {
       border: none;
       border-radius: 0.35rem;
-      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-      margin-bottom: 1.5rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      transition: transform 0.3s ease;
     }
     
-    .card-header {
-      background-color: var(--primary-color);
-      color: white;
-      font-weight: 600;
-      border-bottom: none;
-      border-radius: 0.35rem 0.35rem 0 0 !important;
-      padding: 1rem 1.35rem;
+    .card:hover {
+      transform: translateY(-5px);
     }
     
-    .form-control, .form-select {
-      border: 1px solid #d1d3e2;
-      border-radius: 0.35rem;
-      padding: 0.75rem 1rem;
-    }
-    
-    .form-control:focus, .form-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
-    }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      padding: 0.5rem 1.5rem;
-      font-weight: 600;
-    }
-    
-    .btn-primary:hover {
-      background-color: var(--accent-color);
-      border-color: var(--accent-color);
-    }
-    
-    .btn-warning {
-      color: white;
-    }
-    
-    .table {
-      margin-top: 1.5rem;
-      background-color: white;
-    }
-    
-    .table th {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-      font-weight: 600;
-      border-top: 1px solid #e3e6f0;
-    }
-    
-    .table td {
-      vertical-align: middle;
-    }
-    
-    .action-buttons .btn {
-      margin-right: 0.3rem;
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
     }
     
     .progress {
@@ -103,618 +58,1535 @@
       background-color: var(--primary-color);
     }
     
-    .search-container {
-      margin-bottom: 1.5rem;
-    }
-    
-    .status-badge {
-      padding: 0.35em 0.65em;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    
-    .status-active {
-      background-color: #d1e7dd;
-      color: #0f5132;
-    }
-    
-    .status-inactive {
-      background-color: #f8d7da;
-      color: #842029;
-    }
-    
-    .floating-button {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      width: 3.5rem;
-      height: 3.5rem;
+    .user-avatar {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background-color: var(--primary-color);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.3);
-      z-index: 1000;
+      object-fit: cover;
+    }
+    
+    .route-link {
+      position: relative;
+      padding: 0.5rem 1rem;
+    }
+    
+    .route-link.active {
+      font-weight: 600;
+    }
+    
+    .route-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 15%;
+      width: 70%;
+      height: 3px;
+      background-color: white;
+      border-radius: 3px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-box i {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #6c757d;
+    }
+    
+    .search-box input {
+      padding-left: 35px;
+    }
+    
+    .user-card {
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
     }
     
-    .floating-button:hover {
-      background-color: var(--accent-color);
-      transform: scale(1.05);
+    .user-card:hover {
+      background-color: rgba(78, 115, 223, 0.1);
     }
     
-    /* Loading spinner */
-    .spinner-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100px;
+    .user-card.selected {
+      background-color: rgba(78, 115, 223, 0.2);
+      border-left: 4px solid var(--primary-color);
     }
     
-    .spinner {
-      width: 3rem;
-      height: 3rem;
-      border: 0.35em solid rgba(78, 115, 223, 0.2);
+    .stats-card {
+      border-left: 4px solid;
+    }
+    
+    .stats-card.primary {
       border-left-color: var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .stats-card.success {
+      border-left-color: var(--success-color);
     }
     
-    /* Table row animation */
-    tr {
-      transition: all 0.3s ease;
+    .stats-card.warning {
+      border-left-color: var(--warning-color);
     }
     
-    tr:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    .stats-card.info {
+      border-left-color: var(--info-color);
     }
     
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+    .badge-status {
+      padding: 0.35em 0.65em;
+      font-weight: 600;
     }
     
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+    .badge-pending {
+      background-color: #f6c23e;
+      color: #000;
     }
     
-    ::-webkit-scrollbar-thumb {
-      background: var(--primary-color);
-      border-radius: 10px;
+    .badge-approved {
+      background-color: #1cc88a;
+      color: #fff;
     }
     
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--accent-color);
+    .badge-mentor {
+      background-color: #4e73df;
+      color: #fff;
+    }
+    
+    .badge-admin {
+      background-color: #e74a3b;
+      color: #fff;
+    }
+    
+    .user-details-card img {
+      max-width: 100%;
+      border-radius: 0.35rem;
+      margin-bottom: 1rem;
+    }
+    
+    .tree-node {
+      padding: 10px;
+      border-radius: 5px;
+      background-color: white;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      margin: 5px;
+      display: inline-block;
+      text-align: center;
+    }
+    
+    .tree-node.mentor {
+      background-color: #e1e9ff;
+    }
+    
+    .tree-node.admin {
+      background-color: #ffe1e1;
+    }
+    
+    .tree-connector {
+      height: 20px;
+      width: 2px;
+      background-color: #dee2e6;
+      margin: 0 auto;
     }
   </style>
 </head>
-<body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-    <div class="container">
-      <a class="navbar-brand" href="#" data-aos="fade-right">
-        <i class="bi bi-people-fill me-2"></i>Student Manager
-      </a>
-      <div class="d-flex align-items-center">
-        <span class="me-3 d-none d-sm-inline" data-aos="fade-down">Welcome, Admin</span>
-        <button class="btn btn-outline-danger btn-sm" data-aos="fade-left">
-          <i class="bi bi-box-arrow-right"></i> Logout
-        </button>
+<body class="bg-light">
+    <!-- Modal or section to show tree -->
+<div class="modal fade" id="mentorTreeModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Referral Tree View</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-    </div>
-  </nav>
-
-  <div class="container">
-    <!-- Student Form Card -->
-    <div class="card mb-4" id="studentFormCard" data-aos="fade-up">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-person-plus-fill me-2"></i>Student Information</span>
-        <button class="btn btn-sm btn-light" onclick="collapseForm()">
-          <i class="bi bi-dash-lg"></i>
-        </button>
-      </div>
-      <div class="card-body">
-        <form id="studentForm">
-          <input type="hidden" id="studentId" />
-          <div class="row g-3">
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="first_name" class="form-label">First Name</label>
-              <input class="form-control" id="first_name" placeholder="Enter first name" required />
-            </div>
-            <div class="col-md-6" data-aos="fade-left">
-              <label for="last_name" class="form-label">Last Name</label>
-              <input class="form-control" id="last_name" placeholder="Enter last name" required />
-            </div>
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="contact_number" class="form-label">Contact Number</label>
-              <input class="form-control" id="contact_number" placeholder="Enter phone number" required />
-            </div>
-            <div class="col-md-6" data-aos="fade-left">
-              <label for="email" class="form-label">Email</label>
-              <input type="email" class="form-control" id="email" placeholder="Enter email address" required />
-            </div>
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="college_name" class="form-label">College Name</label>
-              <input class="form-control" id="college_name" placeholder="Enter college name" />
-            </div>
-            <div class="col-md-6" data-aos="fade-left">
-              <label for="study_year" class="form-label">Study Year</label>
-              <select class="form-select" id="study_year">
-                <option value="">Select year</option>
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
-                <option value="Graduate">Graduate</option>
-              </select>
-            </div>
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="district" class="form-label">District</label>
-              <input class="form-control" id="district" placeholder="Enter district" />
-            </div>
-            <div class="col-md-6" data-aos="fade-left">
-              <label for="payment_method" class="form-label">Payment Method</label>
-              <select class="form-select" id="payment_method">
-                <option value="">Select method</option>
-                <option value="Mobile Money">Mobile Money</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cash">Cash</option>
-              </select>
-            </div>
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="payment_number" class="form-label">Payment Number</label>
-              <input class="form-control" id="payment_number" placeholder="Enter payment number" />
-            </div>
-            <div class="col-md-6" data-aos="fade-left">
-              <label for="target" class="form-label">Target Users</label>
-              <div class="input-group">
-                <input type="number" class="form-control" id="target" placeholder="Enter target amount" />
-              </div>
-            </div>
-            <div class="col-md-6" data-aos="fade-right">
-              <label for="attained" class="form-label">Attained Users</label>
-              <div class="input-group">
-                <input type="number" class="form-control" id="attained" placeholder="Enter attained amount" readonly/>
-              </div>
-            </div>
-            <div class="col-12 mt-3" data-aos="fade-up">
-              <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                  <span id="submitText"><i class="bi bi-save-fill me-2"></i>Save Student</span>
-                  <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Students List Card -->
-    <div class="card" data-aos="fade-up" data-aos-delay="100">
-      <div class="card-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <span><i class="bi bi-people-fill me-2"></i>Student Records</span>
-          <div class="input-group" style="width: 300px;">
-            <input type="text" class="form-control" placeholder="Search students..." id="searchInput">
-            <button class="btn btn-outline-primary" type="button">
-              <i class="bi bi-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover" id="studentTable">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Contact</th>
-                <th>College</th>
-                <th>Progress</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="studentTableBody">
-              <!-- Loading spinner will be shown here initially -->
-              <tr>
-                <td colspan="6" class="text-center">
-                  <div class="spinner-container">
-                    <div class="spinner"></div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Pagination -->
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-center mt-4">
-            <li class="page-item disabled">
-              <a class="page-link" href="#" tabindex="-1">Previous</a>
-            </li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#">Next</a>
-            </li>
-          </ul>
-        </nav>
+      <div class="modal-body">
+        <div id="referralNetwork" style="height: 500px;"></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Floating Action Button -->
-  <div class="floating-button" onclick="showForm()" data-aos="fade-up" data-aos-delay="200">
-    <i class="bi bi-plus-lg" style="font-size: 1.5rem;"></i>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" id="appNav"></nav>
+
+  <!-- Main Content -->
+  <div class="container-fluid mt-4" id="app">
+    <div class="row">
+      <div class="col-md-3" id="sidebar"></div>
+      <div class="col-md-9" id="main-content"></div>
+    </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-  
+  <!-- Footer -->
+  <footer class="text-center text-muted mt-5 mb-3">© 2025 Referral Program</footer>
+
   <script>
-    // Initialize AOS animation
-    AOS.init({
-      duration: 80,
-      easing: 'ease-in-out',
-      once: true
-    });
+    const API_URL = 'https://eventdb.onrender.com';
+    const ADMIN_API_URL = 'https://eventdb.onrender.com/admin'; // Add this line
+    let currentUser = null;
+    let allStudents = [];
+    let selectedStudent = null;
 
-    const API_BASE = 'https://eventdb.onrender.com/students'; 
-    const jwtToken = localStorage.getItem('jwtToken');
-    if (!jwtToken) {
-      Swal.fire({
-        title: 'Authentication Required',
-        text: 'No token found. Please log in first.',
-        icon: 'warning',
-        confirmButtonText: 'Go to Login',
-        allowOutsideClick: false
-      }).then(() => {
-        window.location.href = '/login.html';
-      });
-    }
+    // Initialize App
+   document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('student');
+  if (token) currentUser = JSON.parse(token);
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${jwtToken}`
-    };
-
-    // Toggle form visibility
-    function collapseForm() {
-      const formCard = document.getElementById('studentFormCard');
-      formCard.style.display = formCard.style.display === 'none' ? 'block' : 'none';
-    }
-    
-    function showForm() {
-      document.getElementById('studentFormCard').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Show loading state
-    function showLoading(element) {
-      const textElement = element.querySelector('#submitText');
-      const spinnerElement = element.querySelector('#submitSpinner');
+  renderNav();
+  loadRoute(window.location.hash || '#dashboard');
+  window.addEventListener('hashchange', () => loadRoute(window.location.hash));
+  
+  // Load all students data for sidebar
+  if (currentUser && (currentUser.role === 'mentor' || currentUser.role === 'admin')) {
+    try {
+      const [studentsRes, statsRes] = await Promise.all([
+        fetch(`${ADMIN_API_URL}/students`),
+        fetch(`${ADMIN_API_URL}/stats`)
+      ]);
       
-      textElement.classList.add('d-none');
-      spinnerElement.classList.remove('d-none');
-      element.disabled = true;
-    }
-    
-    // Hide loading state
-    function hideLoading(element) {
-      const textElement = element.querySelector('#submitText');
-      const spinnerElement = element.querySelector('#submitSpinner');
+      allStudents = await studentsRes.json();
+      const stats = await statsRes.json();
       
-      textElement.classList.remove('d-none');
-      spinnerElement.classList.add('d-none');
-      element.disabled = false;
-    }
-
-    // Load All Students
-    async function loadStudents() {
-      try {
-        // Show loading in table
-        const tbody = document.querySelector('#studentTableBody');
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="text-center">
-              <div class="spinner-container">
-                <div class="spinner"></div>
-              </div>
-            </td>
-          </tr>
-        `;
-
-        const res = await fetch(API_BASE, { headers });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="6" class="text-center text-muted py-4">
-                <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
-                <p class="mt-2">No students found</p>
-              </td>
-            </tr>
-          `;
-          return;
-        }
-
-        data.forEach((student, index) => {
-          const progress = student.target > 0 ? 
-            Math.min(100, Math.round((student.attained / student.target) * 100)) : 0;
-            
-          const row = document.createElement('tr');
-          row.setAttribute('data-aos', 'fade-up');
-          row.setAttribute('data-aos-delay', `${index * 50}`);
-          row.innerHTML = `
-            <td>
-              <div class="fw-bold">${student.first_name} ${student.last_name}</div>
-              <div class="text-muted small">${student.email}</div>
-            </td>
-            <td>${student.contact_number || '-'}</td>
-            <td>${student.college_name || '-'}</td>
-            <td>
-              <div class="d-flex align-items-center">
-                <div class="progress flex-grow-1 me-2">
-                  <div class="progress-bar" role="progressbar" style="width: ${progress}%" 
-                    aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <small class="text-muted">${progress}%</small>
-              </div>
-              <small class="text-muted d-block">
-                ${student.attained || 0} of ${student.target || 0}
-              </small>
-            </td>
-            <td>
-              <span class="status-badge ${progress >= 100 ? 'status-active' : 'status-inactive'}">
-                ${progress >= 100 ? 'Completed' : 'In Progress'}
-              </span>
-            </td>
-            <td class="action-buttons">
-              <button class="btn btn-sm btn-outline-primary" onclick='editStudent(${JSON.stringify(student)})'>
-                <i class="bi bi-pencil-square"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${student.id})">
-                <i class="bi bi-trash"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-primary" onclick='viewStudent(${JSON.stringify(student).replace(/'/g, "&apos;")})'>
-  <i class="bi bi-eye"></i>
-</button>
-
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-        
-        // Re-initialize AOS for new elements
-        AOS.refresh();
-      } catch (error) {
-        console.error('Error loading students:', error);
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="text-center text-danger py-4">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-              <p class="mt-2">Failed to load students</p>
-              <button class="btn btn-sm btn-primary mt-2" onclick="loadStudents()">
-                <i class="bi bi-arrow-repeat"></i> Retry
-              </button>
-            </td>
-          </tr>
-        `;
-      }
-    }
-
-    function viewStudent(student) {
-      const { first_name, last_name, email, contact_number, college_name, attained, target } = student;
-      const percent = target && target > 0 ? Math.round((attained / target) * 100) : 0;
+      // You can use stats for dashboard if needed
+      console.log('System stats:', stats);
       
-      Swal.fire({
-        title: `${first_name} ${last_name}`,
-        html: `
-          <div class="text-start">
-            <p><i class="bi bi-envelope-fill me-2"></i> <strong>Email:</strong> ${email}</p>
-            <p><i class="bi bi-telephone-fill me-2"></i> <strong>Contact:</strong> ${contact_number || 'N/A'}</p>
-            <p><i class="bi bi-building me-2"></i> <strong>College:</strong> ${college_name || 'N/A'}</p>
-            <div class="mt-3">
-              <h6>Progress</h6>
-              <div class="progress mb-2">
-                <div class="progress-bar" role="progressbar" style="width: ${percent}%" 
-                  aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-              <p>${attained || 0} of ${target || 0} (${percent}%)</p>
-            </div>
-          </div>
-        `,
-        confirmButtonText: 'Close',
-        showCloseButton: true,
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        }
-      });
+    } catch (error) {
+      console.error('Error loading data:', error);
+      alert('Failed to load student data');
     }
-
-    // Save Student
-    document.getElementById('studentForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const submitBtn = document.getElementById('submitBtn');
-      showLoading(submitBtn);
-
-      const student = {
-        first_name: document.getElementById('first_name').value,
-        last_name: document.getElementById('last_name').value,
-        contact_number: document.getElementById('contact_number').value,
-        email: document.getElementById('email').value,
-        college_name: document.getElementById('college_name').value,
-        study_year: document.getElementById('study_year').value,
-        district: document.getElementById('district').value,
-        payment_method: document.getElementById('payment_method').value,
-        payment_number: document.getElementById('payment_number').value,
-        target: parseInt(document.getElementById('target').value) || 0,
-        attained: parseInt(document.getElementById('attained').value) || 0
-      };
-
-      const studentId = document.getElementById('studentId').value;
-      const method = studentId ? 'PUT' : 'POST';
-      const url = studentId ? `${API_BASE}/${studentId}` : API_BASE;
-
-      try {
-        const res = await fetch(url, {
-          method,
-          headers,
-          body: JSON.stringify(student)
-        });
-
-        if (res.ok) {
-          const result = await res.json();
-          hideLoading(submitBtn);
-       Swal.fire({
-  title: 'Success!',
-  html: `
-    Student ${studentId ? 'updated' : 'added'} successfully.<br><br>
-    <button class="btn btn-success" onclick="shareStudent('${student.first_name}', '${student.email}', '${student.contact_number}')">
-      <i class="bi bi-whatsapp"></i> Share Login Link
-    </button>
-  `,
-  icon: 'success',
-  confirmButtonText: 'OK',
-  timer: 5000,
-  timerProgressBar: true,
-  willClose: () => {
-    document.getElementById('studentForm').reset();
-    document.getElementById('studentId').value = '';
-    loadStudents();
   }
 });
 
-        } else {
-          const error = await res.json();
-          throw new Error(error.message || 'Failed to save student');
-        }
-      } catch (error) {
-        hideLoading(submitBtn);
-        console.error('Error saving student:', error);
-        
-        Swal.fire({
-          title: 'Error!',
-          text: error.message || 'Failed to save student. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+    // Render Nav based on Role
+    function renderNav() {
+      const nav = document.getElementById('appNav');
+      nav.innerHTML = `
+        <div class="container-fluid">
+          <a class="navbar-brand fw-bold" href="#"><i class="bi bi-people-fill me-2"></i>Referral Dashboard</a>
+          <ul class="navbar-nav ms-auto d-flex flex-row align-items-center">
+            ${currentUser ? `
+              <li class="nav-item me-3">
+                <div class="d-flex align-items-center">
+                  <img src="${currentUser.photo_url || 'https://via.placeholder.com/40'}" class="user-avatar me-2">
+                  <span class="nav-link text-white">Hi, ${currentUser.first_name}</span>
+                </div>
+              </li>
+            ` : ''}
+            <li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#dashboard' ? 'active' : ''}" onclick="navigateTo('#dashboard')"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+            ${currentUser && currentUser.role === 'mentor' ? `<li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#assign-target' ? 'active' : ''}" onclick="navigateTo('#assign-target')"><i class="bi bi-bullseye me-1"></i> Assign Target</a></li>` : ''}
+            ${currentUser && currentUser.role === 'admin' ? `<li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#approve-students' ? 'active' : ''}" onclick="navigateTo('#approve-students')"><i class="bi bi-check-circle me-1"></i> Approve</a></li>` : ''}
+            ${currentUser && currentUser.role === 'admin' ? `<li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#promote' ? 'active' : ''}" onclick="navigateTo('#promote')"><i class="bi bi-arrow-up-circle me-1"></i> Promote</a></li>` : ''}
+            ${currentUser && currentUser.role === 'admin' ? `
+  <li class="nav-item me-2">
+    <a class="nav-link route-link ${window.location.hash === '#manage-mentors' ? 'active' : ''}" 
+       onclick="navigateTo('#manage-mentors')">
+      <i class="bi bi-person-gear me-1"></i> Manage Mentors
+    </a>
+  </li>
+` : ''}
+            <li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#leaderboard' ? 'active' : ''}" onclick="navigateTo('#leaderboard')"><i class="bi bi-trophy me-1"></i> Leaderboard</a></li>
+            <li class="nav-item me-2"><a class="nav-link route-link ${window.location.hash === '#referral-tree' ? 'active' : ''}" onclick="navigateTo('#referral-tree')"><i class="bi bi-diagram-3 me-1"></i> Tree</a></li>
+            <li class="nav-item"><a class="nav-link" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-1"></i> Logout</a></li>
+          </ul>
+        </div>
+      `;
+    }
+
+    function navigateTo(route) {
+      window.location.hash = route;
+      renderNav();
+    }
+
+    function logout() {
+      localStorage.removeItem('student');
+      currentUser = null;
+      navigateTo('#login');
+      location.reload();
+    }
+
+    // Load Route Content
+    async function loadRoute(hash) {
+      const sidebar = document.getElementById('sidebar');
+      const main = document.getElementById('main-content');
+      
+      // Clear previous content
+      sidebar.innerHTML = '';
+      main.innerHTML = '';
+      
+      switch (hash) {
+        case '#login':
+          main.innerHTML = await getLoginForm();
+          break;
+        case '#register':
+          main.innerHTML = await getRegisterForm();
+          break;
+        case '#dashboard':
+          sidebar.innerHTML = await getDashboardSidebar();
+          main.innerHTML = await getDashboard();
+          break;
+        case '#assign-target':
+          sidebar.innerHTML = await getStudentListSidebar();
+          main.innerHTML = await getAssignTargetForm();
+          break;
+        case '#approve-students':
+          sidebar.innerHTML = await getStudentListSidebar('pending');
+          main.innerHTML = await getApproveStudentsList();
+          break;
+        case '#promote':
+          sidebar.innerHTML = await getStudentListSidebar('ready');
+          main.innerHTML = await getPromoteStudentsList();
+          break;
+        case '#leaderboard':
+          sidebar.innerHTML = await getLeaderboardSidebar();
+          main.innerHTML = await getLeaderboardTable();
+          break;
+        case '#referral-tree':
+          sidebar.innerHTML = await getReferralTreeSidebar();
+          main.innerHTML = await getReferralTree();
+          break;
+        case '#manage-mentors':
+  sidebar.innerHTML = await getStudentListSidebar();
+  main.innerHTML = await getManageMentorsForm();
+  break;  
+  
+        default:
+          sidebar.innerHTML = await getDashboardSidebar();
+          main.innerHTML = await getDashboard();
       }
+      
+      // Highlight active route in navbar
+      document.querySelectorAll('.route-link').forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('onclick').includes(hash)) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    // Sidebar components
+    async function getDashboardSidebar() {
+      if (!currentUser) return '';
+      
+      return `
+        <div class="card mb-4">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>My Profile</h5>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-3">
+              <img src="${currentUser.photo_url || 'https://via.placeholder.com/150'}" class="img-fluid rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+              <h5>${currentUser.first_name} ${currentUser.last_name}</h5>
+              <span class="badge ${
+                currentUser.role === 'admin' ? 'badge-admin' : 
+                currentUser.role === 'mentor' ? 'badge-mentor' : 
+                currentUser.status === 'approved' ? 'badge-approved' : 'badge-pending'
+              } badge-status">
+                ${currentUser.role === 'admin' ? 'Admin' : currentUser.role === 'mentor' ? 'Mentor' : currentUser.status}
+              </span>
+            </div>
+            
+            <div class="mb-3">
+              <small class="text-muted">Email</small>
+              <p>${currentUser.email}</p>
+            </div>
+            
+            <div class="mb-3">
+              <small class="text-muted">Contact</small>
+              <p>${currentUser.contact_number}</p>
+            </div>
+            
+            <div class="mb-3">
+              <small class="text-muted">College</small>
+              <p>${currentUser.college_name}</p>
+            </div>
+            
+            <div class="mb-3">
+              <small class="text-muted">Referral Code</small>
+              <p class="fw-bold">${currentUser.referral_code || 'Pending'}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getStudentListSidebar(filter = 'all') {
+      if (!currentUser || !(currentUser.role === 'mentor' || currentUser.role === 'admin')) return '';
+      
+      let filteredStudents = allStudents;
+      if (filter === 'pending') {
+        filteredStudents = allStudents.filter(s => s.status === 'pending');
+      } else if (filter === 'ready') {
+        filteredStudents = allStudents.filter(s => s.attained >= s.target && s.target > 0);
+      }
+      
+      return `
+        <div class="card mb-4">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Students</h5>
+            <span class="badge bg-primary rounded-pill">${filteredStudents.length}</span>
+          </div>
+          <div class="card-body p-0">
+            <div class="search-box p-3 border-bottom">
+              <i class="bi bi-search"></i>
+              <input type="text" id="studentSearch" class="form-control form-control-sm" placeholder="Search students..." onkeyup="filterStudents()">
+            </div>
+            <div class="list-group list-group-flush" id="studentList" style="max-height: 500px; overflow-y: auto;">
+              ${filteredStudents.map(student => `
+                <a href="#" class="list-group-item list-group-item-action user-card ${selectedStudent && selectedStudent.id === student.id ? 'selected' : ''}" 
+                   onclick="selectStudent(${student.id})" data-id="${student.id}">
+                  <div class="d-flex align-items-center">
+                    <img src="${student.photo_url || 'https://via.placeholder.com/40'}" class="rounded-circle me-3" width="40" height="40">
+                    <div>
+                      <h6 class="mb-0">${student.first_name} ${student.last_name}</h6>
+                      <small class="text-muted">${student.email}</small>
+                    </div>
+                    <div class="ms-auto">
+                      <span class="badge ${
+                        student.role === 'admin' ? 'badge-admin' : 
+                        student.role === 'mentor' ? 'badge-mentor' : 
+                        student.status === 'approved' ? 'badge-approved' : 'badge-pending'
+                      } badge-status">
+                        ${student.role === 'admin' ? 'Admin' : student.role === 'mentor' ? 'Mentor' : student.status}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getLeaderboardSidebar() {
+      return `
+        <div class="card mb-4">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Leaderboard Info</h5>
+          </div>
+          <div class="card-body">
+            <p>The leaderboard shows the top performers in the referral program based on their total referrals.</p>
+            <p class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Approved: Referrals that have been approved</p>
+            <p><i class="bi bi-people-fill text-primary me-2"></i>Total: All referrals including pending ones</p>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getReferralTreeSidebar() {
+      if (!currentUser) return '';
+      
+      return `
+        <div class="card mb-4">
+          <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Tree Info</h5>
+          </div>
+          <div class="card-body">
+            <p>Your referral tree shows all users who joined through your referral code.</p>
+            <div class="d-flex align-items-center mb-2">
+              <div class="tree-node mentor me-2" style="width: 20px; height: 20px;"></div>
+              <small>Mentor</small>
+            </div>
+            <div class="d-flex align-items-center mb-2">
+              <div class="tree-node admin me-2" style="width: 20px; height: 20px;"></div>
+              <small>Admin</small>
+            </div>
+            <div class="d-flex align-items-center">
+              <div class="tree-node me-2" style="width: 20px; height: 20px;"></div>
+              <small>Student</small>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Main content components
+    async function getDashboard() {
+      if (!currentUser) return '<div class="alert alert-danger">Please login first.</div>';
+      
+      const progressPercentage = currentUser.target > 0 ? 
+        Math.min(100, Math.round((currentUser.attained / currentUser.target) * 100)) : 0;
+      
+      return `
+        <div class="card mb-4">
+          <div class="card-header bg-white">
+            <h4 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard Overview</h4>
+          </div>
+          <div class="card-body">
+            <div class="row mb-4">
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card primary h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Target</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${currentUser.target || 0}</div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="bi bi-bullseye fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card success h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Attained</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${currentUser.attained || 0}</div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card warning h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Progress</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${progressPercentage}%</div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="bi bi-graph-up fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card info h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Referral Code</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${currentUser.referral_code || 'Pending'}</div>
+                      </div>
+                      <div class="col-auto">
+                        <i class="bi bi-upc-scan fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                  <div class="card-header bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">Target Progress</h6>
+                  </div>
+                  <div class="card-body">
+                    <h4 class="small font-weight-bold">Target Completion <span class="float-right">${progressPercentage}%</span></h4>
+                    <div class="progress mb-4">
+                      <div class="progress-bar" role="progressbar" style="width: ${progressPercentage}%" 
+                        aria-valuenow="${progressPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="mb-0">${currentUser.attained || 0} out of ${currentUser.target || 0} referrals completed</p>
+                    ${currentUser.target > 0 && currentUser.attained >= currentUser.target ? 
+                      '<div class="alert alert-success mt-3 mb-0">Congratulations! You\'ve reached your target!</div>' : ''}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-6 mb-4">
+                <div class="card shadow h-100">
+                  <div class="card-header bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <a href="#leaderboard" class="btn btn-primary w-100 py-3">
+                          <i class="bi bi-trophy me-2"></i>Leaderboard
+                        </a>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <a href="#referral-tree" class="btn btn-info w-100 py-3 text-white">
+                          <i class="bi bi-diagram-3 me-2"></i>Referral Tree
+                        </a>
+                      </div>
+                      ${currentUser.role === 'mentor' ? `
+                        <div class="col-md-6">
+                          <a href="#assign-target" class="btn btn-warning w-100 py-3">
+                            <i class="bi bi-bullseye me-2"></i>Assign Target
+                          </a>
+                        </div>
+                      ` : ''}
+                      ${currentUser.role === 'admin' ? `
+                        <div class="col-md-6">
+                          <a href="#approve-students" class="btn btn-success w-100 py-3">
+                            <i class="bi bi-check-circle me-2"></i>Approve Students
+                          </a>
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getAssignTargetForm() {
+      if (!currentUser || currentUser.role !== 'mentor') return '<div class="alert alert-danger">Access Denied</div>';
+
+      return `
+        <div class="card shadow">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-bullseye me-2"></i>Assign Target</h4>
+            ${selectedStudent ? `
+              <div class="d-flex align-items-center">
+                <img src="${selectedStudent.photo_url || 'https://via.placeholder.com/40'}" class="rounded-circle me-2" width="30" height="30">
+                <span>${selectedStudent.first_name} ${selectedStudent.last_name}</span>
+              </div>
+            ` : '<span class="text-muted">Select a student from the sidebar</span>'}
+          </div>
+          <div class="card-body">
+            ${selectedStudent ? `
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="card bg-light">
+                    <div class="card-body">
+                      <h5 class="card-title">Current Status</h5>
+                      <table class="table table-sm">
+                        <tr>
+                          <th>Current Target</th>
+                          <td>${selectedStudent.target || 0}</td>
+                        </tr>
+                        <tr>
+                          <th>Attained</th>
+                          <td>${selectedStudent.attained || 0}</td>
+                        </tr>
+                        <tr>
+                          <th>Progress</th>
+                          <td>
+                            <div class="progress" style="height: 10px;">
+                              <div class="progress-bar" role="progressbar"
+                                style="width: ${selectedStudent.target > 0 ? Math.min(100, Math.round((selectedStudent.attained / selectedStudent.target) * 100)) : 0}%"
+                                aria-valuenow="${selectedStudent.target > 0 ? Math.min(100, Math.round((selectedStudent.attained / selectedStudent.target) * 100)) : 0}"
+                                aria-valuemin="0" aria-valuemax="100">
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card bg-light">
+                    <div class="card-body">
+                      <h5 class="card-title">Student Info</h5>
+                      <table class="table table-sm">
+                        <tr>
+                          <th>Email</th>
+                          <td>${selectedStudent.email}</td>
+                        </tr>
+                        <tr>
+                          <th>College</th>
+                          <td>${selectedStudent.college_name}</td>
+                        </tr>
+                        <tr>
+                          <th>Referral Code</th>
+                          <td>${selectedStudent.referral_code || 'None'}</td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <form id="assignTargetForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Current Target</label>
+                    <input type="text" class="form-control" value="${selectedStudent.target || 0}" disabled>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Current Attained</label>
+                    <input type="text" class="form-control" value="${selectedStudent.attained || 0}" disabled>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="form-label">New Target</label>
+                  <input type="number" name="target" class="form-control" required min="1" value="${selectedStudent.target || ''}">
+                  <input type="hidden" name="student_id" value="${selectedStudent.id}">
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-2"></i>Update Target
+                  </button>
+                </div>
+              </form>
+            ` : `
+              <div class="text-center py-5">
+                <i class="bi bi-people display-4 text-muted mb-3"></i>
+                <h4 class="text-muted">Select a student from the sidebar to assign target</h4>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    async function getApproveStudentsList() {
+      if (!currentUser || currentUser.role !== 'admin') return '<div class="alert alert-danger">Access Denied</div>';
+
+      const pendingStudents = allStudents.filter(s => s.status === 'pending');
+      
+      if (pendingStudents.length === 0) {
+        return `
+          <div class="card shadow">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="bi bi-check-circle me-2"></i>Pending Approvals</h4>
+            </div>
+            <div class="card-body text-center py-5">
+              <i class="bi bi-emoji-smile display-4 text-success mb-3"></i>
+              <h4 class="text-success">No pending approvals!</h4>
+              <p class="text-muted">All students have been approved.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card shadow">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-check-circle me-2"></i>Pending Approvals</h4>
+            <span class="badge bg-primary rounded-pill">${pendingStudents.length} pending</span>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>College</th>
+                    <th>Documents</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${pendingStudents.map(student => `
+                    <tr>
+                      <td>
+                        <img src="${student.photo_url || 'https://via.placeholder.com/40'}" class="rounded-circle" width="40" height="40">
+                      </td>
+                      <td>
+                        <strong>${student.first_name} ${student.last_name}</strong><br>
+                        <small class="text-muted">${student.email}</small>
+                      </td>
+                      <td>${student.contact_number}</td>
+                      <td>${student.college_name}</td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <a href="${student.clg_id_photo_url}" target="_blank" class="btn btn-outline-primary">ID</a>
+                          <a href="${student.photo_url}" target="_blank" class="btn btn-outline-primary">Photo</a>
+                          <a href="${student.signature_photo_url}" target="_blank" class="btn btn-outline-primary">Signature</a>
+                        </div>
+                      </td>
+                      <td>
+                        <button class="btn btn-success btn-sm" onclick="approveStudent(${student.id})">
+                          <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getPromoteStudentsList() {
+      if (!currentUser || currentUser.role !== 'admin') return '<div class="alert alert-danger">Access Denied</div>';
+
+      const readyStudents = allStudents.filter(s => s.attained >= s.target && s.target > 0);
+      
+      if (readyStudents.length === 0) {
+        return `
+          <div class="card shadow">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Ready for Promotion</h4>
+            </div>
+            <div class="card-body text-center py-5">
+              <i class="bi bi-emoji-frown display-4 text-warning mb-3"></i>
+              <h4 class="text-warning">No students ready for promotion</h4>
+              <p class="text-muted">Students will appear here when they reach their targets.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card shadow">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Ready for Promotion</h4>
+            <span class="badge bg-primary rounded-pill">${readyStudents.length} ready</span>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Target</th>
+                    <th>Attained</th>
+                    <th>Progress</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${readyStudents.map(student => {
+                    const progress = Math.min(100, Math.round((student.attained / student.target) * 100));
+                 return `
+                      <tr>
+                        <td>
+                          <strong>${student.first_name} ${student.last_name}</strong><br>
+                          <small class="text-muted">${student.referral_code || 'No code'}</small>
+                        </td>
+                        <td>${student.email}</td>
+                        <td>${student.target}</td>
+                        <td>${student.attained}</td>
+                        <td>
+                          <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                              style="width: ${progress}%" 
+                              aria-valuenow="${progress}" 
+                              aria-valuemin="0" 
+                              aria-valuemax="100">
+                            </div>
+                          </div>
+                          <small>${progress}%</small>
+                        </td>
+                        <td>
+                          <button class="btn btn-warning btn-sm" onclick="promoteStudent(${student.id})">
+                            <i class="bi bi-arrow-up"></i> Promote
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getLeaderboardTable() {
+      const res = await fetch(`${API_URL}/referral/leaderboard`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        return `
+          <div class="card shadow">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="bi bi-trophy me-2"></i>Leaderboard</h4>
+            </div>
+            <div class="card-body text-center py-5">
+              <i class="bi bi-emoji-frown display-4 text-warning mb-3"></i>
+              <h4 class="text-warning">Leaderboard is empty</h4>
+              <p class="text-muted">No referral data available yet.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card shadow">
+          <div class="card-header bg-white">
+            <h4 class="mb-0"><i class="bi bi-trophy me-2"></i>Leaderboard</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Referrals</th>
+                    <th>Approved</th>
+                    <th>Attained</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map((entry, i) => {
+                       const progress = entry.target > 0 ? 
+ Math.min(100, Math.round((entry.total_attained / entry.target) * 100)) : 0;
+             
+                    return `
+                      <tr>
+                        <td>
+                          ${i + 1}
+                          ${i < 3 ? `<i class="bi bi-trophy-fill ms-1 ${i === 0 ? 'text-warning' : i === 1 ? 'text-secondary' : 'text-danger'}"></i>` : ''}
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <img src="${entry.photo_url || 'https://via.placeholder.com/40'}" class="rounded-circle me-2" width="30" height="30">
+                            <div>
+                              ${entry.first_name} ${entry.last_name}<br>
+                              <small class="text-muted">${entry.role === 'mentor' ? 'Mentor' : entry.role === 'admin' ? 'Admin' : 'Student'}</small>
+                            </div>
+                          </div>
+                        </td>
+                        <td>${entry.total_referrals}</td>
+                        <td>${entry.approved_referrals}</td>
+                        <td>${entry.total_attained}</td>
+                        <td>
+                          <div class="progress" style="height: 10px;">
+                            <div class="progress-bar ${progress >= 100 ? 'bg-success' : ''}" 
+                              role="progressbar" 
+                              style="width: ${progress}%" 
+                              aria-valuenow="${progress}" 
+                              aria-valuemin="0" 
+                              aria-valuemax="100">
+                            </div>
+                          </div>
+                          <small>${progress}%</small>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function getReferralTree() {
+      if (!currentUser) return '<div class="alert alert-danger">Login Required</div>';
+
+      const res = await fetch(`${API_URL}/students/referral-tree/${currentUser.referral_code}`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        return `
+          <div class="card shadow">
+            <div class="card-header bg-white">
+              <h4 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Referral Tree</h4>
+            </div>
+            <div class="card-body text-center py-5">
+              <i class="bi bi-people display-4 text-muted mb-3"></i>
+              <h4 class="text-muted">Your referral tree is empty</h4>
+              <p class="text-muted">No one has joined using your referral code yet.</p>
+              ${currentUser.referral_code ? `
+                <div class="alert alert-info mt-3">
+                  <h5>Your Referral Code: <strong>${currentUser.referral_code}</strong></h5>
+                  <p>Share this code with others to build your referral tree!</p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Organize data by levels
+      const levels = {};
+      data.forEach(entry => {
+        if (!levels[entry.level]) levels[entry.level] = [];
+        levels[entry.level].push(entry);
+      });
+
+      return `
+        <div class="card shadow">
+          <div class="card-header bg-white">
+            <h4 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Referral Tree</h4>
+          </div>
+          <div class="card-body">
+            ${currentUser.referral_code ? `
+              <div class="alert alert-info mb-4">
+                <h5>Your Referral Code: <strong>${currentUser.referral_code}</strong></h5>
+                <p>Share this code with others to build your referral tree!</p>
+              </div>
+            ` : ''}
+            
+            <div class="d-flex justify-content-center">
+              <div class="text-center mb-4">
+                <div class="tree-node ${currentUser.role === 'mentor' ? 'mentor' : currentUser.role === 'admin' ? 'admin' : ''} p-3 mb-2">
+                  <img src="${currentUser.photo_url || 'https://via.placeholder.com/50'}" class="rounded-circle mb-1" width="50" height="50">
+                  <div><strong>You</strong></div>
+                  <small>Level 0</small>
+                </div>
+              </div>
+            </div>
+            
+            ${Object.keys(levels).map(level => `
+              <div class="text-center mb-4">
+                <h5 class="mb-3">Level ${level}</h5>
+                <div class="d-flex justify-content-center flex-wrap">
+                  ${levels[level].map(user => `
+                    <div class="mx-3 mb-4">
+                      <div class="tree-connector"></div>
+                      <div class="tree-node ${user.role === 'mentor' ? 'mentor' : user.role === 'admin' ? 'admin' : ''} p-2">
+                        <img src="${user.photo_url || 'https://via.placeholder.com/40'}" class="rounded-circle mb-1" width="40" height="40">
+                        <div><strong>${user.first_name}</strong></div>
+                        <small>${user.role === 'mentor' ? 'Mentor' : user.role === 'admin' ? 'Admin' : 'Student'}</small>
+                        <div class="mt-1">
+                          <span class="badge ${user.target_achieved ? 'bg-success' : 'bg-secondary'}">
+                            ${user.target_achieved ? 'Target ✓' : 'Target ✗'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+            
+            <div class="table-responsive mt-4">
+              <table class="table table-bordered">
+                <thead class="table-light">
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Level</th>
+                    <th>Target Achieved</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(entry => `
+                    <tr>
+                      <td>${entry.first_name} ${entry.last_name}</td>
+                      <td>${entry.email}</td>
+                      <td>
+                        <span class="badge ${
+                          entry.role === 'admin' ? 'badge-admin' : 
+                          entry.role === 'mentor' ? 'badge-mentor' : 
+                          'bg-secondary'
+                        }">
+                          ${entry.role === 'admin' ? 'Admin' : entry.role === 'mentor' ? 'Mentor' : 'Student'}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge ${
+                          entry.status === 'approved' ? 'badge-approved' : 'badge-pending'
+                        }">
+                          ${entry.status}
+                        </span>
+                      </td>
+                      <td>${entry.level}</td>
+                      <td>${entry.target_achieved ? '✅' : '❌'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+
+
+    async function getManageMentorsForm() {
+  if (!currentUser || currentUser.role !== 'admin') return '<div class="alert alert-danger">Access Denied</div>';
+
+  try {
+    // Fetch mentors and their students using the admin route
+    const mentorsRes = await fetch(`${ADMIN_API_URL}/mentors`);
+    const mentors = await mentorsRes.json();
+
+    // Fetch all regular students (non-mentors, non-admins)
+    const studentsRes = await fetch(`${ADMIN_API_URL}/students`);
+    const allStudentsData = await studentsRes.json();
+    const regularStudents = allStudentsData.filter(s => s.role !== 'mentor' && s.role !== 'admin');
+
+    return `
+      <div class="card shadow">
+        <div class="card-header bg-white">
+          <h4 class="mb-0"><i class="bi bi-person-gear me-2"></i>Manage Mentors</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="card mb-4">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0">Create New Mentor</h5>
+                </div>
+                <div class="card-body">
+                  <form id="createMentorForm">
+                    <div class="mb-3">
+                      <label class="form-label">Select Student to Promote</label>
+                      <select name="student_id" class="form-select" required>
+                        <option value="">Select a student</option>
+                        ${regularStudents.map(student => `
+                          <option value="${student.id}">
+                            ${student.first_name} ${student.last_name} (${student.email})
+                          </option>
+                        `).join('')}
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-person-plus me-2"></i>Promote to Mentor
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header bg-white">
+                  <h5 class="mb-0">Assign Students to Mentors</h5>
+                </div>
+                <div class="card-body">
+                  <form id="assignStudentsForm">
+                    <div class="mb-3">
+                      <label class="form-label">Select Mentor</label>
+                      <select name="mentor_id" class="form-select" required>
+                        <option value="">Select a mentor</option>
+                        ${mentors.map(mentor => `
+                          <option value="${mentor.mentor_id}">
+                            ${mentor.mentor_name} (${mentor.referral_code})
+                          </option>
+                        `).join('')}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Select Students</label>
+                      <select name="student_ids" class="form-select" multiple required>
+                        ${regularStudents.map(student => `
+                          <option value="${student.id}">
+                            ${student.first_name} ${student.last_name} (${student.email})
+                          </option>
+                        `).join('')}
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-link me-2"></i>Assign Students
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card mt-4">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Mentor Performance</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Mentor</th>
+                      <th>Referral Code</th>
+                      <th>Downline Count</th>
+                      <th>Total Attained</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${mentors.map(mentor => `
+                      <tr>
+                        <td>${mentor.mentor_name}</td>
+                        <td>${mentor.referral_code}</td>
+                        <td>${mentor.downline_count}</td>
+                        <td>${mentor.total_attained}</td>
+                        <td>
+                          <button class="btn btn-sm btn-info" onclick="viewMentorTree(${mentor.mentor_id})">
+                            <i class="bi bi-diagram-3"></i> View Tree
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading mentor data:', error);
+    return '<div class="alert alert-danger">Failed to load mentor data</div>';
+  }
+}
+
+// Add this new function to view mentor tree
+async function viewMentorTree(mentorId) {
+  try {
+    const res = await fetch(`http://localhost:4000/admin/referral-tree/${mentorId}`);
+    const downlines = await res.json();
+
+    const mentorRes = await fetch(`http://localhost:4000/admin/student/${mentorId}`);
+    const mentor = await mentorRes.json();
+
+    const nodes = [];
+    const edges = [];
+
+    // Mentor node
+    const mentorNodeId = `mentor-${mentor.id}`;
+    nodes.push({
+      id: mentorNodeId,
+      label: `${mentor.first_name} ${mentor.last_name}\n(Mentor)`,
+      shape: "box",
+      color: { background: "#0d6efd", border: "#003eaa", highlight: "#0a58ca" },
+      font: { color: "#fff", bold: true }
     });
 
+    // Add downlines
+    downlines.forEach(student => {
+      const studentNodeId = `student-${student.id}`;
+      nodes.push({
+        id: studentNodeId,
+        label: `${student.first_name} ${student.last_name}`,
+        title: `Email: ${student.email}\nTarget: ${student.target}, Attained: ${student.attained}`,
+        shape: "ellipse",
+        color: student.status === 'approved' ? '#198754' : '#ffc107'
+      });
 
-    function shareStudent(name, email, phone) {
-  const loginLink = `https://eventorag.netlify.app/stdlogin.html`;
-  const message = `👋 Hello ${name},\n\nYou have been successfully registered for the Referer program.\n\n🔐 Login using:\n📧 Email: ${email}\n📱 Phone: ${phone}\n\n🔗 Login here: ${loginLink}\n\n📊 You can also track your referral progress on the portal.\n\nBest wishes!`;
-  const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+      edges.push({
+        from: mentorNodeId,
+        to: studentNodeId
+      });
+    });
 
-  window.open(whatsappUrl, '_blank');
+    // Draw the network
+    const container = document.getElementById("referralNetwork");
+    const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+
+    const options = {
+      layout: {
+        hierarchical: {
+          direction: "UD",
+          sortMethod: "directed"
+        }
+      },
+      interaction: { hover: true },
+      physics: false
+    };
+
+    new vis.Network(container, data, options);
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('mentorTreeModal')).show();
+
+  } catch (error) {
+    console.error('Error loading tree:', error);
+    alert('Failed to load referral tree.');
+  }
 }
 
 
 
-    // Edit
-    function editStudent(student) {
-      document.getElementById('studentId').value = student.id;
-      document.getElementById('first_name').value = student.first_name;
-      document.getElementById('last_name').value = student.last_name;
-      document.getElementById('contact_number').value = student.contact_number;
-      document.getElementById('email').value = student.email;
-      document.getElementById('college_name').value = student.college_name;
-      document.getElementById('study_year').value = student.study_year;
-      document.getElementById('district').value = student.district;
-      document.getElementById('payment_method').value = student.payment_method;
-      document.getElementById('payment_number').value = student.payment_number;
-      document.getElementById('target').value = student.target;
-      document.getElementById('attained').value = student.attained;
-      
-      showForm();
+    async function getLoginForm() {
+      return `
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <div class="card shadow-lg">
+              <div class="card-body p-5">
+                <div class="text-center mb-4">
+                  <i class="bi bi-people-fill display-4 text-primary mb-3"></i>
+                  <h2 class="fw-bold">Referral System Login</h2>
+                  <p class="text-muted">Enter your credentials to access your dashboard</p>
+                </div>
+                
+                <form id="loginForm">
+                  <div class="mb-4">
+                    <label class="form-label">Contact Number</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                      <input type="text" name="contact_number" class="form-control" placeholder="Enter your contact number" required>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <label class="form-label">Email</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                      <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                  </div>
+                  
+                  <button type="submit" class="btn btn-primary w-100 py-2">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                  </button>
+                  
+                  <div class="text-center mt-3">
+                    <p class="text-muted">Don't have an account? <a href="#register" onclick="navigateTo('#register')">Register here</a></p>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    // Delete
-    async function deleteStudent(id) {
-      const { isConfirmed } = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-      });
-      
-      if (!isConfirmed) return;
-
-      try {
-        const res = await fetch(`${API_BASE}/${id}`, {
-          method: 'DELETE',
-          headers
-        });
-
-        if (res.ok) {
-          await Swal.fire({
-            title: 'Deleted!',
-            text: 'Student has been deleted.',
-            icon: 'success',
-            timer: 1500,
-            timerProgressBar: true,
-            showConfirmButton: false
-          });
-          loadStudents();
-        } else {
-          throw new Error('Delete failed');
-        }
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        Swal.fire({
-          title: 'Error!',
-          text: 'Failed to delete student. Please try again.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+    // Utility functions
+    function selectStudent(id) {
+      selectedStudent = allStudents.find(s => s.id === id);
+      if (window.location.hash === '#assign-target') {
+        loadRoute('#assign-target');
+      } else if (window.location.hash === '#approve-students') {
+        loadRoute('#approve-students');
+      } else if (window.location.hash === '#promote') {
+        loadRoute('#promote');
       }
     }
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      loadStudents();
+    function filterStudents() {
+      const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+      const studentCards = document.querySelectorAll('#studentList .user-card');
       
-      // Search functionality
-      document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#studentTable tbody tr');
-        
-        rows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+      studentCards.forEach(card => {
+        const name = card.querySelector('h6').textContent.toLowerCase();
+        const email = card.querySelector('small').textContent.toLowerCase();
+        if (name.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else if (email.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
       });
+    }
+
+    async function approveStudent(id) {
+      try {
+        const res = await fetch(`${API_URL}/students/approve/${id}`, { method: 'PUT' });
+        const result = await res.json();
+        
+        if (res.ok) {
+          // Update the student in our local data
+          const index = allStudents.findIndex(s => s.id === id);
+          if (index !== -1) {
+            allStudents[index].status = 'approved';
+          }
+          
+          // Show success message
+          alert(result.message);
+          
+          // Reload the view
+          loadRoute('#approve-students');
+        } else {
+          alert(result.error || 'Failed to approve student');
+        }
+      } catch (err) {
+        alert('Failed to approve student. Please try again.');
+        console.error(err);
+      }
+    }
+
+    async function promoteStudent(id) {
+      try {
+        const res = await fetch(`${API_URL}/students/promote/${id}`, { method: 'PUT' });
+        const result = await res.json();
+        
+        if (res.ok) {
+          // Update the student in our local data
+          const index = allStudents.findIndex(s => s.id === id);
+          if (index !== -1) {
+            allStudents[index].is_mentor = true;
+            allStudents[index].role = 'mentor';
+          }
+          
+          // Show success message
+          alert(result.message);
+          
+          // Reload the view
+          loadRoute('#promote');
+        } else {
+          alert(result.error || 'Failed to promote student');
+        }
+      } catch (err) {
+        alert('Failed to promote student. Please try again.');
+        console.error(err);
+      }
+    }
+
+    // Event listeners
+    document.body.addEventListener('submit', async (e) => {
+       if (e.target.id === 'createMentorForm') {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    
+    try {
+      const res = await fetch(`${ADMIN_API_URL}/promote-to-mentor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
+        alert('Student promoted to mentor successfully!');
+        // Refresh the data
+        const res = await fetch(`${ADMIN_API_URL}/students`);
+        allStudents = await res.json();
+        loadRoute('#manage-mentors');
+      } else {
+        alert(result.error || 'Failed to promote student');
+      }
+    } catch (err) {
+      alert('Failed to promote student. Please try again.');
+      console.error(err);
+    }
+  }
+
+  if (e.target.id === 'assignStudentsForm') {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      mentor_id: formData.get('mentor_id'),
+      student_ids: Array.from(formData.getAll('student_ids')).map(id => parseInt(id))
+    };
+    
+    try {
+      const res = await fetch(`${ADMIN_API_URL}/assign-students`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
+        alert('Students assigned to mentor successfully!');
+        // Refresh the data
+        const res = await fetch(`${ADMIN_API_URL}/students`);
+        allStudents = await res.json();
+        loadRoute('#manage-mentors');
+      } else {
+        alert(result.error || 'Failed to assign students');
+      }
+    } catch (err) {
+      alert('Failed to assign students. Please try again.');
+      console.error(err);
+    }
+  }
+  
+
+
+
+      if (e.target.id === 'loginForm') {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        
+        try {
+          const res = await fetch(`${API_URL}/stdlogin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          const result = await res.json();
+          
+          if (!res.ok) {
+            return alert(result.error || 'Login failed. Please check your credentials.');
+          }
+          
+          localStorage.setItem('student', JSON.stringify(result));
+          currentUser = result;
+          location.reload();
+        } catch (err) {
+          alert('Login failed. Please try again.');
+          console.error(err);
+        }
+      }
+      
+      if (e.target.id === 'assignTargetForm') {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        data.mentor_email = currentUser.email;
+
+        try {
+          const res = await fetch(`${API_URL}/mentors/assign-target`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          const result = await res.json();
+          
+          if (res.ok) {
+            // Update the student in our local data
+            const index = allStudents.findIndex(s => s.id === parseInt(data.student_id));
+            if (index !== -1) {
+              allStudents[index].target = parseInt(data.target);
+            }
+            
+            // Update selected student if it's the same one
+            if (selectedStudent && selectedStudent.id === parseInt(data.student_id)) {
+              selectedStudent.target = parseInt(data.target);
+            }
+            
+            alert(result.message || 'Target assigned successfully!');
+            loadRoute('#assign-target');
+          } else {
+            alert(result.error || 'Failed to assign target');
+          }
+        } catch (err) {
+          alert('Failed to assign target. Please try again.');
+          console.error(err);
+        }
+      }
     });
+
+
+   async function unassignStudent(studentId, mentorId) {
+  if (!confirm('Are you sure you want to unassign this student from the mentor?')) return;
+  
+  try {
+    const res = await fetch(`${ADMIN_API_URL}/unassign-student`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, mentor_id: mentorId })
+    });
+    
+    const result = await res.json();
+    
+    if (res.ok) {
+      alert('Student unassigned successfully!');
+      // Refresh the data
+      const res = await fetch(`${ADMIN_API_URL}/students`);
+      allStudents = await res.json();
+      loadRoute('#manage-mentors');
+    } else {
+      alert(result.error || 'Failed to unassign student');
+    }
+  } catch (err) {
+    alert('Failed to unassign student. Please try again.');
+    console.error(err);
+  }
+}
+
+
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
