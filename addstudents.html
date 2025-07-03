@@ -1236,10 +1236,10 @@
 // Add this new function to view mentor tree
 async function viewMentorTree(mentorId) {
   try {
-    const res = await fetch(`http://localhost:4000/admin/referral-tree/${mentorId}`);
+    const res = await fetch(`${ADMIN_API_URL}/referral-tree/${mentorId}`);
     const downlines = await res.json();
 
-    const mentorRes = await fetch(`http://localhost:4000/admin/student/${mentorId}`);
+    const mentorRes = await fetch(`${ADMIN_API_URL}/student/${mentorId}`);
     const mentor = await mentorRes.json();
 
     const nodes = [];
