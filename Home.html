@@ -13,70 +13,81 @@
 </head>
 <body>
     <style>
-         /* Announcement bar styles */
-    .announcement-bar {
-      background-color: #343a40; /* Dark background to match navbar */
-      color: white;
-      padding: 8px 0;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .announcement-ticker {
-      display: inline-block;
-      white-space: nowrap;
-      padding-left: 100%;
-      animation: scrollAnnouncements 30s linear infinite;
-    }
-    
-    .announcement-item {
-      display: inline-block;
-      padding: 0 2rem;
-      position: relative;
-      cursor: pointer;
-    }
-    
-    .announcement-item:after {
-      content: "•";
-      position: absolute;
-      right: -0.5rem;
-      color: rgba(255,255,255,0.5);
-    }
-    
-    .announcement-item:last-child:after {
-      display: none;
-    }
-    
-    @keyframes scrollAnnouncements {
-      0% {
-        transform: translateX(0);
-      }
-      100% {
-        transform: translateX(-100%);
-      }
-    }
-    
-    /* See All button styles */
-    #seeAllAnnouncements {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 10;
-      background-color: rgba(52, 58, 64, 0.8);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .announcement-item {
-        padding: 0 1rem;
-      }
-      
-      #seeAllAnnouncements {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-      }
-    }
+    /* Announcement bar styles */
+.announcement-bar {
+  background-color: #343a40; /* Dark background */
+  color: white;
+  padding: 8px 0;
+  overflow: hidden;
+  position: fixed; /* Make it stay at top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1055; /* Higher than Bootstrap navbar (default is 1030) */
+}
+
+/* Push content down so it's not hidden under fixed bar */
+body {
+  padding-top: 50px; /* Adjust based on announcement bar height */
+}
+
+.announcement-ticker {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 100%;
+  animation: scrollAnnouncements 30s linear infinite;
+}
+
+.announcement-item {
+  display: inline-block;
+  padding: 0 2rem;
+  position: relative;
+  cursor: pointer;
+}
+
+.announcement-item:after {
+  content: "•";
+  position: absolute;
+  right: -0.5rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.announcement-item:last-child:after {
+  display: none;
+}
+
+@keyframes scrollAnnouncements {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* See All button styles */
+#seeAllAnnouncements {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1060;
+  background-color: rgba(52, 58, 64, 0.8);
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .announcement-item {
+    padding: 0 1rem;
+  }
+
+  #seeAllAnnouncements {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
     </style>
   
     <!-- Navigation -->
