@@ -1145,6 +1145,11 @@ async function showEventModal(event) {
             </div>
           </div>
         </div>
+        <div class="mb-3 mt-2">
+  <label for="referral-code" class="form-label">Referral Code (optional)</label>
+  <input type="text" class="form-control" id="referral-code" placeholder="e.g., ID1234ABCD">
+</div>
+
       </div>
     </div>
   ` : `
@@ -1299,15 +1304,14 @@ async function registerForEvent() {
   const eventId = document.getElementById('register-event-id').value;
   const registerButton = document.getElementById('registerButton');
   const transactionId = document.getElementById('transaction-id').value.trim();
+  const referralCodeInput = document.getElementById('referral-code').value.trim();
 
   if (!currentUserProfile) {
     showToast('Please verify your profile before registration', 'warning');
     return;
   }
 
-  // 👉 Use native JavaScript prompt for referral code
-  let referralCode = prompt('Enter your referral code (optional):', '');
-  referralCode = referralCode ? referralCode.trim() : null;
+  const referralCode = referralCodeInput || null;
 
   registerButton.disabled = true;
   registerButton.innerHTML = `
