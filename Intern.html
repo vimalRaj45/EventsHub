@@ -421,7 +421,7 @@
               </td>
               <td>
                 <span class="badge ${app.transaction_id ? 'bg-success' : 'bg-secondary'}">
-                  ${app.transaction_id ? 'paid' : 'unpaid'}
+                  ${app.transaction_id ? 'paid' : 'waiting for approval'}
                 </span>
               </td>
               <td>${new Date(app.applied_at).toLocaleDateString()}</td>
