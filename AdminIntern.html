@@ -2,622 +2,293 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard</title>
+  <title>Admin Approval Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    .applicant-card { cursor: pointer; transition: all 0.2s; }
-    .applicant-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .status-badge { font-size: 0.8rem; }
-    .modal { aria-hidden: false !important; }
-    .internship-card { transition: all 0.3s ease; }
-    .internship-card:hover { transform: scale(1.02); }
-    .internship-img { max-height: 150px; object-fit: cover; }
+    .application-card { transition: all 0.2s; }
+    .application-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .badge-pending { background-color: #ffc107; color: #000; }
+    .badge-paid { background-color: #fd7e14; color: #fff; }
+    .badge-verified { background-color: #28a745; color: #fff; }
+    .badge-approved { background-color: #17a2b8; color: #fff; }
+    .badge-rejected { background-color: #dc3545; color: #fff; }
+    .qr-img { max-width: 200px; max-height: 200px; }
   </style>
 </head>
-<body class="container my-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-user-shield me-2"></i>Admin Dashboard</h2>
-    <button class="btn btn-outline-danger" onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-  </div>
-
-  <!-- Internship Management -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5>Create New Internship</h5>
-    </div>
-    <div class="card-body">
-      <form id="createInternship">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Company Name</label>
-            <input class="form-control" id="company" required>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Position</label>
-            <input class="form-control" id="position" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Duration</label>
-            <input class="form-control" id="duration" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Start Date</label>
-            <input class="form-control" id="start" type="date" required>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">End Date</label>
-            <input class="form-control" id="end" type="date" required>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Internship Image (optional)</label>
-            <input class="form-control" type="file" id="internshipImg" accept="image/*">
-          </div>
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary">
-              <i class="fas fa-plus-circle"></i> Create Internship
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Internship List -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <h5>All Internships</h5>
-      <button class="btn btn-sm btn-light" onclick="loadInternships()">
-        <i class="fas fa-sync-alt"></i> Refresh
+<body class="bg-light">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-user-shield me-2"></i>Payment Approvals</h2>
+      <button class="btn btn-outline-danger" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
       </button>
     </div>
-    <div class="card-body">
-      <div id="internshipList" class="row"></div>
-    </div>
-  </div>
 
-  <!-- Edit Internship Modal -->
-  <div class="modal fade" id="editInternshipModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Edit Internship</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editInternshipForm">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Company Name</label>
-                <input class="form-control" id="editCompany" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Position</label>
-                <input class="form-control" id="editPosition" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Duration</label>
-                <input class="form-control" id="editDuration" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Start Date</label>
-                <input class="form-control" id="editStart" type="date" required>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">End Date</label>
-                <input class="form-control" id="editEnd" type="date" required>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Internship Image (optional)</label>
-                <input class="form-control" type="file" id="editInternshipImg" accept="image/*">
-                <input type="hidden" id="editImgUrl">
-                <div class="mt-2" id="currentImageContainer">
-                  <small>Current Image:</small>
-                  <img id="currentImagePreview" src="" class="img-thumbnail internship-img d-none">
-                  <div id="noImageText" class="text-muted">No image uploaded</div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Status</label>
-                <select class="form-select" id="editStatus" required>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-            </div>
-            <input type="hidden" id="editId">
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveInternshipChanges()">
-            <i class="fas fa-save"></i> Save Changes
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Applications</h5>
+          <button class="btn btn-sm btn-light" onclick="loadApplications()">
+            <i class="fas fa-sync-alt"></i> Refresh
           </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Internship</th>
+                <th>Applied At</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Transaction No</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTable">
+              <!-- Applications will be loaded here -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Applications Section -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5>Applications</h5>
-    </div>
-    <div class="card-body">
-      <div id="applicationList"></div>
-    </div>
-  </div>
-
-  <!-- Applicant Details Modal -->
-  <div class="modal fade" id="applicantModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+  <!-- Payment Verification Modal -->
+  <div class="modal fade" id="verifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Applicant Details</h5>
+          <h5 class="modal-title">Verify Payment</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="applicantDetails">
+        <div class="modal-body" id="verifyModalBody">
           <!-- Content loaded dynamically -->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" onclick="confirmVerify()">
+            <i class="fas fa-check-circle"></i> Verify Payment
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-<script>
-const BASE = "https://eventdb.onrender.com";
-const token = localStorage.getItem("jwtToken") || "";
-let applicantModal = null;
-let editModal = null;
+  <script>
+    const BASE = "https://eventdb.onrender.com";
+    const token = localStorage.getItem("jwtToken") || "";
+    let verifyModal = null;
+    let currentApplicationId = null;
 
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', () => {
-  applicantModal = new bootstrap.Modal(document.getElementById('applicantModal'));
-  editModal = new bootstrap.Modal(document.getElementById('editInternshipModal'));
-  
-  if (!token) {
-    Swal.fire('Error', 'You need to login first', 'error').then(() => {
-      window.location.href = 'index.html';
+    document.addEventListener('DOMContentLoaded', () => {
+      verifyModal = new bootstrap.Modal(document.getElementById('verifyModal'));
+      
+      if (!token) {
+        Swal.fire('Error', 'You need to login first', 'error').then(() => {
+          window.location.href = 'index.html';
+        });
+        return;
+      }
+      
+      loadApplications();
     });
-    return;
-  }
-  
-  loadInternships();
-  loadApplications();
-});
 
-// Logout function
-function logout() {
-  localStorage.removeItem('jwtToken');
-  window.location.href = 'login.html';
-}
-
-// Load Internships
-async function loadInternships() {
-  try {
-    const res = await fetch(`${BASE}/api/internships`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) throw new Error('Failed to load internships');
-    
-    const data = await res.json();
-    renderInternships(data);
-  } catch (err) {
-    console.error('Error loading internships:', err);
-    document.getElementById('internshipList').innerHTML = `
-      <div class="col-12">
-        <div class="alert alert-danger">Error loading internships: ${err.message}</div>
-      </div>
-    `;
-  }
-}
-
-// Upload image to ImgBB
-async function uploadToImgBB(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-
-  const res = await fetch('https://api.imgbb.com/1/upload?key=76954d664f0beaf57b8c5a5b0eca84e6', {
-    method: 'POST',
-    body: formData
-  });
-
-  const data = await res.json();
-  if (!res.ok || !data.success) {
-    throw new Error('Failed to upload internship image');
-  }
-
-  return data.data.url;
-}
-
-// Render internships to the DOM
-function renderInternships(internships) {
-  const internshipList = document.getElementById('internshipList');
-  internshipList.innerHTML = internships.map(i => `
-    <div class="col-md-6 mb-3">
-      <div class="card h-100 internship-card">
-        ${i.imgurl ? `<img src="${i.imgurl}" class="card-img-top internship-img" alt="${i.company_name}">` : ''}
-        <div class="card-body">
-          <h5 class="card-title">${i.company_name}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">${i.position}</h6>
-          <p class="card-text">
-            <small class="text-muted">Duration: ${i.duration}</small><br>
-            <small class="text-muted">Dates: ${new Date(i.start_date).toLocaleDateString()} to ${new Date(i.end_date).toLocaleDateString()}</small><br>
-            <span class="badge ${getStatusBadgeClass(i.status)}">${i.status}</span>
-          </p>
-        </div>
-        <div class="card-footer bg-transparent">
-          <button onclick="deleteInternship(${i.id})" class="btn btn-sm btn-danger me-2">
-            <i class="fas fa-trash"></i> Delete
-          </button>
-          <button onclick="openEditModal(${i.id})" class="btn btn-sm btn-primary">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('') || '<div class="col-12"><p class="text-muted">No internships found</p></div>';
-}
-
-// Get badge class based on status
-function getStatusBadgeClass(status) {
-  switch (status) {
-    case 'active': return 'bg-success';
-    case 'inactive': return 'bg-warning text-dark';
-    case 'completed': return 'bg-info text-dark';
-    default: return 'bg-secondary';
-  }
-}
-
-// Open edit modal with internship data
-async function openEditModal(id) {
-  try {
-    // Show loading state
-    document.getElementById('editCompany').value = 'Loading...';
-    document.getElementById('editPosition').value = 'Loading...';
-    
-    const res = await fetch(`${BASE}/api/internships/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Failed to load internship data');
-    }
-    
-    const internship = await res.json();
-    
-    // Format dates for the date inputs
-    const formatDateForInput = (dateString) => {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0];
-    };
-
-    // Fill the form with the fetched data
-    document.getElementById('editId').value = internship.id;
-    document.getElementById('editCompany').value = internship.company_name || '';
-    document.getElementById('editPosition').value = internship.position || '';
-    document.getElementById('editDuration').value = internship.duration || '';
-    document.getElementById('editStart').value = formatDateForInput(internship.start_date);
-    document.getElementById('editEnd').value = formatDateForInput(internship.end_date);
-    document.getElementById('editStatus').value = internship.status || 'active';
-    
-    // Handle image preview
-    const imgPreview = document.getElementById('currentImagePreview');
-    const noImageText = document.getElementById('noImageText');
-    
-    if (internship.imgurl) {
-      imgPreview.src = internship.imgurl;
-      imgPreview.classList.remove('d-none');
-      noImageText.classList.add('d-none');
-      document.getElementById('editImgUrl').value = internship.imgurl;
-    } else {
-      imgPreview.classList.add('d-none');
-      noImageText.classList.remove('d-none');
-      document.getElementById('editImgUrl').value = '';
-    }
-    
-    editModal.show();
-  } catch (err) {
-    console.error('Error opening edit modal:', err);
-    Swal.fire({
-      title: 'Error',
-      text: err.message,
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-}
-
-// Save changes to internship
-async function saveInternshipChanges() {
-  try {
-    const id = document.getElementById('editId').value;
-    const fileInput = document.getElementById('editInternshipImg');
-    let imgurl = document.getElementById('editImgUrl').value;
-
-    // Upload new image if selected
-    if (fileInput.files.length > 0) {
-      imgurl = await uploadToImgBB(fileInput.files[0]);
+    function logout() {
+      localStorage.removeItem('jwtToken');
+      window.location.href = 'login.html';
     }
 
-    const body = {
-      company_name: document.getElementById('editCompany').value,
-      position: document.getElementById('editPosition').value,
-      duration: document.getElementById('editDuration').value,
-      start_date: document.getElementById('editStart').value,
-      end_date: document.getElementById('editEnd').value,
-      status: document.getElementById('editStatus').value,
-      imgurl: imgurl || null
-    };
-
-    const res = await fetch(`${BASE}/api/internships/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    const responseData = await res.json();
-    
-    if (!res.ok) {
-      console.error('PUT Error Response:', responseData);
-      throw new Error(responseData.error || 'Failed to update internship');
+    async function loadApplications() {
+      try {
+        document.getElementById('applicationsTable').innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p>Loading applications...</p>
+            </td>
+          </tr>
+        `;
+        
+        const res = await fetch(`${BASE}/api/admin/applications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load applications');
+        
+        const applications = await res.json();
+        renderApplications(applications);
+      } catch (err) {
+        document.getElementById('applicationsTable').innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center text-danger">
+              Error loading applications: ${err.message}
+            </td>
+          </tr>
+        `;
+      }
     }
 
-    editModal.hide();
-    Swal.fire({
-      title: 'Success!',
-      text: 'Internship updated successfully',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    });
-    loadInternships();
-  } catch (err) {
-    console.error('Error updating internship:', err);
-    Swal.fire({
-      title: 'Error',
-      text: err.message,
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-}
-
-// Delete Internship
-async function deleteInternship(id) {
-  try {
-    const confirm = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    });
-    
-    if (!confirm.isConfirmed) return;
-    
-    const res = await fetch(`${BASE}/api/internships/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Failed to delete internship');
-    }
-    
-    Swal.fire('Deleted!', 'The internship has been deleted.', 'success');
-    loadInternships();
-  } catch (err) {
-    Swal.fire('Error', err.message, 'error');
-  }
-}
-
-// Create new internship
-document.getElementById('createInternship').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  try {
-    const fileInput = document.getElementById('internshipImg');
-    let imgurl = null;
-
-    // Upload image if selected
-    if (fileInput.files.length > 0) {
-      imgurl = await uploadToImgBB(fileInput.files[0]);
-    }
-
-    const body = {
-      company_name: document.getElementById('company').value,
-      position: document.getElementById('position').value,
-      duration: document.getElementById('duration').value,
-      start_date: document.getElementById('start').value,
-      end_date: document.getElementById('end').value,
-      imgurl: imgurl
-    };
-
-    const res = await fetch(`${BASE}/api/internships`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Failed to create internship');
-    }
-
-    Swal.fire('Success', 'Internship created successfully', 'success');
-    e.target.reset();
-    loadInternships();
-  } catch (err) {
-    Swal.fire('Error', err.message, 'error');
-  }
-});
-
-// Load Applications
-async function loadApplications() {
-  try {
-    const res = await fetch(`${BASE}/api/admin/applications`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) throw new Error('Failed to load applications');
-    
-    const data = await res.json();
-    renderApplications(data);
-  } catch (err) {
-    console.error('Error loading applications:', err);
-    document.getElementById('applicationList').innerHTML = `
-      <div class="alert alert-danger">Error loading applications: ${err.message}</div>
-    `;
-  }
-}
-
-// Render applications to the DOM
-function renderApplications(applications) {
-  const applicationList = document.getElementById('applicationList');
-  applicationList.innerHTML = applications.map(a => `
-    <div class="card mb-3 applicant-card" onclick="showApplicantDetails(${a.user_id})">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5>${a.student_name || 'Unknown User'}</h5>
-            <p class="mb-1">${a.position} at ${a.company_name}</p>
-            <span class="badge ${a.status === 'approved' ? 'bg-success' : 
-                               a.status === 'rejected' ? 'bg-danger' : 'bg-secondary'}">
-              ${a.status}
+    function renderApplications(applications) {
+      const tableBody = document.getElementById('applicationsTable');
+      
+      if (applications.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center text-muted">
+              No applications found
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tableBody.innerHTML = applications.map(app => `
+        <tr class="application-card">
+          <td>
+            <strong>${app.student_name}</strong><br>
+            <small class="text-muted">${app.email}</small>
+          </td>
+          <td>
+            ${app.position} at ${app.company_name}
+          </td>
+          <td>${new Date(app.applied_at).toLocaleString()}</td>
+          <td>
+            <span class="badge rounded-pill ${getStatusClass(app.status)}">
+              ${app.status}
             </span>
-          </div>
-          <div>
-            <button onclick="event.stopPropagation(); updateApplicationStatus(${a.id}, 'approved')" 
-              class="btn btn-sm btn-success me-1">
-              <i class="fas fa-check"></i> Approve
+          </td>
+          <td>
+            <span class="badge rounded-pill ${getPaymentStatusClass(app.payment_status)}">
+              ${app.payment_status || 'unpaid'}
+            </span>
+          </td>
+          <td>${app.transaction_no || 'N/A'}</td>
+          <td>
+            ${app.payment_status === 'paid' ? `
+              <button class="btn btn-sm btn-success" onclick="openVerifyModal(${app.id})">
+                <i class="fas fa-check"></i> Verify
+              </button>
+            ` : ''}
+            <button class="btn btn-sm btn-info" onclick="viewApplicationDetails(${app.id})">
+              <i class="fas fa-eye"></i> View
             </button>
-            <button onclick="event.stopPropagation(); updateApplicationStatus(${a.id}, 'rejected')" 
-              class="btn btn-sm btn-danger">
-              <i class="fas fa-times"></i> Reject
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('') || '<p class="text-muted">No applications found</p>';
-}
+          </td>
+        </tr>
+      `).join('');
+    }
 
-// Show applicant details
-async function showApplicantDetails(userId) {
-  try {
-    document.getElementById('applicantDetails').innerHTML = `
-      <div class="text-center my-4">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading applicant details...</p>
-      </div>
-    `;
-    
-    applicantModal.show();
-    
-    const res = await fetch(`${BASE}/api/users/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) throw new Error('Failed to fetch user details');
-    
-    const userData = await res.json();
-    
-    document.getElementById('applicantDetails').innerHTML = `
-      <div class="row">
-        <div class="col-md-6">
-          <div class="card mb-3">
-            <div class="card-header bg-light">
-              <h6>Personal Information</h6>
-            </div>
-            <div class="card-body">
-              <p><strong>Name:</strong> ${userData.name || 'N/A'}</p>
-              <p><strong>Email:</strong> ${userData.email || 'N/A'}</p>
-              <p><strong>Contact:</strong> ${userData.contact_no || 'N/A'}</p>
-              <p><strong>Role:</strong> ${userData.role || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header bg-light">
-              <h6>Account Information</h6>
-            </div>
-            <div class="card-body">
-              <p><strong>Member Since:</strong> 
-                ${userData.created_at ? new Date(userData.created_at).toLocaleDateString() : 'N/A'}
-              </p>
-              <p><strong>Last Login:</strong> 
-                ${userData.last_login ? new Date(userData.last_login).toLocaleString() : 'N/A'}
-              </p>
-              <p><strong>User ID:</strong> ${userData.id}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    document.getElementById('applicantDetails').innerHTML = `
-      <div class="alert alert-danger">
-        <h5>Error Loading Details</h5>
-        <p>${err.message}</p>
-      </div>
-    `;
-  }
-}
+    function getStatusClass(status) {
+      switch (status) {
+        case 'approved': return 'badge-approved';
+        case 'rejected': return 'badge-rejected';
+        default: return 'badge-pending';
+      }
+    }
 
-// Update application status
-async function updateApplicationStatus(id, status) {
-  try {
-    const confirm = await Swal.fire({
-      title: `Are you sure you want to ${status} this application?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: `Yes, ${status}`,
-      cancelButtonText: 'Cancel'
-    });
-    
-    if (!confirm.isConfirmed) return;
-    
-    const res = await fetch(`${BASE}/api/admin/applications/${id}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ status })
-    });
-    
-    if (!res.ok) throw new Error('Failed to update application status');
-    
-    const result = await res.json();
-    Swal.fire('Success', result.message, 'success');
-    loadApplications();
-  } catch (err) {
-    Swal.fire('Error', err.message, 'error');
-  }
-}
-</script>
+    function getPaymentStatusClass(status) {
+      switch (status) {
+        case 'verified': return 'badge-verified';
+        case 'paid': return 'badge-paid';
+        default: return 'badge-pending';
+      }
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    async function openVerifyModal(applicationId) {
+      try {
+        currentApplicationId = applicationId;
+        
+        // Get application details
+        const res = await fetch(`${BASE}/api/admin/applications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load application details');
+        
+        const applications = await res.json();
+        const application = applications.find(app => app.id == applicationId);
+        
+        if (!application) throw new Error('Application not found');
+        
+        // Get internship payment QR
+        const internshipRes = await fetch(`${BASE}/api/internships/${application.internship_id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!internshipRes.ok) throw new Error('Failed to load internship details');
+        const internship = await internshipRes.json();
+        
+        // Populate modal
+        document.getElementById('verifyModalBody').innerHTML = `
+          <div class="mb-3">
+            <h6>Student: ${application.student_name}</h6>
+            <p>Internship: ${application.position} at ${application.company_name}</p>
+            <p>Transaction No: <strong>${application.transaction_no}</strong></p>
+          </div>
+          ${internship.payment_qr ? `
+            <div class="text-center mb-3">
+              <p class="mb-2"><strong>Payment QR Code:</strong></p>
+              <img src="${internship.payment_qr}" class="img-fluid qr-img border p-2">
+            </div>
+          ` : ''}
+          <div class="alert alert-info">
+            Verify that the payment with transaction number <strong>${application.transaction_no}</strong> has been received.
+          </div>
+        `;
+        
+        verifyModal.show();
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    async function confirmVerify() {
+      try {
+        const res = await fetch(`${BASE}/api/admin/applications/${currentApplicationId}/verify-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Failed to verify payment');
+        }
+        
+        const result = await res.json();
+        verifyModal.hide();
+        
+        Swal.fire({
+          title: 'Success!',
+          text: result.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+        
+        loadApplications();
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    function viewApplicationDetails(applicationId) {
+      // You can implement this to show more details
+      Swal.fire({
+        title: 'Application Details',
+        text: 'Detailed view would show more information about this application',
+        icon: 'info'
+      });
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
