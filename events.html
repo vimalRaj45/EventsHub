@@ -1294,26 +1294,37 @@ async function getFirstGalleryImage(eventId) {
     return 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
   }
 }
-
 async function registerForEvent() {
   const eventId = document.getElementById('register-event-id').value;
   const registerButton = document.getElementById('registerButton');
   const transactionId = document.getElementById('transaction-id').value.trim();
-  
+
   if (!currentUserProfile) {
     showToast('Please verify your profile before registration', 'warning');
     return;
   }
-  
+
+  const { value: referralCode } = await Swal.fire({
+    title: 'Referral Code (optional)',
+    input: 'text',
+    inputLabel: 'Enter a referral code if you have one',
+    inputPlaceholder: 'e.g., ID1234ABCD',
+    showCancelButton: true,
+    confirmButtonText: 'Submit',
+    cancelButtonText: 'Skip',
+    inputAttributes: {
+      autocapitalize: 'off'
+    }
+  });
+
   registerButton.disabled = true;
   registerButton.innerHTML = `
     <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
     Registering...
   `;
-  
+
   try {
     let registrationData = {};
-
     try {
       registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
     } catch (e) {
@@ -1322,16 +1333,14 @@ async function registerForEvent() {
 
     const result = await makeRequest('POST', `/events/${eventId}/register`, { 
       registration_data: registrationData,
-      transaction_id: transactionId
+      transaction_id: transactionId,
+      referral_code: referralCode || null
     });
-    
+
     Swal.fire({
       icon: 'success',
       title: '🎉 Registration Successful!',
-      html: `
-        <p>You have successfully registered for the event.</p>
-        <p><strong>Would you like to view your events now?</strong></p>
-      `,
+      html: `<p>You have successfully registered for the event.</p><p><strong>Would you like to view your events now?</strong></p>`,
       showCancelButton: true,
       confirmButtonText: '✅ Yes, show my events',
       cancelButtonText: '❌ No, maybe later',
@@ -1349,11 +1358,10 @@ async function registerForEvent() {
     showToast(`❌ Registration failed: ${error.message}`, 'danger');
   } finally {
     registerButton.disabled = false;
-    registerButton.innerHTML = `
-      <i class="bi bi-check-circle me-1"></i>Confirm Registration
-    `;
+    registerButton.innerHTML = `<i class="bi bi-check-circle me-1"></i>Confirm Registration`;
   }
 }
+
 
 function getStatusColor(status) {
   switch (status) {
