@@ -14,6 +14,7 @@
     .badge-inactive { background-color: #6c757d; color: white; }
     .badge-completed { background-color: #17a2b8; color: white; }
     .qr-img { max-width: 200px; max-height: 200px; }
+    .payment-instructions { background-color: #f8f9fa; border-radius: 5px; padding: 15px; margin-bottom: 20px; }
   </style>
 </head>
 <body class="bg-light">
@@ -65,7 +66,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">Submit Payment</h5>
+            <h5 class="modal-title">Complete Your Payment</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body" id="paymentModalBody">
@@ -189,6 +190,17 @@
 
     async function applyForInternship(internshipId) {
       try {
+        const { isConfirmed } = await Swal.fire({
+          title: 'Confirm Application',
+          text: 'Are you sure you want to apply for this internship?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Apply',
+          cancelButtonText: 'Cancel'
+        });
+        
+        if (!isConfirmed) return;
+        
         const res = await fetch(`${BASE}/api/internships/${internshipId}/apply`, {
           method: 'POST',
           headers: {
@@ -213,7 +225,7 @@
         const result = await res.json();
         
         Swal.fire({
-          title: 'Success!',
+          title: 'Application Submitted!',
           text: result.message,
           icon: 'success',
           confirmButtonText: 'OK'
@@ -241,20 +253,40 @@
         document.getElementById('paymentModalBody').innerHTML = `
           <div class="mb-3">
             <h5>${internship.position} at ${internship.company_name}</h5>
-            <p>Please complete your payment to finalize your application</p>
+            <p class="text-muted">Please complete payment to finalize your application</p>
+          </div>
+          
+          <div class="payment-instructions">
+            <h6><i class="fas fa-info-circle me-2"></i>Payment Instructions:</h6>
+            <ol>
+              <li>Scan the QR code below using your payment app</li>
+              <li>Complete the payment</li>
+              <li>Enter the transaction ID/reference number below</li>
+              <li>Click "Submit Payment"</li>
+            </ol>
           </div>
           
           ${internship.payment_qr ? `
-            <div class="text-center mb-3">
-              <p class="mb-2"><strong>Scan this QR code to pay:</strong></p>
-              <img src="${internship.payment_qr}" class="img-fluid qr-img border p-2 mb-3">
+            <div class="text-center mb-4">
+              <p class="mb-2"><strong>Scan to Pay:</strong></p>
+              <img src="${internship.payment_qr}" class="img-fluid qr-img border p-2 mb-2">
+              <p class="small text-muted">Amount: ₹500 (Application Fee)</p>
             </div>
-          ` : ''}
+          ` : `
+            <div class="alert alert-warning">
+              No payment QR code available for this internship
+            </div>
+          `}
           
           <div class="mb-3">
-            <label for="transactionNo" class="form-label">Transaction Number</label>
-            <input type="text" class="form-control" id="transactionNo" placeholder="Enter your payment transaction number">
-            <small class="text-muted">Please enter the transaction number from your payment receipt</small>
+            <label for="transactionNo" class="form-label">Transaction ID/Reference Number</label>
+            <input type="text" class="form-control" id="transactionNo" 
+                   placeholder="Enter transaction ID from your payment receipt" required>
+            <div class="form-text">This is required to verify your payment</div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-clock me-2"></i>Your application will be processed after payment verification (usually within 24 hours).
           </div>
         `;
         
@@ -269,8 +301,19 @@
         const transactionNo = document.getElementById('transactionNo').value.trim();
         
         if (!transactionNo) {
-          throw new Error('Please enter your transaction number');
+          throw new Error('Please enter your transaction ID/reference number');
         }
+        
+        const { isConfirmed } = await Swal.fire({
+          title: 'Confirm Payment Submission',
+          text: 'Are you sure you want to submit this payment information?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Submit',
+          cancelButtonText: 'Cancel'
+        });
+        
+        if (!isConfirmed) return;
         
         const res = await fetch(`${BASE}/api/internships/${currentInternshipId}/submit-payment`, {
           method: 'POST',
@@ -290,13 +333,14 @@
         paymentModal.hide();
         
         Swal.fire({
-          title: 'Success!',
+          title: 'Payment Submitted!',
           text: result.message,
           icon: 'success',
           confirmButtonText: 'OK'
+        }).then(() => {
+          loadMyApplications();
+          loadInternships();
         });
-        
-        loadMyApplications();
       } catch (err) {
         Swal.fire('Error', err.message, 'error');
       }
@@ -346,14 +390,15 @@
       
       container.innerHTML = `
         <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
               <tr>
                 <th>Company</th>
                 <th>Position</th>
                 <th>Status</th>
                 <th>Payment</th>
                 <th>Applied At</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -374,6 +419,13 @@
                     </span>
                   </td>
                   <td>${new Date(app.applied_at).toLocaleDateString()}</td>
+                  <td>
+                    ${app.payment_status === 'paid' ? `
+                      <button class="btn btn-sm btn-info" onclick="openPaymentModal(${app.internship_id})">
+                        <i class="fas fa-money-bill-wave"></i> Payment
+                      </button>
+                    ` : ''}
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
