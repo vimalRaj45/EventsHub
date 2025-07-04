@@ -12,6 +12,72 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <style>
+         /* Announcement bar styles */
+    .announcement-bar {
+      background-color: #343a40; /* Dark background to match navbar */
+      color: white;
+      padding: 8px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .announcement-ticker {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: scrollAnnouncements 30s linear infinite;
+    }
+    
+    .announcement-item {
+      display: inline-block;
+      padding: 0 2rem;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .announcement-item:after {
+      content: "•";
+      position: absolute;
+      right: -0.5rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    .announcement-item:last-child:after {
+      display: none;
+    }
+    
+    @keyframes scrollAnnouncements {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    
+    /* See All button styles */
+    #seeAllAnnouncements {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background-color: rgba(52, 58, 64, 0.8);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .announcement-item {
+        padding: 0 1rem;
+      }
+      
+      #seeAllAnnouncements {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+      }
+    }
+    </style>
   
     <!-- Navigation -->
     <nav class="navbar">
@@ -56,6 +122,18 @@
             </div>
         </div>
     </nav>
+
+    <!-- Announcement bar below navbar -->
+  <div class="announcement-bar">
+    <div class="container-fluid position-relative">
+      <div class="announcement-ticker">
+        <!-- Announcements will be added here dynamically -->
+      </div>
+      <button class="btn btn-sm btn-outline-light" id="seeAllAnnouncements">
+        See All <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </div>
 
     <!-- Hero Section -->
 <section id="home" class="hero">
@@ -297,6 +375,166 @@ document.addEventListener('keydown', function(e) {
     showDevPopup();
   }
 });
+
+
+
+// Helper functions
+    function truncateText(text, maxLength) {
+      if (!text) return '';
+      if (text.length <= maxLength) return text;
+      return text.substring(0, maxLength) + '...';
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function getPriorityClass(priority) {
+      switch (priority) {
+        case 1: return 'bg-danger';
+        case 2: return 'bg-warning text-dark';
+        case 3: return 'bg-success';
+        default: return 'bg-secondary';
+      }
+    }
+
+    function getPriorityText(priority) {
+      switch (priority) {
+        case 1: return 'High';
+        case 2: return 'Medium';
+        case 3: return 'Low';
+        default: return '';
+      }
+    }
+
+    function viewAnnouncementDetails(id) {
+      // Implement this function based on your application needs
+      console.log('Viewing announcement with ID:', id);
+      // Example: window.location.href = `/announcements/${id}`;
+    }
+
+    // Fetch announcements and populate ticker
+    async function loadAnnouncementTicker() {
+      try {
+        const response = await fetch('https://eventdb.onrender.com/api/announcements?active=true');
+        const announcements = await response.json();
+        
+        const ticker = document.querySelector('.announcement-ticker');
+        
+        if (announcements.length === 0) {
+          ticker.innerHTML = '<span class="announcement-item">No current announcements</span>';
+          document.getElementById('seeAllAnnouncements').style.display = 'none';
+          return;
+        }
+        
+        // Store announcements globally for the See All button
+        window.announcementsList = announcements;
+        
+        // Create announcement items
+        announcements.forEach(announcement => {
+          const item = document.createElement('span');
+          item.className = 'announcement-item';
+          item.textContent = `${announcement.title} - ${truncateText(announcement.content, 50)}`;
+          item.title = `${announcement.title}: ${announcement.content}`;
+          
+          // Make it clickable to view details
+          item.addEventListener('click', () => {
+            viewAnnouncementDetails(announcement.id);
+          });
+          
+          ticker.appendChild(item);
+        });
+        
+        // Clone all items for seamless infinite scroll
+        const items = ticker.querySelectorAll('.announcement-item');
+        items.forEach(item => {
+          const clone = item.cloneNode(true);
+          ticker.appendChild(clone);
+        });
+        
+        // Add click handler for See All button
+        document.getElementById('seeAllAnnouncements').addEventListener('click', showAllAnnouncementsModal);
+        
+      } catch (error) {
+        console.error('Error loading announcements:', error);
+        document.querySelector('.announcement-ticker').innerHTML = 
+          '<span class="announcement-item">Announcements currently unavailable</span>';
+        document.getElementById('seeAllAnnouncements').style.display = 'none';
+      }
+    }
+
+    // Show all announcements in a modal
+    function showAllAnnouncementsModal() {
+      if (!window.announcementsList || window.announcementsList.length === 0) return;
+      
+      // Create modal HTML
+      const modalHTML = `
+        <div class="modal fade" id="allAnnouncementsModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">All Announcements</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="list-group">
+                  ${window.announcementsList.map(announcement => `
+                    <a href="#" class="list-group-item list-group-item-action announcement-modal-item" data-id="${announcement.id}">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${announcement.title}</h6>
+                        <small class="text-muted">${formatDate(announcement.created_at)}</small>
+                      </div>
+                      <p class="mb-1">${truncateText(announcement.content, 100)}</p>
+                      <small>
+                        <span class="badge ${getPriorityClass(announcement.priority)} me-1">
+                          ${getPriorityText(announcement.priority)}
+                        </span>
+                        ${announcement.author}
+                      </small>
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to DOM
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Initialize modal
+      const modal = new bootstrap.Modal(document.getElementById('allAnnouncementsModal'));
+      modal.show();
+      
+      // Add click handlers to announcement items
+      document.querySelectorAll('.announcement-modal-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = e.currentTarget.getAttribute('data-id');
+          modal.hide();
+          viewAnnouncementDetails(id);
+        });
+      });
+      
+      // Remove modal from DOM when hidden
+      document.getElementById('allAnnouncementsModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('allAnnouncementsModal').remove();
+      });
+    }
+
+    // Call this when page loads
+    document.addEventListener('DOMContentLoaded', loadAnnouncementTicker);
     function logout() {
     // Clear all localStorage data
     localStorage.clear();
@@ -312,4 +550,3 @@ document.addEventListener('keydown', function(e) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
