@@ -13,102 +13,103 @@
 </head>
 <body>
     <style>
-    /* Elegant Transparent Announcement Bar */
-.announcement-bar {
-  background: rgba(33, 37, 41, 0.8); /* Semi-transparent dark */
-  backdrop-filter: blur(10px); /* Glass effect */
-  -webkit-backdrop-filter: blur(10px);
-  color: #f8f9fa;
-  padding: 10px 0;
-  position: fixed;
-  top: 10%;
-  left: 0;
-  right: 0;
-  z-index: 1055;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+     /* ===== Base Styles ===== */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f1f1;
+      padding-top: 70px; /* Prevent overlap from fixed bar */
+    }
 
-/* Prevent content from being hidden under fixed bar */
-body {
-  padding-top: 70px;
-}
+    /* ===== Announcement Bar ===== */
+    .announcement-bar {
+      background: rgba(33, 37, 41, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #f8f9fa;
+      padding: 10px 16px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+    }
 
-.announcement-ticker {
-  display: inline-block;
-  white-space: nowrap;
-  padding-left: 100%;
-  animation: scrollAnnouncements 25s linear infinite;
-}
+    .announcement-ticker {
+      white-space: nowrap;
+      overflow: hidden;
+      flex-grow: 1;
+      animation: scrollAnnouncements 20s linear infinite;
+    }
 
-.announcement-item {
-  display: inline-block;
-  padding: 0 2rem;
-  position: relative;
-  color: #ffe66d; /* Rich accent color */
-  font-weight: 500;
-  font-size: 1rem;
-  transition: color 0.3s ease;
-}
+    .announcement-item {
+      display: inline-block;
+      padding: 0 1.5rem;
+      color: #ffe66d;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+    }
 
-.announcement-item:hover {
-  color: #f9ca24;
-}
+    .announcement-item::after {
+      content: "•";
+      position: absolute;
+      right: -1rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 1.2rem;
+    }
 
-.announcement-item:after {
-  content: "•";
-  position: absolute;
-  right: -1rem;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 1.2rem;
-}
+    .announcement-item:last-child::after {
+      display: none;
+    }
 
-.announcement-item:last-child:after {
-  display: none;
-}
+    @keyframes scrollAnnouncements {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
+    }
 
-@keyframes scrollAnnouncements {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
+    /* ===== See All Button ===== */
+    .see-all-btn {
+      margin-left: 10px;
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+      white-space: nowrap;
+    }
 
-#seeAllAnnouncements {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1060;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  transition: background 0.3s ease, color 0.3s ease;
-}
+    .see-all-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffe66d;
+    }
 
-#seeAllAnnouncements:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffe66d;
-}
+    /* ===== Responsive Adjustments ===== */
+    @media (max-width: 768px) {
+      .announcement-item {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+      }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .announcement-item {
-    padding: 0 1rem;
-    font-size: 0.9rem;
-  }
-
-  #seeAllAnnouncements {
-    font-size: 0.75rem;
-    padding: 2px 8px;
-  }
-}
+      .see-all-btn {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+      }
+    }
 
 
     </style>
@@ -158,16 +159,17 @@ body {
     </nav>
 
     <!-- Announcement bar below navbar -->
-  <div class="announcement-bar">
-    <div class="container-fluid position-relative">
-      <div class="announcement-ticker">
-        <!-- Announcements will be added here dynamically -->
-      </div>
-      <button class="btn btn-sm btn-outline-light" id="seeAllAnnouncements">
-        See All <i class="bi bi-chevron-right"></i>
-      </button>
+<div class="announcement-bar">
+  <div class="announcement-container">
+    <div class="announcement-ticker">
+      
     </div>
+    <button class="see-all-btn" id="seeAllAnnouncements">
+      See All →
+    </button>
   </div>
+</div>
+
 
     <!-- Hero Section -->
 <section id="home" class="hero">
