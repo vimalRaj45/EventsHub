@@ -78,8 +78,8 @@
                 </select>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Payment QR Code (URL)</label>
-                <input class="form-control" id="paymentQr">
+                <label class="form-label">Payment QR Code (Image)</label>
+                <input class="form-control" type="file" id="paymentQrImg" accept="image/*">
               </div>
               <div class="col-12">
                 <label class="form-label">Internship Image</label>
@@ -152,8 +152,14 @@
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Payment QR Code (URL)</label>
-                    <input class="form-control" id="editPaymentQr">
+                    <label class="form-label">Payment QR Code (Image)</label>
+                    <input class="form-control" type="file" id="editPaymentQrImg" accept="image/*">
+                    <input type="hidden" id="editPaymentQrUrl">
+                    <div class="mt-2" id="currentQrContainer">
+                      <small>Current QR Code:</small>
+                      <img id="currentQrPreview" src="" class="img-thumbnail" style="max-height: 150px; display: none;">
+                      <div id="noQrText" class="text-muted">No QR code uploaded</div>
+                    </div>
                   </div>
                   <div class="col-12">
                     <label class="form-label">Internship Image</label>
@@ -161,7 +167,7 @@
                     <input type="hidden" id="editImgUrl">
                     <div class="mt-2" id="currentImageContainer">
                       <small>Current Image:</small>
-                      <img id="currentImagePreview" src="" class="img-thumbnail" style="max-height: 150px; object-fit: cover; display: none;">
+                      <img id="currentImagePreview" src="" class="img-thumbnail" style="max-height: 150px; display: none;">
                       <div id="noImageText" class="text-muted">No image uploaded</div>
                     </div>
                   </div>
@@ -326,7 +332,7 @@ async function uploadToImgBB(file) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    throw new Error('Failed to upload internship image');
+    throw new Error('Failed to upload image');
   }
 
   return data.data.url;
@@ -378,6 +384,12 @@ function renderInternships(internships) {
             <small class="text-muted">Dates: ${new Date(i.start_date).toLocaleDateString()} to ${new Date(i.end_date).toLocaleDateString()}</small><br>
             <span class="badge ${getStatusBadgeClass(i.status)}">${i.status}</span>
           </p>
+          ${i.payment_qr ? `
+            <div class="mt-2">
+              <p class="mb-1"><strong>Payment QR Code:</strong></p>
+              <img src="${i.payment_qr}" style="max-width: 150px;" class="img-thumbnail">
+            </div>
+          ` : ''}
         </div>
         <div class="card-footer bg-transparent">
           <button onclick="deleteInternship(${i.id})" class="btn btn-sm btn-danger me-2">
@@ -436,7 +448,20 @@ async function openEditModal(id) {
     document.getElementById('editStart').value = formatDateForInput(internship.start_date);
     document.getElementById('editEnd').value = formatDateForInput(internship.end_date);
     document.getElementById('editStatus').value = internship.status || 'active';
-    document.getElementById('editPaymentQr').value = internship.payment_qr || '';
+    document.getElementById('editPaymentQrUrl').value = internship.payment_qr || '';
+    
+    // Handle QR code preview
+    const qrPreview = document.getElementById('currentQrPreview');
+    const noQrText = document.getElementById('noQrText');
+    
+    if (internship.payment_qr) {
+      qrPreview.src = internship.payment_qr;
+      qrPreview.style.display = 'block';
+      noQrText.style.display = 'none';
+    } else {
+      qrPreview.style.display = 'none';
+      noQrText.style.display = 'block';
+    }
     
     // Handle image preview
     const imgPreview = document.getElementById('currentImagePreview');
@@ -470,11 +495,18 @@ async function saveInternshipChanges() {
   try {
     const id = document.getElementById('editId').value;
     const fileInput = document.getElementById('editInternshipImg');
+    const qrFileInput = document.getElementById('editPaymentQrImg');
     let imgurl = document.getElementById('editImgUrl').value;
+    let paymentQrUrl = document.getElementById('editPaymentQrUrl').value;
 
     // Upload new image if selected
     if (fileInput.files.length > 0) {
       imgurl = await uploadToImgBB(fileInput.files[0]);
+    }
+
+    // Upload new QR code if selected
+    if (qrFileInput.files.length > 0) {
+      paymentQrUrl = await uploadToImgBB(qrFileInput.files[0]);
     }
 
     const body = {
@@ -485,7 +517,7 @@ async function saveInternshipChanges() {
       start_date: document.getElementById('editStart').value,
       end_date: document.getElementById('editEnd').value,
       status: document.getElementById('editStatus').value,
-      payment_qr: document.getElementById('editPaymentQr').value || null,
+      payment_qr: paymentQrUrl || null,
       imgurl: imgurl || null
     };
 
@@ -562,11 +594,18 @@ document.getElementById('createInternship').addEventListener('submit', async (e)
 
   try {
     const fileInput = document.getElementById('internshipImg');
+    const qrFileInput = document.getElementById('paymentQrImg');
     let imgurl = null;
+    let paymentQrUrl = null;
 
-    // Upload image if selected
+    // Upload internship image if selected
     if (fileInput.files.length > 0) {
       imgurl = await uploadToImgBB(fileInput.files[0]);
+    }
+
+    // Upload QR code image if selected
+    if (qrFileInput.files.length > 0) {
+      paymentQrUrl = await uploadToImgBB(qrFileInput.files[0]);
     }
 
     const body = {
@@ -577,7 +616,7 @@ document.getElementById('createInternship').addEventListener('submit', async (e)
       start_date: document.getElementById('start').value,
       end_date: document.getElementById('end').value,
       status: document.getElementById('status').value,
-      payment_qr: document.getElementById('paymentQr').value || null,
+      payment_qr: paymentQrUrl,
       imgurl: imgurl
     };
 
@@ -803,7 +842,7 @@ async function openVerifyPaymentModal(applicationId) {
       ${internship.payment_qr ? `
         <div class="text-center mb-3">
           <p class="mb-2"><strong>Payment QR Code:</strong></p>
-          <img src="${internship.payment_qr}" class="img-fluid" style="max-width: 200px; max-height: 200px;" class="border p-2">
+          <img src="${internship.payment_qr}" style="max-width: 200px;" class="img-fluid border p-2">
         </div>
       ` : ''}
       <div class="alert alert-info">
