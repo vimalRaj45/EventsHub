@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Referral System Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Bootstrap 5 & Select2 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --success-color: #4cc9f0;
+      --danger-color: #f72585;
+      --warning-color: #f8961e;
+      --info-color: #4895ef;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+    }
+    
+    body {
+      background-color: #f5f7fb;
+      font-family: 'Poppins', sans-serif;
+      color: #333;
+    }
+    
+    .hidden { display: none; }
+    
+    .profile-img { 
+      width: 100px; 
+      height: 100px; 
+      object-fit: cover; 
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: none;
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .progress {
+      height: 10px;
+      border-radius: 5px;
+    }
+    
+    .progress-bar {
+      border-radius: 5px;
+    }
+    
+    .btn {
+      border-radius: 8px;
+      font-weight: 500;
+      padding: 8px 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+    
+    .btn-warning {
+      background-color: var(--warning-color);
+      border-color: var(--warning-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+    
+    .table {
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .table th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .login-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    
+    .referral-code {
+      background: #f0f4ff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      display: inline-block;
+      margin: 10px 0;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      border: 0.25em solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner-border 0.75s linear infinite;
+    }
+    
+    @keyframes spinner-border {
+      to { transform: rotate(360deg); }
+    }
+    
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-inactive {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .floating-action-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
+      z-index: 1000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .floating-action-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(67, 97, 238, 0.4);
+    }
+    
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .search-box i {
+      position: absolute;
+      top: 12px;
+      left: 15px;
+      color: #6c757d;
+    }
+    
+    .search-box input {
+      padding-left: 40px;
+      border-radius: 8px;
+    }
+    
+    .nav-tabs .nav-link {
+      border: none;
+      color: #6c757d;
+      font-weight: 500;
+      padding: 10px 20px;
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--primary-color);
+      border-bottom: 3px solid var(--primary-color);
+      background: transparent;
+    }
+    
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+    }
+  </style>
+</head>
+<body class="container py-4">
+
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div id="successToast" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    
+    <div id="errorToast" class="toast align-items-center text-white bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Section -->
+  <div id="loginSection" class="login-container">
+    <div class="text-center mb-4">
+      <img src="https://via.placeholder.com/100x100?text=Logo" alt="Logo" class="mb-3" style="height: 60px;">
+      <h2 class="fw-bold">Welcome Back</h2>
+      <p class="text-muted">Sign in to access your dashboard</p>
+    </div>
+    
+    <form id="loginForm">
+      <div class="mb-3">
+        <label for="contact" class="form-label">Contact Number</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-phone"></i></span>
+          <input type="text" class="form-control" id="contact" placeholder="Enter your phone number" required>
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+          <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+        </div>
+      </div>
+      
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          <span id="loginText">Login</span>
+          <span id="loginSpinner" class="loading-spinner" style="color: white;display: none;"></span>
+        </button>
+      </div>
+      
+      <div class="text-center mt-3">
+        <a href="#" class="text-decoration-none">Forgot password?</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Student Dashboard -->
+  <div id="studentDashboard" class="hidden">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="fw-bold mb-1"><i class="fas fa-graduation-cap me-2"></i>Student Dashboard</h3>
+        <p class="mb-0">Welcome back, <span id="studentName"></span>!</p>
+      </div>
+      <button id="logoutBtn1" class="btn btn-light">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </button>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="stat-value text-primary" id="studentTarget">0</div>
+          <div class="stat-label">Your Target</div>
+          <i class="fas fa-bullseye mt-2" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="stat-value text-success" id="studentAttained">0</div>
+          <div class="stat-label">Attained</div>
+          <i class="fas fa-check-circle mt-2" style="color: var(--success-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="stat-value text-warning" id="studentRemaining">0</div>
+          <div class="stat-label">Remaining</div>
+          <i class="fas fa-hourglass-half mt-2" style="color: var(--warning-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <img src="https://via.placeholder.com/150" class="profile-img mb-3" id="studentPhoto">
+            <h5 id="studentFullName"></h5>
+            <p class="text-muted mb-2" id="studentEmail"></p>
+          </div>
+          
+          <div class="col-md-8">
+            <h5 class="fw-bold mb-3">Your Progress</h5>
+            <div class="progress mb-3">
+              <div class="progress-bar bg-success" role="progressbar" 
+                id="studentProgressBar" 
+                aria-valuenow="0" 
+                aria-valuemin="0" 
+                aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+              <span class="text-muted">0%</span>
+              <span class="text-muted" id="studentProgressPercent">0%</span>
+              <span class="text-muted">100%</span>
+            </div>
+            
+            <h5 class="fw-bold mb-3">Your Referral Code</h5>
+            <div class="referral-code mb-3" id="refCode">Pending Approval</div>
+            <p class="text-muted mb-3">Share this code with others to earn rewards!</p>
+            
+            <div class="d-flex gap-2">
+              <button id="whatsappShare" class="btn btn-success">
+                <i class="fab fa-whatsapp me-1"></i> Share on WhatsApp
+              </button>
+              <button id="copyReferralBtn" class="btn btn-outline-primary">
+                <i class="fas fa-copy me-1"></i> Copy Code
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+        <div class="list-group">
+          <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">Account Created</h6>
+              <small class="text-muted">Today</small>
+            </div>
+            <p class="mb-1">Your student account was successfully created.</p>
+          </div>
+          <!-- More activity items would be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mentor Dashboard -->
+  <div id="mentorDashboard" class="hidden">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+      <div>
+        <h3 class="fw-bold mb-1"><i class="fas fa-chalkboard-teacher me-2"></i>Mentor Dashboard</h3>
+        <p class="mb-0">Welcome back, <span id="mentorName"></span>!</p>
+      </div>
+      <button id="logoutBtn2" class="btn btn-light">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </button>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="stat-value text-primary" id="mentorTarget">0</div>
+          <div class="stat-label">Total Target</div>
+          <i class="fas fa-bullseye mt-2" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="stat-value text-success" id="mentorAttained">0</div>
+          <div class="stat-label">Total Attained</div>
+          <i class="fas fa-check-circle mt-2" style="color: var(--success-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="stat-value text-info" id="mentorStudents">0</div>
+          <div class="stat-label">Active Students</div>
+          <i class="fas fa-users mt-2" style="color: var(--info-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="stat-value text-warning" id="mentorCompletion">0%</div>
+          <div class="stat-label">Completion Rate</div>
+          <i class="fas fa-chart-line mt-2" style="color: var(--warning-color); font-size: 1.5rem;"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <img src="https://via.placeholder.com/150" class="profile-img mb-3" id="mentorPhoto">
+            <h5 id="mentorFullName"></h5>
+            <p class="text-muted mb-2" id="mentorEmail"></p>
+            <div class="referral-code mb-3" id="mentorRefCode"></div>
+          </div>
+          
+          <div class="col-md-8">
+            <h5 class="fw-bold mb-3">Team Progress</h5>
+            <div class="progress mb-3">
+              <div class="progress-bar bg-success" role="progressbar" 
+                id="mentorProgressBar" 
+                aria-valuenow="0" 
+                aria-valuemin="0" 
+                aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+              <span class="text-muted">0%</span>
+              <span class="text-muted" id="mentorProgressPercent">0%</span>
+              <span class="text-muted">100%</span>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button id="mentorWhatsappShare" class="btn btn-success">
+                <i class="fab fa-whatsapp me-1"></i> Share Your Code
+              </button>
+              <button id="mentorCopyReferralBtn" class="btn btn-outline-primary">
+                <i class="fas fa-copy me-1"></i> Copy Code
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <ul class="nav nav-tabs mb-4" id="mentorTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">Students</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="targets-tab" data-bs-toggle="tab" data-bs-target="#targets" type="button" role="tab">Assign Targets</button>
+          </li>
+        </ul>
+        
+        <div class="tab-content" id="mentorTabContent">
+          <div class="tab-pane fade show active" id="students" role="tabpanel">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" class="form-control" id="studentSearch" placeholder="Search students...">
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Target</th>
+                    <th>Attained</th>
+                    <th>Progress</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="downlineTable"></tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="tab-pane fade" id="targets" role="tabpanel">
+            <h5 class="fw-bold mb-3">🎯 Assign New Target</h5>
+            <form id="assignForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Select Student</label>
+                  <select id="studentSelect" class="form-select" required>
+                    <option value="">-- Select Student --</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">New Target</label>
+                  <input type="number" class="form-control" id="targetValue" placeholder="Enter target" required>
+                </div>
+                <div class="col-md-2 mb-3 d-flex align-items-end">
+                  <button type="submit" class="btn btn-warning w-100">
+                    <i class="fas fa-paper-plane me-1"></i> Assign
+                  </button>
+                </div>
+              </div>
+            </form>
+            
+            <div class="mt-4">
+              <h5 class="fw-bold mb-3">Recent Assignments</h5>
+              <div class="list-group" id="recentAssignments">
+                <!-- Recent assignments will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Detail Modal -->
+  <div class="modal fade" id="studentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Student Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="studentModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <div class="floating-action-btn hidden" id="helpBtn">
+    <i class="fas fa-question" style="font-size: 1.5rem;"></i>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script>
+    const baseUrl = "https://eventdb.onrender.com";
+    const loginForm = document.getElementById("loginForm");
+    const loginSection = document.getElementById("loginSection");
+    const studentDashboard = document.getElementById("studentDashboard");
+    const mentorDashboard = document.getElementById("mentorDashboard");
+    const contactInput = document.getElementById("contact");
+    const emailInput = document.getElementById("email");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginText = document.getElementById("loginText");
+    const loginSpinner = document.getElementById("loginSpinner");
+    const helpBtn = document.getElementById("helpBtn");
+    
+    // Toast elements
+    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+    const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+    
+    let currentUser = null;
+
+    // Show toast notification
+    function showToast(type, message) {
+      const toast = type === 'success' ? successToast : errorToast;
+      document.querySelector(`#${type}Toast .toast-body`).textContent = message;
+      toast.show();
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const contact_number = contactInput.value;
+      const email = emailInput.value;
+
+      // Show loading state
+      loginText.classList.add("hidden");
+      loginSpinner.classList.remove("hidden");
+      loginBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${baseUrl}/stdlogin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contact_number, email })
+        });
+        const user = await res.json();
+        
+        if (!res.ok) throw new Error(user.error || "Login failed. Please check your credentials.");
+        
+        currentUser = user;
+        loginSection.classList.add("hidden");
+        helpBtn.classList.remove("hidden");
+
+        if (user.role === 'admin') {
+  window.location.replace("/referAdmin.html")    // 🛠️ Admin goes to admin dashboard
+} else if (user.role === 'mentor') {
+  loadMentorDashboard(user);    // 👨‍🏫 Mentor goes to mentor dashboard
+} else {
+  loadStudentDashboard(user);   // 🎓 Student goes to student dashboard
+}
+
+        
+        showToast('success', `Welcome back, ${user.first_name}!`);
+      } catch (err) {
+        showToast('error', err.message);
+        console.error("Login error:", err);
+      } finally {
+        // Reset loading state
+        loginText.classList.remove("hidden");
+        loginSpinner.classList.add("hidden");
+        loginBtn.disabled = false;
+      }
+    });
+
+    function loadStudentDashboard(user) {
+      studentDashboard.classList.remove("hidden");
+      
+      // Update profile info
+      document.getElementById("studentName").textContent = user.first_name;
+      document.getElementById("studentFullName").textContent = `${user.first_name} ${user.last_name}`;
+      document.getElementById("studentEmail").textContent = user.email;
+      document.getElementById("studentPhoto").src = user.photo_url || 'https://via.placeholder.com/150?text=No+Photo';
+      
+      // Update stats
+      document.getElementById("studentTarget").textContent = user.target || 0;
+      document.getElementById("studentAttained").textContent = user.attained || 0;
+      const remaining = Math.max(0, (user.target || 0) - (user.attained || 0));
+      document.getElementById("studentRemaining").textContent = remaining;
+      
+      // Update progress bar
+      const progressPercent = user.target ? Math.min(100, Math.round((user.attained / user.target) * 100)) : 0;
+      document.getElementById("studentProgressBar").style.width = `${progressPercent}%`;
+      document.getElementById("studentProgressBar").setAttribute('aria-valuenow', progressPercent);
+      document.getElementById("studentProgressPercent").textContent = `${progressPercent}%`;
+      
+      // Update referral code
+      const refCodeElement = document.getElementById("refCode");
+      if (user.referral_code) {
+        refCodeElement.textContent = user.referral_code;
+        refCodeElement.classList.add('active-code');
+      } else {
+        refCodeElement.textContent = 'Pending Approval';
+        refCodeElement.classList.remove('active-code');
+      }
+    }
+
+    // WhatsApp share functionality
+    document.getElementById("whatsappShare").addEventListener("click", () => {
+      const code = document.getElementById("refCode").textContent;
+      if (code && code !== "Pending Approval") {
+        const msg = `Hey! Use my referral code *${code}* to sign up for this amazing program! 🚀\n\nJoin now and let's grow together!`;
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(url, "_blank");
+      } else {
+        showToast('error', "Referral code not available yet.");
+      }
+    });
+
+    // Copy referral code
+    document.getElementById("copyReferralBtn").addEventListener("click", () => {
+      const code = document.getElementById("refCode").textContent;
+      if (code && code !== "Pending Approval") {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('success', "Referral code copied to clipboard!");
+        }).catch(err => {
+          showToast('error', "Failed to copy: " + err);
+        });
+      } else {
+        showToast('error', "No referral code available to copy.");
+      }
+    });
+
+    async function loadMentorDashboard(user) {
+      mentorDashboard.classList.remove("hidden");
+      
+      // Update profile info
+      document.getElementById("mentorName").textContent = user.first_name;
+      document.getElementById("mentorFullName").textContent = `${user.first_name} ${user.last_name}`;
+      document.getElementById("mentorEmail").textContent = user.email;
+      document.getElementById("mentorPhoto").src = user.photo_url || 'https://via.placeholder.com/150?text=No+Photo';
+      document.getElementById("mentorRefCode").textContent = user.referral_code || 'Not Available';
+      
+      try {
+        const res = await fetch(`${baseUrl}/students/referral-tree/${user.referral_code}`);
+        const downlines = await res.json();
+        
+        if (!res.ok) throw new Error("Failed to load student data");
+        
+        // Calculate totals
+        let totalTarget = 0;
+        let totalAttained = 0;
+        let activeStudents = 0;
+        
+        const studentSelect = document.getElementById("studentSelect");
+        studentSelect.innerHTML = `<option value="">-- Select Student --</option>`;
+        downlineTable.innerHTML = "";
+        
+        downlines.forEach(d => {
+          if (d.level > 0 && d.role === 'student') {
+            // Add to totals
+            totalTarget += d.target || 0;
+            totalAttained += d.attained || 0;
+            if (d.status === 'active') activeStudents++;
+            
+            // Add to student dropdown
+            studentSelect.innerHTML += `<option value="${d.id}">${d.first_name} ${d.last_name} (${d.email})</option>`;
+            
+            // Calculate progress
+            const progress = d.target ? Math.min(100, Math.round((d.attained / d.target) * 100)) : 0;
+            
+            // Add to table
+            downlineTable.innerHTML += `
+              <tr onclick="viewStudent(${d.id})" style="cursor: pointer;">
+                <td>${d.first_name} ${d.last_name}</td>
+                <td>${d.email}</td>
+                <td>${d.target || 0}</td>
+                <td>${d.attained || 0}</td>
+                <td>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                      style="width: ${progress}%" 
+                      aria-valuenow="${progress}" 
+                      aria-valuemin="0" 
+                      aria-valuemax="100"></div>
+                  </div>
+                  <small>${progress}%</small>
+                </td>
+                <td><span class="status-badge status-${d.status || 'inactive'}">${d.status || 'inactive'}</span></td>
+              </tr>`;
+          }
+        });
+        
+        // Update mentor stats
+        document.getElementById("mentorTarget").textContent = totalTarget;
+        document.getElementById("mentorAttained").textContent = totalAttained;
+        document.getElementById("mentorStudents").textContent = activeStudents;
+        
+        const completionRate = totalTarget ? Math.min(100, Math.round((totalAttained / totalTarget) * 100)) : 0;
+        document.getElementById("mentorCompletion").textContent = `${completionRate}%`;
+        
+        // Update progress bar
+        document.getElementById("mentorProgressBar").style.width = `${completionRate}%`;
+        document.getElementById("mentorProgressBar").setAttribute('aria-valuenow', completionRate);
+        document.getElementById("mentorProgressPercent").textContent = `${completionRate}%`;
+        
+        // Enhance dropdown
+        setTimeout(() => $('#studentSelect').select2({
+          placeholder: "Search student...",
+          width: '100%'
+        }), 300);
+        
+        // Add search functionality
+        document.getElementById('studentSearch').addEventListener('input', (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const rows = downlineTable.querySelectorAll('tr');
+          
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+          });
+        });
+        
+      } catch (err) {
+        showToast('error', "Failed to load student data: " + err.message);
+        console.error("Error loading mentor dashboard:", err);
+      }
+    }
+
+    // Assign target form
+    const assignForm = document.getElementById("assignForm");
+    assignForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const student_id = document.getElementById("studentSelect").value;
+      const target = document.getElementById("targetValue").value;
+
+      if (!student_id) {
+        showToast('error', "Please select a student.");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${baseUrl}/mentors/assign-target`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student_id, target, mentor_email: currentUser.email })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || "Failed to assign target");
+        
+        showToast('success', "Target assigned successfully!");
+        assignForm.reset();
+        $('#studentSelect').val(null).trigger('change'); // Reset select2
+        
+        // Add to recent assignments
+        const studentName = document.getElementById("studentSelect").selectedOptions[0].text.split(' (')[0];
+        const recentAssignments = document.getElementById("recentAssignments");
+        const now = new Date().toLocaleString();
+        
+        recentAssignments.innerHTML = `
+          <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">${studentName}</h6>
+              <small class="text-muted">Just now</small>
+            </div>
+            <p class="mb-1">New target assigned: ${target}</p>
+          </div>
+          ${recentAssignments.innerHTML}
+        `;
+        
+        // Reload data
+        loadMentorDashboard(currentUser);
+      } catch (err) {
+        showToast('error', "Error: " + err.message);
+      }
+    });
+
+    // View student details
+    async function viewStudent(id) {
+      try {
+        const res = await fetch(`${baseUrl}/admin/student/${id}`);
+        const user = await res.json();
+        
+        if (!res.ok) throw new Error("Failed to load student details");
+        
+        const progress = user.target ? Math.min(100, Math.round((user.attained / user.target) * 100)) : 0;
+        
+        const html = `
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img src="${user.photo_url || 'https://via.placeholder.com/150?text=No+Photo'}" class="img-fluid rounded mb-3" style="max-height: 200px;">
+              <h4>${user.first_name} ${user.last_name}</h4>
+              <p class="text-muted">${user.email}</p>
+              <p><span class="status-badge status-${user.status || 'inactive'}">${user.status || 'inactive'}</span></p>
+            </div>
+            
+            <div class="col-md-8">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <div class="card stat-card">
+                    <div class="stat-value text-primary">${user.target || 0}</div>
+                    <div class="stat-label">Target</div>
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <div class="card stat-card">
+                    <div class="stat-value text-success">${user.attained || 0}</div>
+                    <div class="stat-label">Attained</div>
+                  </div>
+                </div>
+              </div>
+              
+              <h5 class="fw-bold mt-3">Progress</h5>
+              <div class="progress mb-3">
+                <div class="progress-bar bg-success" role="progressbar" 
+                  style="width: ${progress}%" 
+                  aria-valuenow="${progress}" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100"></div>
+              </div>
+              <div class="d-flex justify-content-between mb-4">
+                <span class="text-muted">0%</span>
+                <span class="text-muted">${progress}%</span>
+                <span class="text-muted">100%</span>
+              </div>
+              
+              <h5 class="fw-bold mt-3">Contact Information</h5>
+              <p><strong>Phone:</strong> ${user.contact_number || 'Not provided'}</p>
+              <p><strong>Joined:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById("studentModalBody").innerHTML = html;
+        new bootstrap.Modal(document.getElementById('studentModal')).show();
+      } catch (err) {
+        showToast('error', "Failed to load student details: " + err.message);
+      }
+    }
+
+    // Logout functionality
+    document.getElementById("logoutBtn1").onclick =
+    document.getElementById("logoutBtn2").onclick = () => {
+      showToast('success', "Logged out successfully. See you soon!");
+      setTimeout(() => location.reload(), 1000);
+    };
+
+    // Help button functionality
+    helpBtn.addEventListener('click', () => {
+      alert("Need help? Contact our support team at support@referralprogram.com");
+    });
+
+    // Mentor share buttons
+    document.getElementById("mentorWhatsappShare").addEventListener("click", () => {
+      const code = document.getElementById("mentorRefCode").textContent;
+      if (code && code !== "Not Available") {
+        const msg = `Hello! I'm a mentor for this program. Use my referral code *${code}* when signing up to join my team! 🚀\n\nI'll be happy to guide you through the process!`;
+        const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(url, "_blank");
+      } else {
+        showToast('error', "Referral code not available.");
+      }
+    });
+
+    document.getElementById("mentorCopyReferralBtn").addEventListener("click", () => {
+      const code = document.getElementById("mentorRefCode").textContent;
+      if (code && code !== "Not Available") {
+        navigator.clipboard.writeText(code).then(() => {
+          showToast('success', "Referral code copied to clipboard!");
+        }).catch(err => {
+          showToast('error', "Failed to copy: " + err);
+        });
+      } else {
+        showToast('error', "No referral code available to copy.");
+      }
+    });
+  </script>
+</body>
+</html>
