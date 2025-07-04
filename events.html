@@ -6,12 +6,7 @@
     <title>Events - EventHub</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="events.css">
-    <!-- jQuery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- jQuery Confirm CSS & JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
-<script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
-
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -1301,62 +1296,70 @@ async function getFirstGalleryImage(eventId) {
   }
 }
 async function registerForEvent() {
-  const eventId = $('#register-event-id').val();
-  const transactionId = $('#transaction-id').val().trim();
-  const registerButton = $('#registerButton');
+  const eventId = document.getElementById('register-event-id').value;
+  const registerButton = document.getElementById('registerButton');
+  const transactionId = document.getElementById('transaction-id').value.trim();
 
   if (!currentUserProfile) {
     showToast('Please verify your profile before registration', 'warning');
     return;
   }
 
-  // Show jQuery UI Dialog to get referral code
-  const referralCode = await new Promise((resolve) => {
-    $('#referral-code-input').val(''); // clear previous input if any
-    $('#referral-dialog').dialog({
-      modal: true,
-      buttons: {
-        Submit: function () {
-          const code = $('#referral-code-input').val().trim();
-          $(this).dialog('close');
-          resolve(code || null); // pass null if empty
-        },
-        Skip: function () {
-          $(this).dialog('close');
-          resolve(null);
-        }
-      }
-    });
-  });
+   const result = await Swal.fire({
+  title: 'Referral Code (optional)',
+  input: 'text',
+  inputLabel: 'Enter a referral code if you have one',
+  inputPlaceholder: 'e.g., ID1234ABCD',
+  showCancelButton: true,
+  confirmButtonText: 'Submit',
+  cancelButtonText: 'Skip'
+});
 
-  registerButton.prop('disabled', true).html(`
+let referralCode = null;
+
+if (result.isConfirmed) {
+  referralCode = result.value?.trim() || null;
+} else {
+  referralCode = null; // User clicked 'Skip'
+}
+
+// Now you can safely use referralCode
+console.log("Referral Code:", referralCode);
+
+
+  registerButton.disabled = true;
+  registerButton.innerHTML = `
     <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
     Registering...
-  `);
+  `;
 
   try {
     let registrationData = {};
     try {
-      registrationData = JSON.parse($('#register-data').val() || '{}');
+      registrationData = JSON.parse(document.getElementById('register-data').value || '{}');
     } catch (e) {
       throw new Error('Invalid JSON in registration data');
     }
 
-    const result = await makeRequest('POST', `/events/${eventId}/register`, {
+    const result = await makeRequest('POST', `/events/${eventId}/register`, { 
       registration_data: registrationData,
       transaction_id: transactionId,
-      referral_code: referralCode
+      referral_code: referralCode || null
     });
 
     Swal.fire({
       icon: 'success',
       title: '🎉 Registration Successful!',
-      html: `<p>You have successfully registered for the event.</p><p>View your events now?</p>`,
+      html: `<p>You have successfully registered for the event.</p><p><strong>Would you like to view your events now?</strong></p>`,
       showCancelButton: true,
-      confirmButtonText: '✅ Yes',
-      cancelButtonText: '❌ Later'
-    }).then((res) => {
-      if (res.isConfirmed) getMyEvents();
+      confirmButtonText: '✅ Yes, show my events',
+      cancelButtonText: '❌ No, maybe later',
+      confirmButtonColor: '#198754',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        getMyEvents();
+      }
     });
 
     eventModal.hide();
@@ -1364,10 +1367,10 @@ async function registerForEvent() {
   } catch (error) {
     showToast(`❌ Registration failed: ${error.message}`, 'danger');
   } finally {
-    registerButton.prop('disabled', false).html(`<i class="bi bi-check-circle me-1"></i>Confirm Registration`);
+    registerButton.disabled = false;
+    registerButton.innerHTML = `<i class="bi bi-check-circle me-1"></i>Confirm Registration`;
   }
 }
-
 
 
 function getStatusColor(status) {
@@ -1434,10 +1437,5 @@ document.addEventListener('keydown', function(e) {
 });
 
   </script>
-  <div id="referral-dialog" title="Enter Referral Code" style="display:none;">
-  <p>Enter referral code (optional):</p>
-  <input type="text" id="referral-code-input" class="form-control" placeholder="e.g., ID1234XYZ">
-</div>
-
 </body>
 </html>
