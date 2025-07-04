@@ -681,9 +681,6 @@
 
     const response = await fetch(`${BASE_URL}/api/announcements/${id}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
     });
                 const announcement = await response.json();
                 
@@ -745,7 +742,6 @@ const response = await fetch(`${BASE_URL}/api/announcements`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
   },
   body: JSON.stringify({
     title,
@@ -804,10 +800,6 @@ const response = await fetch(`${BASE_URL}/api/announcements`, {
 
 const response = await fetch(`${BASE_URL}/api/announcements/${editingAnnouncementId}`, {
   method: 'PUT',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  },
   body: JSON.stringify({
     title,
     content,
@@ -851,13 +843,10 @@ const response = await fetch(`${BASE_URL}/api/announcements/${editingAnnouncemen
                 confirmDeleteBtn.disabled = true;
                 confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
                 
-               const token = localStorage.getItem('jwtToken');
+               
 
 const response = await fetch(`${BASE_URL}/api/announcements/${announcementToDelete}`, {
   method: 'DELETE',
-  headers: {
-    'Authorization': `Bearer ${token}`
-  }
 });
 
                 
