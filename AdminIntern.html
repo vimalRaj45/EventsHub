@@ -497,18 +497,13 @@ async function saveInternshipChanges() {
     const fileInput = document.getElementById('editInternshipImg');
     const qrFileInput = document.getElementById('editPaymentQrImg');
     let imgurl = document.getElementById('editImgUrl').value;
-    let paymentQrUrl = document.getElementById('editPaymentQrUrl').value;
 
     // Upload new image if selected
     if (fileInput.files.length > 0) {
       imgurl = await uploadToImgBB(fileInput.files[0]);
     }
 
-    // Upload new QR code if selected
-    if (qrFileInput.files.length > 0) {
-      paymentQrUrl = await uploadToImgBB(qrFileInput.files[0]);
-    }
-
+    // First update the internship details (without QR code)
     const body = {
       company_name: document.getElementById('editCompany').value,
       position: document.getElementById('editPosition').value,
@@ -517,7 +512,6 @@ async function saveInternshipChanges() {
       start_date: document.getElementById('editStart').value,
       end_date: document.getElementById('editEnd').value,
       status: document.getElementById('editStatus').value,
-      payment_qr: paymentQrUrl || null,
       imgurl: imgurl || null
     };
 
@@ -530,11 +524,15 @@ async function saveInternshipChanges() {
       body: JSON.stringify(body)
     });
 
-    const responseData = await res.json();
-    
     if (!res.ok) {
-      console.error('PUT Error Response:', responseData);
-      throw new Error(responseData.error || 'Failed to update internship');
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to update internship');
+    }
+
+    // Then handle QR code upload separately if a new one was selected
+    if (qrFileInput.files.length > 0) {
+      const qrUrl = await uploadToImgBB(qrFileInput.files[0]);
+      await updatePaymentQrCode(id, qrUrl);
     }
 
     editModal.hide();
@@ -554,6 +552,25 @@ async function saveInternshipChanges() {
       confirmButtonText: 'OK'
     });
   }
+}
+
+// New function to update payment QR code using the dedicated endpoint
+async function updatePaymentQrCode(internshipId, qrUrl) {
+  const res = await fetch(`${BASE}/api/admin/internships/${internshipId}/set-payment-qr`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ paymentQr: qrUrl })
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || 'Failed to update payment QR code');
+  }
+
+  return await res.json();
 }
 
 // Delete Internship
@@ -598,16 +615,7 @@ document.getElementById('createInternship').addEventListener('submit', async (e)
     let imgurl = null;
     let paymentQrUrl = null;
 
-    // Upload internship image if selected
-    if (fileInput.files.length > 0) {
-      imgurl = await uploadToImgBB(fileInput.files[0]);
-    }
-
-    // Upload QR code image if selected
-    if (qrFileInput.files.length > 0) {
-      paymentQrUrl = await uploadToImgBB(qrFileInput.files[0]);
-    }
-
+    // First create the internship without QR code
     const body = {
       company_name: document.getElementById('company').value,
       position: document.getElementById('position').value,
@@ -616,9 +624,14 @@ document.getElementById('createInternship').addEventListener('submit', async (e)
       start_date: document.getElementById('start').value,
       end_date: document.getElementById('end').value,
       status: document.getElementById('status').value,
-      payment_qr: paymentQrUrl,
-      imgurl: imgurl
+      imgurl: null // We'll handle this after creation
     };
+
+    // Upload internship image if selected
+    if (fileInput.files.length > 0) {
+      imgurl = await uploadToImgBB(fileInput.files[0]);
+      body.imgurl = imgurl;
+    }
 
     const res = await fetch(`${BASE}/api/internships`, {
       method: 'POST',
@@ -632,6 +645,14 @@ document.getElementById('createInternship').addEventListener('submit', async (e)
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.message || 'Failed to create internship');
+    }
+
+    const newInternship = await res.json();
+
+    // Handle QR code upload if selected
+    if (qrFileInput.files.length > 0) {
+      paymentQrUrl = await uploadToImgBB(qrFileInput.files[0]);
+      await updatePaymentQrCode(newInternship.id, paymentQrUrl);
     }
 
     Swal.fire('Success', 'Internship created successfully', 'success');
