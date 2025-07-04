@@ -442,6 +442,16 @@
         let currentStudentId = null;
         let currentMentorId = null;
 
+
+        const user = JSON.parse(localStorage.getItem('user')) || {}; // assuming stored as 'user'
+
+function isAdmin() {
+  return user.role === 'admin';
+}
+if (!isAdmin()) {
+  return;
+}
+
         // Initial load
         window.onload = function() {
             loadDashboard();
