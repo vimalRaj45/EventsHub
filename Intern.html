@@ -2,708 +2,387 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Dashboard</title>
+  <title>Student Internship Portal</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3f37c9;
-      --accent-color: #4895ef;
-      --light-color: #f8f9fa;
-      --dark-color: #212529;
-    }
-    
-    body {
-      background-color: #f5f7fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding-top: 0.5rem;
-    }
-    
-    .card {
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      border: none;
-      transition: all 0.3s ease;
-    }
-    
-    .card-header {
-      border-radius: 10px 10px 0 0 !important;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    }
-    
-    .internship-card {
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    
-    .internship-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .internship-img {
-      height: 180px;
-      object-fit: cover;
-      border-radius: 8px 8px 0 0;
-    }
-    
-    .status-badge {
-      font-size: 0.75rem;
-      padding: 5px 10px;
-      border-radius: 50px;
-    }
-    
-    .application-card {
-      transition: all 0.3s ease;
-      border-left: 4px solid var(--accent-color);
-    }
-    
-    .application-card:hover {
-      transform: translateX(5px);
-    }
-    
-    .search-box {
-      max-width: 500px;
-      border-radius: 50px;
-      padding-left: 20px;
-    }
-    
-    .filter-select {
-      border-radius: 50px;
-    }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-    }
-    
-    .btn-primary:hover {
-      background-color: var(--secondary-color);
-      border-color: var(--secondary-color);
-    }
-    
-    .modal-content {
-      border-radius: 15px;
-    }
-    
-    .company-logo {
-      width: 80px;
-      height: 80px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid #eee;
-      padding: 5px;
-      background: white;
-    }
-    
-    .loading-spinner {
-      width: 3rem;
-      height: 3rem;
-    }
-    
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      body {
-        padding-top: 0;
-      }
-      
-      .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-      }
-      
-      .internship-img {
-        height: 150px;
-      }
-      
-      .header-section {
-        flex-direction: column;
-        align-items: flex-start !important;
-        gap: 1rem;
-      }
-      
-      .header-section .btn {
-        width: 100%;
-      }
-      
-      .search-filter-section .col-md-6 {
-        margin-bottom: 1rem;
-      }
-      
-      .search-filter-section .d-flex {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      
-      .card-header h5 {
-        font-size: 1.1rem;
-      }
-      
-      .internship-card .btn {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-      }
-      
-      .company-logo {
-        width: 60px;
-        height: 60px;
-      }
-      
-      .modal-dialog {
-        margin: 0.5rem auto;
-      }
-      
-      .modal-content {
-        border-radius: 10px;
-      }
-      
-      .application-card {
-        font-size: 0.9rem;
-      }
-      
-      /* Make buttons more touch-friendly */
-      .btn {
-        padding: 0.6rem 1rem;
-        min-width: 44px;
-        min-height: 44px;
-      }
-      
-      /* Larger tap targets for interactive elements */
-      .internship-card, .application-card {
-        padding: 0.5rem;
-      }
-      
-      /* Adjust font sizes for better readability */
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      h5 {
-        font-size: 1.2rem;
-      }
-      
-      .card-text, .text-muted {
-        font-size: 0.9rem;
-      }
-    }
-    
-    @media (max-width: 576px) {
-      .internship-img {
-        height: 120px;
-      }
-      
-      .company-logo {
-        width: 50px;
-        height: 50px;
-      }
-      
-      .modal-body {
-        padding: 1rem;
-      }
-      
-      .modal-footer .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-      
-      /* Stack columns on very small screens */
-      .main-content .col-lg-8, 
-      .main-content .col-lg-4 {
-        width: 100%;
-        margin-bottom: 1.5rem;
-      }
-    }
+    .internship-card { transition: all 0.2s; cursor: pointer; }
+    .internship-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .internship-img { height: 180px; object-fit: cover; }
+    .badge-active { background-color: #28a745; color: white; }
+    .badge-inactive { background-color: #6c757d; color: white; }
+    .badge-completed { background-color: #17a2b8; color: white; }
+    .qr-img { max-width: 200px; max-height: 200px; }
   </style>
 </head>
-<body class="container my-3">
-  <!-- Header Section -->
-  <div class="d-flex justify-content-between align-items-center mb-4 header-section">
-    <div>
-      <h2 class="mb-1"><i class="fas fa-user-graduate me-2 text-primary"></i>Student Dashboard</h2>
-      <small class="text-muted">Welcome back! Explore available internships</small>
-    </div>
-    
-  </div>
-
-  <!-- Search and Filter Section -->
-  <div class="card mb-4 border-0 shadow-sm">
-    <div class="card-body py-3 search-filter-section">
-      <div class="row g-3 align-items-center">
-        <div class="col-md-6">
-          <div class="input-group shadow-sm">
-            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-            <input type="text" id="searchInput" class="form-control search-box border-start-0" placeholder="Search internships...">
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="d-flex align-items-center">
-            <span class="me-2 text-muted small">Filter:</span>
-            <select class="form-select filter-select shadow-sm" id="filterStatus">
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-        </div>
+<body class="bg-light">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-briefcase me-2"></i>Internship Opportunities</h2>
+      <div>
+        <button class="btn btn-outline-primary me-2" onclick="loadMyApplications()">
+          <i class="fas fa-list-check"></i> My Applications
+        </button>
+        <button class="btn btn-outline-danger" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- Main Content -->
-  <div class="row main-content">
     <!-- Available Internships -->
-    <div class="col-lg-8 mb-4">
-      <div class="card border-0 shadow">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>Available Internships</h5>
-          <button class="btn btn-sm btn-light" onclick="loadInternships()">
-            <i class="fas fa-sync-alt me-1"></i>
-          </button>
+    <div class="card shadow mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Available Internships</h5>
+      </div>
+      <div class="card-body">
+        <div class="row" id="internshipsList">
+          <!-- Internships will be loaded here -->
         </div>
-        <div class="card-body">
-          <div id="internships" class="row g-3">
-            <div class="col-12 text-center my-5">
-              <div class="spinner-border text-primary loading-spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-3 text-muted">Loading available internships...</p>
-            </div>
+      </div>
+    </div>
+
+    <!-- My Applications Modal -->
+    <div class="modal fade" id="applicationsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">My Applications</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="applicationsModalBody">
+            <!-- Content loaded dynamically -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Your Applications -->
-    <div class="col-lg-4">
-      <div class="card border-0 shadow h-100">
-        <div class="card-header py-3">
-          <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Your Applications</h5>
-        </div>
-        <div class="card-body">
-          <div id="appliedInternships">
-            <div class="text-center my-5">
-              <div class="spinner-border text-primary loading-spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-3 text-muted">Loading your applications...</p>
-            </div>
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Submit Payment</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="paymentModalBody">
+            <!-- Content loaded dynamically -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" onclick="submitPayment()">
+              <i class="fas fa-check-circle"></i> Submit Payment
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Internship Details Modal -->
-  <div class="modal fade" id="internshipModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>Internship Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="internshipDetails">
-          <!-- Content loaded dynamically -->
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" id="applyButton" class="btn btn-primary" onclick="applyForInternship()">
-            <i class="fas fa-paper-plane me-1"></i> Apply Now
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <script>
+    const BASE = "https://eventdb.onrender.com";
+    const token = localStorage.getItem("jwtToken") || "";
+    let applicationsModal = null;
+    let paymentModal = null;
+    let currentInternshipId = null;
 
-<script>
-const BASE = "https://eventdb.onrender.com";
-const token = localStorage.getItem("jwtToken") || "";
-let internshipModal = null;
-let selectedInternshipId = null;
-
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', () => {
-  internshipModal = new bootstrap.Modal(document.getElementById('internshipModal'));
-  
-  if (!token) {
-    showError('Session Expired', 'You need to login first').then(() => {
-      window.location.href = 'index.html';
+    document.addEventListener('DOMContentLoaded', () => {
+      applicationsModal = new bootstrap.Modal(document.getElementById('applicationsModal'));
+      paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+      
+      if (!token) {
+        Swal.fire('Error', 'You need to login first', 'error').then(() => {
+          window.location.href = 'index.html';
+        });
+        return;
+      }
+      
+      loadInternships();
     });
-    return;
-  }
-  
-  loadInternships();
-  loadApplied();
-  
-  // Setup event listeners
-  document.getElementById('searchInput').addEventListener('input', debounce((e) => {
-    loadInternships(e.target.value.toLowerCase());
-  }, 300));
-  
-  document.getElementById('filterStatus').addEventListener('change', (e) => {
-    loadInternships(document.getElementById('searchInput').value.toLowerCase(), e.target.value);
-  });
-});
 
-// Utility function for debouncing
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
-
-// Show error message
-function showError(title, message) {
-  return Swal.fire({
-    title: title,
-    text: message,
-    icon: 'error',
-    confirmButtonText: 'OK'
-  });
-}
-
-// Logout function
-function logout() {
-  Swal.fire({
-    title: 'Logout?',
-    text: 'Are you sure you want to logout?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#4361ee',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Yes, logout'
-  }).then((result) => {
-    if (result.isConfirmed) {
+    function logout() {
       localStorage.removeItem('jwtToken');
       window.location.href = 'login.html';
     }
-  });
-}
 
-// Load All Internships with Search and Filter
-async function loadInternships(search = '', status = '') {
-  try {
-    // Show loading state
-    document.getElementById('internships').innerHTML = `
-      <div class="col-12 text-center my-5">
-        <div class="spinner-border text-primary loading-spinner" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-3 text-muted">Loading internships...</p>
-      </div>
-    `;
-    
-    const res = await fetch(`${BASE}/api/internships`);
-    if (!res.ok) throw new Error('Failed to load internships');
-    
-    let data = await res.json();
-    
-    // Client-side filtering
-    if (search) {
-      data = data.filter(i => 
-        i.company_name.toLowerCase().includes(search) || 
-        i.position.toLowerCase().includes(search) ||
-        (i.description && i.description.toLowerCase().includes(search))
-      );
-    }
-    
-    if (status) {
-      data = data.filter(i => i.status === status);
-    }
-    
-    renderInternships(data);
-  } catch (err) {
-    console.error('Error loading internships:', err);
-    document.getElementById('internships').innerHTML = `
-      <div class="col-12">
-        <div class="alert alert-danger">Error loading internships: ${err.message}</div>
-      </div>
-    `;
-  }
-}
-
-// Render internships to the DOM
-function renderInternships(internships) {
-  if (internships.length === 0) {
-    document.getElementById('internships').innerHTML = `
-      <div class="col-12">
-        <div class="alert alert-info d-flex align-items-center">
-          <i class="fas fa-info-circle me-2"></i>
-          No internships found matching your criteria
-        </div>
-      </div>
-    `;
-    return;
-  }
-  
-  document.getElementById('internships').innerHTML = internships.map(i => `
-    <div class="col-md-6 mb-3">
-      <div class="card h-100 internship-card" onclick="showInternshipDetails(${i.id})">
-        ${i.imgurl ? `<img src="${i.imgurl}" class="internship-img card-img-top" alt="${i.company_name}">` : ''}
-        <div class="card-body">
-          <div class="d-flex align-items-start mb-2">
-            ${i.logo_url ? `<img src="${i.logo_url}" class="company-logo me-3" alt="${i.company_name} logo">` : ''}
-            <div>
-              <h5 class="card-title mb-1">${i.company_name}</h5>
-              <h6 class="card-subtitle text-muted">${i.position}</h6>
+    async function loadInternships() {
+      try {
+        document.getElementById('internshipsList').innerHTML = `
+          <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
+            <p>Loading internships...</p>
           </div>
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            <span class="badge ${getStatusBadgeClass(i.status)}">${i.status}</span>
-            <span class="badge bg-light text-dark"><i class="fas fa-clock me-1"></i>${i.duration}</span>
+        `;
+        
+        const res = await fetch(`${BASE}/api/internships`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load internships');
+        
+        const internships = await res.json();
+        renderInternships(internships);
+      } catch (err) {
+        document.getElementById('internshipsList').innerHTML = `
+          <div class="col-12 text-center text-danger">
+            Error loading internships: ${err.message}
           </div>
-          <p class="card-text text-muted small">
-            <i class="fas fa-calendar-alt me-1"></i>
-            ${formatDate(i.start_date)} - ${formatDate(i.end_date)}
-          </p>
-          <span class="text-secondary text-bold small p-2">
-            Dates may vary based on your preference.
-          </span>
-        </div>
-        <div class="card-footer bg-transparent border-top-0">
-          <button class="btn btn-primary w-100" onclick="event.stopPropagation(); showInternshipDetails(${i.id}, true)">
-            <i class="fas fa-info-circle me-1"></i> Details & Apply
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// Format date for display
-function formatDate(dateString) {
-  if (!dateString) return 'N/A';
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-}
-
-// Get badge class based on status
-function getStatusBadgeClass(status) {
-  switch (status) {
-    case 'active': return 'bg-success';
-    case 'completed': return 'bg-info text-dark';
-    case 'featured': return 'bg-warning text-dark';
-    default: return 'bg-secondary';
-  }
-}
-
-// Show internship details in modal
-async function showInternshipDetails(id, showApplyButton = false) {
-  try {
-    selectedInternshipId = id;
-    
-    // Show loading state
-    document.getElementById('internshipDetails').innerHTML = `
-      <div class="text-center my-5 py-4">
-        <div class="spinner-border text-primary loading-spinner" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-3 text-muted">Loading internship details...</p>
-      </div>
-    `;
-    
-    // Show/hide apply button based on parameter
-    document.getElementById('applyButton').style.display = showApplyButton ? 'block' : 'none';
-    
-    const res = await fetch(`${BASE}/api/internships/${id}`);
-    if (!res.ok) throw new Error('Failed to fetch internship details');
-    
-    const internship = await res.json();
-    
-    document.getElementById('internshipDetails').innerHTML = `
-      <div class="row">
-        <div class="col-md-4 text-center mb-4 mb-md-0">
-          ${internship.imgurl ? `<img src="${internship.imgurl}" class="img-fluid rounded mb-3" alt="${internship.company_name}">` : ''}
-          ${internship.logo_url ? `<img src="${internship.logo_url}" class="company-logo" alt="${internship.company_name} logo">` : ''}
-          <h4 class="mt-3">${internship.company_name}</h4>
-          <h5 class="text-muted">${internship.position}</h5>
-          <div class="d-flex justify-content-center gap-2 my-3">
-            <span class="badge ${getStatusBadgeClass(internship.status)}">${internship.status}</span>
-            <span class="badge bg-light text-dark"><i class="fas fa-clock me-1"></i>${internship.duration}</span>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="mb-4">
-            <h5><i class="fas fa-info-circle text-primary me-2"></i>Description</h5>
-            <p class="text-muted">
-              Every internship is a stepping stone to your future. Apply confidently—your journey toward a brighter career begins here! 🌟
-            </p>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <div class="card h-100">
-                <div class="card-body">
-                  <h6 class="card-title text-muted"><i class="fas fa-calendar-alt text-primary me-2"></i>Timing</h6>
-                  <ul class="list-unstyled">
-                    <li class="mb-2"><strong>Start:</strong> ${formatDate(internship.start_date)}</li>
-                    <li><strong>End:</strong> ${formatDate(internship.end_date)}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          ${internship.requirements ? `
-          <div class="mb-3">
-            <h6><i class="fas fa-clipboard-check text-primary me-2"></i>Requirements</h6>
-            <ul class="text-muted">
-              ${internship.requirements.split('\n').map(req => `<li>${req}</li>`).join('')}
-            </ul>
-          </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
-    
-    internshipModal.show();
-  } catch (err) {
-    console.error('Error loading internship details:', err);
-    document.getElementById('internshipDetails').innerHTML = `
-      <div class="alert alert-danger">
-        <h5><i class="fas fa-exclamation-triangle me-2"></i>Error Loading Details</h5>
-        <p>${err.message}</p>
-      </div>
-    `;
-    internshipModal.show();
-  }
-}
-
-// Apply for internship
-async function applyForInternship() {
-  if (!selectedInternshipId) return;
-  
-  try {
-    const confirm = await Swal.fire({
-      title: 'Confirm Application',
-      text: 'Are you sure you want to apply for this internship?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#4361ee',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Yes, apply',
-      cancelButtonText: 'Cancel'
-    });
-    
-    if (!confirm.isConfirmed) return;
-    
-    const res = await fetch(`${BASE}/api/internships/${selectedInternshipId}/apply`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        `;
       }
-    });
-    
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || 'Failed to submit application');
     }
-    
-    const result = await res.json();
-    
-    Swal.fire({
-      title: 'Success!',
-      text: result.message || 'Your application has been submitted successfully',
-      icon: 'success',
-      confirmButtonColor: '#4361ee',
-      confirmButtonText: 'OK'
-    });
-    
-    internshipModal.hide();
-    loadApplied();
-  } catch (err) {
-    Swal.fire({
-      title: 'Application Error',
-      text: err.message,
-      icon: 'error',
-      confirmButtonText: 'OK'
-    });
-  }
-}
 
-// Load Applied Internships
-async function loadApplied() {
-  try {
-    // Show loading state
-    document.getElementById('appliedInternships').innerHTML = `
-      <div class="text-center my-5 py-4">
-        <div class="spinner-border text-primary loading-spinner" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-3 text-muted">Loading your applications...</p>
-      </div>
-    `;
-    
-    const res = await fetch(`${BASE}/api/internships/applied`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    
-    if (!res.ok) throw new Error('Failed to load applications');
-    
-    const data = await res.json();
-    renderAppliedInternships(data);
-  } catch (err) {
-    console.error('Error loading applications:', err);
-    document.getElementById('appliedInternships').innerHTML = `
-      <div class="alert alert-danger">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        Error loading applications: ${err.message}
-      </div>
-    `;
-  }
-}
-
-// Render applied internships to the DOM
-function renderAppliedInternships(applications) {
-  if (applications.length === 0) {
-    document.getElementById('appliedInternships').innerHTML = `
-      <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
-        You haven't applied to any internships yet.
-      </div>
-    `;
-    return;
-  }
-  
-  document.getElementById('appliedInternships').innerHTML = applications.map(app => `
-    <div class="card mb-3 application-card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="mb-1">${app.company_name}</h6>
-            <p class="mb-2 text-muted">${app.position}</p>
-            <div class="d-flex align-items-center mb-1">
-              <span class="badge ${app.status === 'approved' ? 'bg-success' : 
-                                 app.status === 'rejected' ? 'bg-danger' : 
-                                 app.status === 'pending' ? 'bg-warning text-dark' : 'bg-secondary'} me-2">
-                ${app.status}
+    function renderInternships(internships) {
+      const container = document.getElementById('internshipsList');
+      
+      if (internships.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center text-muted">
+            No internships available at this time
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = internships.map(internship => `
+        <div class="col-md-6 mb-4">
+          <div class="card h-100 internship-card">
+            ${internship.imgurl ? `
+              <img src="${internship.imgurl}" class="card-img-top internship-img" alt="${internship.company_name}">
+            ` : ''}
+            <div class="card-body">
+              <h5 class="card-title">${internship.company_name}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${internship.position}</h6>
+              <p class="card-text">
+                <small class="text-muted">Duration: ${internship.duration}</small><br>
+                <small class="text-muted">
+                  ${new Date(internship.start_date).toLocaleDateString()} - 
+                  ${new Date(internship.end_date).toLocaleDateString()}
+                </small>
+              </p>
+              <span class="badge rounded-pill ${getStatusClass(internship.status)}">
+                ${internship.status}
               </span>
-              <small class="text-muted">
-                <i class="fas fa-calendar-alt me-1"></i>
-              </small>
             </div>
-
-            ${
-              app.status === 'pending'
-                ? `<small class="text-success fst-italic">
-                    ✅ Once approved, we will contact you shortly.
-                   </small>`
-                : ''
-            }
+            <div class="card-footer bg-transparent">
+              <button class="btn btn-primary w-100" onclick="applyForInternship(${internship.id})">
+                <i class="fas fa-paper-plane"></i> Apply Now
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  `).join('');
-}
-</script>
+      `).join('');
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    function getStatusClass(status) {
+      switch (status) {
+        case 'active': return 'badge-active';
+        case 'inactive': return 'badge-inactive';
+        case 'completed': return 'badge-completed';
+        default: return 'badge-secondary';
+      }
+    }
+
+    async function applyForInternship(internshipId) {
+      try {
+        const res = await fetch(`${BASE}/api/internships/${internshipId}/apply`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          if (error.message === 'Already applied') {
+            await Swal.fire({
+              title: 'Already Applied',
+              text: 'You have already applied for this internship',
+              icon: 'info'
+            });
+            return;
+          }
+          throw new Error(error.message || 'Failed to apply');
+        }
+        
+        const result = await res.json();
+        
+        Swal.fire({
+          title: 'Success!',
+          text: result.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          openPaymentModal(internshipId);
+        });
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    async function openPaymentModal(internshipId) {
+      try {
+        currentInternshipId = internshipId;
+        
+        // Get internship details for payment QR
+        const res = await fetch(`${BASE}/api/internships/${internshipId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load internship details');
+        const internship = await res.json();
+        
+        // Populate payment modal
+        document.getElementById('paymentModalBody').innerHTML = `
+          <div class="mb-3">
+            <h5>${internship.position} at ${internship.company_name}</h5>
+            <p>Please complete your payment to finalize your application</p>
+          </div>
+          
+          ${internship.payment_qr ? `
+            <div class="text-center mb-3">
+              <p class="mb-2"><strong>Scan this QR code to pay:</strong></p>
+              <img src="${internship.payment_qr}" class="img-fluid qr-img border p-2 mb-3">
+            </div>
+          ` : ''}
+          
+          <div class="mb-3">
+            <label for="transactionNo" class="form-label">Transaction Number</label>
+            <input type="text" class="form-control" id="transactionNo" placeholder="Enter your payment transaction number">
+            <small class="text-muted">Please enter the transaction number from your payment receipt</small>
+          </div>
+        `;
+        
+        paymentModal.show();
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    async function submitPayment() {
+      try {
+        const transactionNo = document.getElementById('transactionNo').value.trim();
+        
+        if (!transactionNo) {
+          throw new Error('Please enter your transaction number');
+        }
+        
+        const res = await fetch(`${BASE}/api/internships/${currentInternshipId}/submit-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ transactionNo })
+        });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || 'Failed to submit payment');
+        }
+        
+        const result = await res.json();
+        paymentModal.hide();
+        
+        Swal.fire({
+          title: 'Success!',
+          text: result.message,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+        
+        loadMyApplications();
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+
+    async function loadMyApplications() {
+      try {
+        document.getElementById('applicationsModalBody').innerHTML = `
+          <div class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading your applications...</p>
+          </div>
+        `;
+        
+        applicationsModal.show();
+        
+        const res = await fetch(`${BASE}/api/internships/applied`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Failed to load your applications');
+        
+        const applications = await res.json();
+        renderMyApplications(applications);
+      } catch (err) {
+        document.getElementById('applicationsModalBody').innerHTML = `
+          <div class="alert alert-danger">
+            Error loading your applications: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    function renderMyApplications(applications) {
+      const container = document.getElementById('applicationsModalBody');
+      
+      if (applications.length === 0) {
+        container.innerHTML = `
+          <div class="alert alert-info">
+            You haven't applied to any internships yet
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Applied At</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${applications.map(app => `
+                <tr>
+                  <td>${app.company_name}</td>
+                  <td>${app.position}</td>
+                  <td>
+                    <span class="badge ${app.status === 'approved' ? 'bg-success' : 
+                                      app.status === 'rejected' ? 'bg-danger' : 'bg-secondary'}">
+                      ${app.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge ${app.payment_status === 'verified' ? 'bg-success' : 
+                                      app.payment_status === 'paid' ? 'bg-warning' : 'bg-secondary'}">
+                      ${app.payment_status || 'unpaid'}
+                    </span>
+                  </td>
+                  <td>${new Date(app.applied_at).toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
