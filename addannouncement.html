@@ -677,7 +677,14 @@
             try {
                 showLoadingModal('Loading announcement...');
                 
-                const response = await fetch(`${BASE_URL}/api/announcements/${id}`);
+                 const token = localStorage.getItem('jwtToken');
+
+    const response = await fetch(`${BASE_URL}/api/announcements/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
                 const announcement = await response.json();
                 
                 if (response.ok) {
@@ -732,21 +739,25 @@
                 createAnnouncementBtn.disabled = true;
                 createAnnouncementBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
                 
-                const response = await fetch(`${BASE_URL}/api/announcements`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title,
-                        content,
-                        author,
-                        priority: parseInt(priority),
-                        end_date: endDate ? new Date(endDate).toISOString() : null,
-                        is_active: isActive,
-                        categories
-                    })
-                });
+              const token = localStorage.getItem('jwtToken');
+
+const response = await fetch(`${BASE_URL}/api/announcements`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    title,
+    content,
+    author,
+    priority: parseInt(priority),
+    end_date: endDate ? new Date(endDate).toISOString() : null,
+    is_active: isActive,
+    categories
+  })
+});
+
                 
                 const data = await response.json();
                 
@@ -789,21 +800,25 @@
                 saveChangesBtn.disabled = true;
                 saveChangesBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
                 
-                const response = await fetch(`${BASE_URL}/api/announcements/${editingAnnouncementId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title,
-                        content,
-                        author,
-                        priority: parseInt(priority),
-                        end_date: endDate ? new Date(endDate).toISOString() : null,
-                        is_active: isActive,
-                        categories
-                    })
-                });
+               const token = localStorage.getItem('jwtToken');
+
+const response = await fetch(`${BASE_URL}/api/announcements/${editingAnnouncementId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  },
+  body: JSON.stringify({
+    title,
+    content,
+    author,
+    priority: parseInt(priority),
+    end_date: endDate ? new Date(endDate).toISOString() : null,
+    is_active: isActive,
+    categories
+  })
+});
+
                 
                 const data = await response.json();
                 
@@ -836,9 +851,15 @@
                 confirmDeleteBtn.disabled = true;
                 confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
                 
-                const response = await fetch(`${BASE_URL}/api/announcements/${announcementToDelete}`, {
-                    method: 'DELETE'
-                });
+               const token = localStorage.getItem('jwtToken');
+
+const response = await fetch(`${BASE_URL}/api/announcements/${announcementToDelete}`, {
+  method: 'DELETE',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
                 
                 const data = await response.json();
                 
