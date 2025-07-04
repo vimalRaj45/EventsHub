@@ -988,16 +988,14 @@ async function incrementAttained(code) {
 
 // Log Untracked Visit
 async function logUntrackedVisit() {
-  const res = await fetch(`https://eventdb.onrender.com/visits/untracked`, { method: 'POST' });
-  const data = await res.json();
+  console.log("📋 Logging untracked visit...");
 }
 
 async function checkReferralAndProceed() {
   if (referralCode) {
-    await incrementAttained(referralCode); // Pass it as an argument
-    referralCode = null; // ✅ Clear after use
+   console.log("callig..")
   } else {
-    await logUntrackedVisit();
+   console.log("callig..")
   }
 }
 
