@@ -444,14 +444,17 @@
         let currentMentorId = null;
 
 
-        const user = JSON.parse(localStorage.getItem('user')) || {}; // assuming stored as 'user'
+     const user = JSON.parse(localStorage.getItem('user')) || {}; // Get user from localStorage
 
 function isAdmin() {
   return user.role === 'admin';
 }
-if (!isAdmin()) 
-window.location.href="index.html";
+
+// If not admin, redirect to index.html
+if (!isAdmin()) {
+  window.location.href = "index.html";
 }
+
 
         // Initial load
         window.onload = function() {
