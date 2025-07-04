@@ -593,13 +593,17 @@ async function setStudentTarget() {
         async function loadDashboardData() {
             try {
                 // Load stats
-                const statsRes = await fetch(`${BASE_URL}/admin/stats`);
+                const statsRes = await fetch(`${BASE_URL}/admin/stats`);  
                 const stats = await statsRes.json();
                 
                 const statsHTML = `
                     <div class="stat-card">
                         <div>Total Students</div>
                         <div class="stat-value">${stats.total_students}</div>
+                    </div>
+                     <div class="stat-card">
+                        <div>Total Count</div>
+                        <div class="stat-value">${stats.approved_students}</div>
                     </div>
                     <div class="stat-card">
                         <div>Total Mentors</div>
@@ -609,10 +613,7 @@ async function setStudentTarget() {
                         <div>Pending Approvals</div>
                         <div class="stat-value">${stats.pending_approvals}</div>
                     </div>
-                    <div class="stat-card">
-                        <div>Approved Students</div>
-                        <div class="stat-value">${stats.approved_students}</div>
-                    </div>
+                   
                 `;
                 document.getElementById('stats-data').innerHTML = statsHTML;
 
@@ -922,81 +923,102 @@ async function setStudentTarget() {
             }
         }
 
-        // Referral functions
-        async function loadReferralData() {
-            try {
-                const response = await fetch(`${BASE_URL}/api/referral-data`);
-                const data = await response.json();
-                
-                // Referrers
-                let referrersHTML = '<h3>Referrers</h3><table border="1"><tr><th>Name</th><th>Referral Code</th><th>Referred</th><th>Attained</th><th>Actions</th></tr>';
-               data.data.referrers.forEach(referrer => {
-  const roleClass = (referrer.role || 'student').toLowerCase(); // fallback if role is undefined
-  referrersHTML += `
-    <tr class="role-${roleClass}">
-      <td>${referrer.name}</td>
-      <td>${referrer.referral_code}</td>
-      <td>${referrer.total_referred}</td>
-      <td>${referrer.total_attained}</td>
-      <td><button onclick="viewReferralTree('${referrer.referral_code}')">View Tree</button></td>
-    </tr>
-  `;
-});
+   <!-- Referral functions -->
+async function loadReferralData() {
+    try {
+        const response = await fetch(`${BASE_URL}/api/referral-data`);
+        const data = await response.json();
+        
+        // Referrers
+        let referrersHTML = '<h3>Referrers</h3><table border="1"><tr><th>Name</th><th>Referral Code</th><th>Referred</th><th>Attained</th><th>Total Attained (Mentor + Downline)</th><th>Actions</th></tr>';
+        data.data.referrers.forEach(referrer => {
+            const roleClass = (referrer.role || 'student').toLowerCase();
+            referrersHTML += `
+                <tr class="role-${roleClass}">
+                    <td>${referrer.name}</td>
+                    <td>${referrer.referral_code}</td>
+                    <td>${referrer.total_referred}</td>
+                    <td>${referrer.total_attained}</td>
+                    <td>${referrer.total_combined_attained || referrer.total_attained}</td>
+                    <td><button onclick="viewReferralTree('${referrer.referral_code}')">View Tree</button></td>
+                </tr>
+            `;
+        });
 
-                referrersHTML += '</table>';
-                
-                // Students without referral
-                let noReferralHTML = '<h3>Students Without Valid Referral</h3><table border="1"><tr><th>Name</th><th>Email</th><th>Status</th><th>Role</th><th>Invalid Code</th></tr>';
-                data.data.students_without_referral.forEach(student => {
-                    const roleBadge = getRoleBadge(student.role || 'student');
-                    noReferralHTML += `
-                        <tr class="role-${(student.role || 'student').toLowerCase()}">
-                            <td>${student.name}</td>
-                            <td>${student.email}</td>
-                            <td><span class="badge badge-${student.status.toLowerCase()}">${student.status}</span></td>
-                            <td>${roleBadge}</td>
-                            <td>${student.invalid_referrer_code || 'N/A'}</td>
-                        </tr>
-                    `;
-                });
-                noReferralHTML += '</table>';
-                
-                document.getElementById('referral-data').innerHTML = referrersHTML + noReferralHTML;
-            } catch (error) {
-                console.error('Error loading referral data:', error);
-                alert('Failed to load referral data');
-            }
-        }
+        referrersHTML += '</table>';
+        
+        // Students without referral
+        let noReferralHTML = '<h3>Students Without Valid Referral</h3><table border="1"><tr><th>Name</th><th>Email</th><th>Status</th><th>Role</th><th>Invalid Code</th></tr>';
+        data.data.students_without_referral.forEach(student => {
+            const roleBadge = getRoleBadge(student.role || 'student');
+            noReferralHTML += `
+                <tr class="role-${(student.role || 'student').toLowerCase()}">
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td><span class="badge badge-${student.status.toLowerCase()}">${student.status}</span></td>
+                    <td>${roleBadge}</td>
+                    <td>${student.invalid_referrer_code || 'N/A'}</td>
+                </tr>
+            `;
+        });
+        noReferralHTML += '</table>';
+        
+        document.getElementById('referral-data').innerHTML = referrersHTML + noReferralHTML;
+    } catch (error) {
+        console.error('Error loading referral data:', error);
+        alert('Failed to load referral data');
+    }
+}
 
-        async function viewReferralTree(referralCode) {
-            try {
-                const response = await fetch(`${BASE_URL}/students/referral-tree/${referralCode}`);
-                const tree = await response.json();
-                
-                let treeHTML = '<h3>Referral Tree</h3><table border="1"><tr><th>Level</th><th>Name</th><th>Email</th><th>Status</th><th>Role</th><th>Referrals</th><th>Attained/Target</th></tr>';
-                tree.forEach(member => {
-                    const roleBadge = getRoleBadge(member.role || 'student');
-                    treeHTML += `
-                        <tr class="role-${(member.role || 'student').toLowerCase()}">
-                            <td>${member.level}</td>
-                            <td style="padding-left: ${member.level * 15}px">${member.first_name} ${member.last_name}</td>
-                            <td>${member.email}</td>
-                            <td><span class="badge badge-${member.status.toLowerCase()}">${member.status}</span></td>
-                            <td>${roleBadge}</td>
-                            <td>${member.referral_count}</td>
-                            <td>${member.attained}/${member.target} ${member.target_achieved ? '✓' : ''}</td>
-                        </tr>
-                    `;
-                });
-                treeHTML += '</table><button onclick="showSection(\'referrals-section\')">Back to Referrals</button>';
-                
-                document.getElementById('referral-tree').innerHTML = treeHTML;
-                showSection('referral-tree-section');
-            } catch (error) {
-                console.error('Error loading referral tree:', error);
-                alert('Failed to load referral tree');
-            }
-        }
+async function viewReferralTree(referralCode) {
+    try {
+        const response = await fetch(`${BASE_URL}/students/referral-tree/${referralCode}`);
+        const tree = await response.json();
+        
+        // Calculate total attained for the entire tree
+        let totalTreeAttained = 0;
+        tree.forEach(member => {
+            totalTreeAttained += member.attained || 0;
+        });
+        
+        let treeHTML = `<h3>Referral Tree - Total Attained: ${totalTreeAttained}</h3>
+                        <table border="1">
+                            <tr>
+                                <th>Level</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Role</th>
+                                <th>Referrals</th>
+                                <th>Attained/Target</th>
+                                <th>Total Attained (Self + Downline)</th>
+                            </tr>`;
+        
+        tree.forEach(member => {
+            const roleBadge = getRoleBadge(member.role || 'student');
+            treeHTML += `
+                <tr class="role-${(member.role || 'student').toLowerCase()}">
+                    <td>${member.level}</td>
+                    <td style="padding-left: ${member.level * 15}px">${member.first_name} ${member.last_name}</td>
+                    <td>${member.email}</td>
+                    <td><span class="badge badge-${member.status.toLowerCase()}">${member.status}</span></td>
+                    <td>${roleBadge}</td>
+                    <td>${member.referral_count}</td>
+                    <td>${member.attained}/${member.target} ${member.target_achieved ? '✓' : ''}</td>
+                    <td>${member.total_combined_attained || member.attained}</td>
+                </tr>
+            `;
+        });
+        
+        treeHTML += '</table><button onclick="showSection(\'referrals-section\')">Back to Referrals</button>';
+        
+        document.getElementById('referral-tree').innerHTML = treeHTML;
+        showSection('referral-tree-section');
+    } catch (error) {
+        console.error('Error loading referral tree:', error);
+        alert('Failed to load referral tree');
+    }
+}
 
         // Report functions
         async function loadReports() {
