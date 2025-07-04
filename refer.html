@@ -627,13 +627,12 @@
         loginSection.classList.add("hidden");
         helpBtn.classList.remove("hidden");
 
-        if (user.role === 'admin') {
-  window.location.replace("/referAdmin.html")    // 🛠️ Admin goes to admin dashboard
-} else if (user.role === 'mentor') {
+       if (user.role === 'mentor') {
   loadMentorDashboard(user);    // 👨‍🏫 Mentor goes to mentor dashboard
 } else {
   loadStudentDashboard(user);   // 🎓 Student goes to student dashboard
 }
+
 
         
         showToast('success', `Welcome back, ${user.first_name}!`);
