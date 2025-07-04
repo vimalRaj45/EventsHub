@@ -1347,7 +1347,7 @@ async function registerForEvent() {
   cancelButtonColor: '#6c757d'
 }).then((response) => {
   if (response.isConfirmed) {
-    window.scrollTo({ top: 120, behavior: 'smooth' }); // 👈 scroll to top
+    window.scrollTo({ top: 10, behavior: 'smooth' }); // 👈 scroll to top
     getMyEvents(); // 👈 load the events section
   }
 });
