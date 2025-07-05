@@ -343,8 +343,7 @@ document.addEventListener('keydown', function(e) {
   }
 });
         const API_BASE_URL = 'https://eventdb.onrender.com/api';
-        let currentToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJ2aW1hbHJhajUyMDdAZ21haWwuY29tIiwicm9sZSI6InBhcnRpY2lwYW50IiwiaWF0IjoxNzUwNzQxNTkwLCJleHAiOjE3NTA4Mjc5OTB9.byORMNfVEhFB-wPmFSqdGRuMWh4UBFCMHT0IooKF4a0';
-
+       let currentToken = localStorage.getItem('jWtToken');
         // Reusable request function
         async function makeRequest(method, endpoint, data = null, requiresAuth = true) {
             const headers = { 'Content-Type': 'application/json' };
