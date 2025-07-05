@@ -315,6 +315,12 @@
 
             <!-- Result log area -->
             <div class="mt-4">
+              <div id="counter-container" class="text-center mb-3" style="display: none;">
+  <h4>Certificates Generated: <span id="certificate-counter">0</span></h4>
+  <button id="stop-counter-btn" class="btn btn-danger btn-sm mt-2">
+    <i class="bi bi-stop-fill"></i> Stop Counter
+  </button>
+</div>
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <h6 class="step-header mb-0"><i class="bi bi-terminal me-2"></i>Generation Log</h6>
                 <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">
@@ -416,6 +422,30 @@
       }
     }
 
+
+
+    // Add these variables at the top of your script
+let certificateCount = 0;
+let counterInterval;
+
+// Add this new function to start the counter
+function startCounter() {
+  certificateCount = 0;
+  document.getElementById('certificate-counter').textContent = '0';
+  document.getElementById('counter-container').style.display = 'block';
+  
+  counterInterval = setInterval(() => {
+    certificateCount++;
+    document.getElementById('certificate-counter').textContent = certificateCount;
+  }, 1000); // Updates every second
+}
+
+// Add this function to stop the counter
+function stopCounter() {
+  clearInterval(counterInterval);
+  log(`Counter stopped at ${certificateCount} certificates`);
+}
+
     async function generateCertificates() {
       const sheetId = getTrimmedValue('sheet-id');
       const sheetName = getTrimmedValue('sheet-name');
@@ -443,7 +473,7 @@
       log(`📁 Folder: ${folderId}`);
       log(`🎯 Event ID: ${eventId}`);
       log('----------------------------------------');
-
+     startCounter();
       try {
         const response = await fetch(`${apiUrl}/api/certificates/generate`, {
           method: 'POST',
