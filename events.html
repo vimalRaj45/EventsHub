@@ -41,12 +41,11 @@
     }
     
 
-    /* Shimmer shine badge */
+/* ========== COMMON SHIMMER BASE ========== */
 .badge-shimmer {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: linear-gradient(135deg, #90ee90, #ffd700); /* green to gold */
   color: #fff;
   padding: 2px 10px;
   font-size: 0.75rem;
@@ -56,7 +55,6 @@
   z-index: 1;
 }
 
-/* The shining effect */
 .badge-shimmer::before {
   content: '';
   position: absolute;
@@ -73,6 +71,25 @@
   animation: shimmerMove 2s infinite;
 }
 
+/* Green to Gold for NEW */
+.badge-new {
+  background: linear-gradient(135deg, #90ee90, #ffd700); /* green to gold */
+  color: #0c0c0c; /* dark text for contrast */
+}
+
+/* Orange to Gold for ENDING SOON */
+.badge-ending {
+  background: linear-gradient(135deg, #ffc107, #ff9800); /* orange shimmer */
+   color: #f1eded; 
+}
+
+/* Cyan Blue for UPDATED */
+.badge-updated {
+  background: linear-gradient(135deg, #00cfff, #007bff); /* cyan to blue */
+   color: #ffffff; 
+}
+
+/* Animation */
 @keyframes shimmerMove {
   0% {
     left: -100%;
@@ -1063,11 +1080,11 @@ function getTopRightBadge(event) {
   const daysToEnd = (endDate - now) / (1000 * 60 * 60 * 24);
 
   if (daysSinceCreation <= 5) {
-    return `<span class="badge-shimmer">New</span>`;
+    return `<span class="badge-shimmer badge-new">New</span>`;
   } else if (daysToEnd >= 0 && daysToEnd <= 2) {
-    return `<span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2">Ending Soon</span>`;
+    return `<span class="badge-shimmer badge-ending">Ending Soon</span>`;
   } else if (daysSinceUpdate <= 3) {
-    return `<span class="position-absolute top-0 end-0 badge bg-info text-dark m-2">Updated</span>`;
+    return `<span class="badge-shimmer badge-updated">Updated</span>`;
   }
 
   return '';
