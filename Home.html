@@ -591,6 +591,10 @@ function showDevPopup() {
   // On page load
   document.addEventListener('DOMContentLoaded', loadAnnouncementTicker);
 
+function logout() {
+  localStorage.clear(); // Clears all localStorage keys
+  window.location.href = "index.html"; // Redirect to login/home page
+}
 
 
 </script>
