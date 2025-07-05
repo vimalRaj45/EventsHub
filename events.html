@@ -40,6 +40,48 @@
       color: #333;
     }
     
+
+    /* Shimmer shine badge */
+.badge-shimmer {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: linear-gradient(135deg, #90ee90, #ffd700); /* green to gold */
+  color: #fff;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  border-radius: 50px;
+  font-weight: 600;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* The shining effect */
+.badge-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerMove 2s infinite;
+}
+
+@keyframes shimmerMove {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
     
     
     .event-card {
@@ -902,6 +944,32 @@ async function getAllEvents() {
   }
 }
 
+
+
+function sortEventsByStatus(events) {
+  const now = new Date();
+
+  return events.sort((a, b) => {
+    const getPriority = (event) => {
+      const createdAt = new Date(event.created_at);
+      const updatedAt = new Date(event.updated_at);
+      const endDate = new Date(event.end_date);
+
+      const daysSinceCreation = (now - createdAt) / (1000 * 60 * 60 * 24);
+      const daysSinceUpdate = (now - updatedAt) / (1000 * 60 * 60 * 24);
+      const daysToEnd = (endDate - now) / (1000 * 60 * 60 * 24);
+
+      if (daysSinceCreation <= 5) return 1;       // 🟢 New (highest priority)
+      if (daysToEnd >= 0 && daysToEnd <= 2) return 2; // ⏳ Ending Soon
+      if (daysSinceUpdate <= 3) return 3;         // 🔄 Updated
+      return 4;                                   // Default / Other
+    };
+
+    return getPriority(a) - getPriority(b);
+  });
+}
+
+
 function preloadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -914,7 +982,7 @@ function preloadImage(src) {
 
 async function displayEvents(events) {
   const container = document.getElementById('events-container');
-  
+
   // Show loading spinner first
   container.innerHTML = `
     <div class="col-12 text-center py-4" id="loading-indicator">
@@ -934,8 +1002,8 @@ async function displayEvents(events) {
     return;
   }
 
-  // Use fragment to prepare content
   const fragment = document.createDocumentFragment();
+events = sortEventsByStatus(events);
 
   const imageLoadPromises = events.map(async event => {
     const card = document.createElement('div');
@@ -948,11 +1016,11 @@ async function displayEvents(events) {
       imageCache.set(event.id, imageUrl);
     }
 
-    // Preload image before inserting into DOM
     await preloadImage(imageUrl);
 
     card.innerHTML = `
-      <div class="card h-100 event-card">
+      <div class="card h-100 event-card position-relative">
+        ${getTopRightBadge(event)}
         <img loading="lazy" src="${imageUrl}" class="event-img card-img-top" alt="${event.title}">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-2">
@@ -979,10 +1047,32 @@ async function displayEvents(events) {
   const cards = await Promise.all(imageLoadPromises);
   cards.forEach(card => fragment.appendChild(card));
 
-  // Clear loading spinner after everything is ready
   container.innerHTML = '';
   container.appendChild(fragment);
 }
+
+
+function getTopRightBadge(event) {
+  const now = new Date();
+  const createdAt = new Date(event.created_at);
+  const updatedAt = new Date(event.updated_at);
+  const endDate = new Date(event.end_date);
+
+  const daysSinceCreation = (now - createdAt) / (1000 * 60 * 60 * 24);
+  const daysSinceUpdate = (now - updatedAt) / (1000 * 60 * 60 * 24);
+  const daysToEnd = (endDate - now) / (1000 * 60 * 60 * 24);
+
+  if (daysSinceCreation <= 5) {
+    return `<span class="badge-shimmer">New</span>`;
+  } else if (daysToEnd >= 0 && daysToEnd <= 2) {
+    return `<span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2">Ending Soon</span>`;
+  } else if (daysSinceUpdate <= 3) {
+    return `<span class="position-absolute top-0 end-0 badge bg-info text-dark m-2">Updated</span>`;
+  }
+
+  return '';
+}
+
 
 
 async function showEventModal(event) {
