@@ -317,10 +317,16 @@
             <div class="mt-4">
               <div id="counter-container" class="text-center mb-3" style="display: none;">
   <h4>Certificates Generated: <span id="certificate-counter">0</span></h4>
-  <button id="stop-counter-btn" class="btn btn-danger btn-sm mt-2">
+  <p class="text-warning">
+    ⏱ Please do not exceed <strong>6 minutes (360 seconds)</strong> to avoid session timeout.
+  </p>
+  <p>Time Elapsed: <span id="elapsed-time" class="text-danger fw-bold">0</span>s</p>
+
+  <button id="stop-counter-btn" class="btn btn-danger btn-sm mt-2" onclik="stopCounter()">
     <i class="bi bi-stop-fill"></i> Stop Counter
   </button>
 </div>
+
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <h6 class="step-header mb-0"><i class="bi bi-terminal me-2"></i>Generation Log</h6>
                 <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">
